@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "docs:update": "node scripts/update-renovate-docs.mjs",
-    "renovate:validate": "npx --yes --package renovate@latest renovate-config-validator default.json org-inherited-config.json",
+    "renovate:validate": "npx --yes --package renovate@latest renovate-config-validator --no-global --strict default.json org-inherited-config.json",
     "verify": "npm run docs:update && npm run renovate:validate"
   }
 }

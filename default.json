@@ -6,7 +6,7 @@
   ],
   "timezone": "America/Chicago",
   "dependencyDashboard": false,
-  "labels": [
+  "addLabels": [
     "dependencies",
     "agent-review"
   ],
@@ -93,7 +93,7 @@
     }
   ],
   "vulnerabilityAlerts": {
-    "labels": [
+    "addLabels": [
       "security",
       "dependencies",
       "agent-review"
