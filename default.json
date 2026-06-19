@@ -1,0 +1,105 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates.",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "America/Chicago",
+  "dependencyDashboard": false,
+  "labels": [
+    "dependencies",
+    "agent-review"
+  ],
+  "prHeader": "Agent review expected: verify the dependency impact, summarize CI status, and merge only when the update is coherent for this repo.",
+  "reviewers": [
+    "Coldaine"
+  ],
+  "reviewersFromCodeOwners": true,
+  "assignees": [
+    "Coldaine"
+  ],
+  "prConcurrentLimit": 2,
+  "branchConcurrentLimit": 2,
+  "prHourlyLimit": 1,
+  "prCreation": "not-pending",
+  "schedule": [
+    "* 4-8 * * 1-5"
+  ],
+  "updateNotScheduled": false,
+  "rebaseWhen": "conflicted",
+  "minimumReleaseAge": "3 days",
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Group npm production dependency minor and patch updates.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "npm production dependencies"
+    },
+    {
+      "description": "Group npm development dependency minor and patch updates.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "npm development dependencies"
+    },
+    {
+      "description": "Group GitHub Actions minor and patch updates.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "github actions"
+    },
+    {
+      "description": "Group Dockerfile minor and patch updates.",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "docker images"
+    },
+    {
+      "description": "Group devcontainer minor and patch updates.",
+      "matchManagers": [
+        "devcontainer"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "devcontainer images and features"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security",
+      "dependencies",
+      "agent-review"
+    ],
+    "schedule": [],
+    "minimumReleaseAge": null,
+    "prCreation": "immediate"
+  }
+}

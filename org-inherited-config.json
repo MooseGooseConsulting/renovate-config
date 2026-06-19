@@ -1,0 +1,7 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-inherited-schema.json",
+  "description": "Inherited config for MooseGooseConsulting repositories using the shared default preset.",
+  "extends": [
+    "github>MooseGooseConsulting/renovate-config"
+  ]
+}
