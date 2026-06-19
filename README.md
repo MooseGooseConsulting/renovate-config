@@ -27,6 +27,6 @@ MooseGooseConsulting repos can also inherit the same policy automatically throug
 - Keep only a small number of Renovate branches/PRs active per repo.
 - Request Patrick's review on Renovate PRs.
 - Group minor/patch updates by dependency family.
-- Let vulnerability-fix PRs bypass dashboard approval and scheduling.
+- Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
 
 This repository intentionally contains no secrets or host rules.
