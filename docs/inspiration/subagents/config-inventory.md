@@ -8,9 +8,13 @@ This report predates the explicit no-Mend decision. Any mention of
 Mend-hosted inherited config should now be read as compatibility-only and
 inactive, not as the planned operating model.
 
+It also predates the later `default.json` move from `config:recommended` to
+`config:best-practices`. Treat any `config:recommended` references below as
+historical unless the file explicitly says otherwise.
+
 ## Config surfaces
 
-- `default.json`: public shared Renovate preset for consumers extending `github>MooseGooseConsulting/renovate-config`. It extends `config:recommended`, disables the Dependency Dashboard, adds dependency/agent-review labels, sets Patrick/Coldaine review and assignment defaults, limits Renovate activity, delays ordinary PR creation until pending checks clear, confines scheduled updates to weekday early mornings in `America/Chicago`, disables automerge, groups minor/patch updates for npm, GitHub Actions, Dockerfile, and devcontainer managers, and gives vulnerability alerts faster treatment.
+- `default.json`: public shared Renovate preset for consumers extending `github>MooseGooseConsulting/renovate-config`. Current state extends `config:best-practices`, disables the Dependency Dashboard, adds dependency/agent-review labels, sets Patrick/Coldaine review and assignment defaults, limits Renovate activity, delays ordinary PR creation until pending checks clear, confines scheduled updates to weekday early mornings in `America/Chicago`, disables automerge, groups minor/patch updates for npm, GitHub Actions, Dockerfile, and devcontainer managers, and gives vulnerability alerts faster treatment.
 - `org-inherited-config.json`: MooseGooseConsulting inherited Renovate config entry point. Historical note: it only extends the shared GitHub preset, but Mend-hosted inherited config is not part of the planned no-Mend operating model.
 - `README.md`: consumer-facing contract. Current docs tell repos to extend the shared preset explicitly and mark Mend inherited config as compatibility-only.
 - `package.json`: maintenance workflow surface. `docs:update` regenerates the local Renovate docs snapshot, `renovate:validate` runs `renovate-config-validator --no-global --strict` over `default.json` and `org-inherited-config.json`, and `verify` chains both.
@@ -28,7 +32,7 @@ The org inherited config appears intentionally thin: it centralizes org behavior
 
 ## Risks and tensions
 
-- Centralization vs repo fit: `default.json` applies concrete reviewers, assignees, labels, schedule, throttles, and `minimumReleaseAge` to every consumer. That keeps behavior consistent, but repos with different owners, time zones, CI speed, or dependency risk may need local overrides.
+- Centralization vs repo fit: `default.json` applies concrete reviewers, assignees, labels, schedule, throttles, and the `config:best-practices` preset to every consumer. That keeps behavior consistent, but repos with different owners, time zones, CI speed, digest-pinning tolerance, lockfile-maintenance expectations, or dependency risk may need local overrides.
 - Specific owners vs reusable preset: hard-coded `reviewers`/`assignees` point to `Coldaine`, while `reviewersFromCodeOwners` also asks Renovate to use repo CODEOWNERS. Main docs should clarify whether both are desired everywhere or whether CODEOWNERS should be the primary repo-specific escape hatch.
 - PRs-as-inbox vs low-noise throttling: `dependencyDashboard=false` makes PRs the main visibility surface, but `prConcurrentLimit: 2`, `branchConcurrentLimit: 2`, `prHourlyLimit: 1`, schedule limits, and `prCreation: not-pending` can substantially delay visibility in busy or slow-CI repos.
 - Grouping vs review precision: grouped minor/patch updates reduce noise, but broad npm development or production groups can mix unrelated packages and make regression attribution harder.

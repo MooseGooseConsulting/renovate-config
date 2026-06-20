@@ -53,10 +53,12 @@ configuration.
 ## Policy Shape
 
 - Do not require the Dependency Dashboard. Renovate PRs are the inbox.
+- Extend Renovate's `config:best-practices` preset as the base policy.
 - Wait for checks to finish before opening ordinary PRs when possible.
 - Keep only a small number of Renovate branches/PRs active per repo.
-- Make release-age/internal checks explicit so ordinary PRs are not created
-  before Renovate's own stability gate is satisfied.
+- Keep internal checks explicit so release-age gates inherited from
+  `config:best-practices`, especially npm's three-day security window, are not
+  bypassed by early PR creation.
 - Request Patrick's review on Renovate PRs.
 - Group minor/patch updates by dependency family.
 - Label major updates for agent triage.

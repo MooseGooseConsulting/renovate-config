@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates.",
   "extends": [
-    "config:recommended"
+    "config:best-practices"
   ],
   "timezone": "America/Chicago",
   "dependencyDashboard": false,
@@ -28,7 +28,6 @@
   ],
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
-  "minimumReleaseAge": "3 days",
   "automerge": false,
   "packageRules": [
     {

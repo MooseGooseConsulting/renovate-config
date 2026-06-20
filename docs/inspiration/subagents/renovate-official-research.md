@@ -25,7 +25,7 @@ this repo because we are not going to pay for Mend.
 
 ## Current official-doc considerations
 
-- Official best-practice guidance now recommends `config:best-practices` over `config:recommended`. This repo's docs should either align with that or explain why the shared preset intentionally starts elsewhere.
+- Official best-practice guidance now recommends `config:best-practices` over `config:recommended`. Current `default.json` aligns with that guidance; consumers should still watch for digest pinning, dev-dependency pinning, npm release-age, and lockfile-maintenance effects.
 - Mend-hosted apps can lag open-source Renovate by hours to about a week, and major versions may be held back. This matters only as external context; our docs should verify the actual runner rather than depend on Mend-hosted behavior.
 - Mend-hosted inherited config is not generic self-hosted global config. For this repo, `org-inherited-config.json` is compatibility-only and should not be treated as active policy.
 - The Mend app automatically adds `mergeConfidence:all-badges` and adds `config:recommended` to onboarding config unless explicitly ignored or overridden. This is unavailable for us; do not rely on those Mend-provided defaults.
@@ -38,7 +38,7 @@ this repo because we are not going to pay for Mend.
 
 1. Keep `default.json` as a small, boring shared preset with clear `description` fields and links from docs to the policy rationale.
 2. Treat `org-inherited-config.json` as compatibility-only. Prefer explicit consumer `extends` rather than Mend-hosted inherited config.
-3. Document intentional deviations from official defaults, especially disabling the Dependency Dashboard or staying on `config:recommended`.
+3. Document intentional deviations from official defaults, especially disabling the Dependency Dashboard and any future override of `config:best-practices` behavior.
 4. Order `packageRules` from broad to specific, and add comments or docs for every broad group so future maintainers know what ownership or CI assumption justifies it.
 5. Group by reviewable domains: monorepos, dev tooling, GitHub Actions, Docker/devcontainer updates, and other families that usually pass or fail together.
 6. Use schedules, `prHourlyLimit`, `prConcurrentLimit`, and delayed `prCreation` to keep routine updates quiet, but keep the limits visible in docs so maintainers understand why updates may be delayed.
