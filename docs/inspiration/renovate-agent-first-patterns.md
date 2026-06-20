@@ -6,6 +6,10 @@ review_by: 2026-09-20
 status: inspirational
 authoritative: false
 sources_read: 10
+mend_policy: >
+  Mend-required confidence signals are unavailable for this repo. We are not
+  paying for Mend or using the Mend-hosted app, so do not promote those features
+  into shared policy.
 description: >
   Research into how teams are making Renovate configurations readable, actionable,
   and safely operable by AI agents and automated systems. Covers PR metadata, risk
@@ -57,7 +61,7 @@ When Renovate opens a PR, a GitHub Actions workflow triggers. It:
 | Reachability | High | 47 call sites in src/ |
 | Breaking changes | Medium | API changes in CHANGELOG.md |
 | CVE | None | OSV clean |
-| Ecosystem adoption | High | mergeConfidence: 85% |
+| Ecosystem adoption | Unavailable | Mend mergeConfidence signal; not usable here |
 
 **Verdict: MANUAL REVIEW REQUIRED**
 ```
@@ -330,6 +334,10 @@ what changed.
 
 ## 10. `mergeConfidence:all-badges` — Ecosystem Risk Signal in PR Body
 
+> **Unavailable for us:** this is a cool signal, but it depends on the
+> Mend-hosted app or Mend API access. We are not going to pay for Mend or use
+> the Mend-hosted app, so this must not be promoted into the shared preset.
+
 **Source:** Automattic/wp-calypso (read June 2026), Mend documentation
 
 ```json
@@ -350,7 +358,7 @@ decision. A package with `Adoption: 92%` and `Passing: 98%` is much lower risk t
 with `Adoption: 3%` and `Passing: 71%`.
 
 **Implementation note:** This requires the Mend-hosted Renovate app or self-hosted
-Renovate with Mend API access. Check availability before including in the shared preset.
+Renovate with Mend API access. For this repo, that makes it unavailable.
 
 ---
 

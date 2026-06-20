@@ -4,7 +4,10 @@ date: 2026-06-20
 status: proposal-draft
 authoritative: false
 owner: Patrick
-related: docs/proposals/agent-governed-renovate-change-agent.md
+related: docs/inspiration/agent-governed-renovate-change-agent.md
+mend_policy: >
+  Any Mend-hosted or paid Mend feature mentioned here is unavailable for this
+  repo. We are not paying for Mend.
 ---
 
 # Renovate as Combinator and Dead Code Agent
@@ -315,9 +318,9 @@ ON TOP of Renovate, not inside Renovate.
 context creates a command injection surface. The security implications of
 allowing arbitrary shell commands - especially in a shared preset that applies
 to all consumer repos - are serious. Commands need explicit allowlists on every
-self-hosted runner. For free-tier Mend-hosted app users, custom
-`postUpgradeTasks` commands are not available; Enterprise/AppSec customers may
-be able to request allowlisting.
+self-hosted runner. Mend-hosted command allowlisting is unavailable for this
+repo because we are not going to pay for Mend; Enterprise/AppSec-only
+allowlisting should not be promoted into our shared policy.
 
 **Custom managers can silently stop working.** A regex that matched a file
 format in 2025 may not match after a toolchain update. There is no automatic
@@ -398,10 +401,10 @@ or pending updates.
 
 ## Open Questions for Further Research
 
-1. **For this repo specifically:** The Mend-hosted Renovate free-tier app does
-   NOT support custom `postUpgradeTasks` commands. Enterprise/Appsec customers
-   can request an allowlist on request. Any shared-preset postUpgradeTasks would
-   silently not run for free-tier users. This is a hard constraint, not a maybe.
+1. **For this repo specifically:** Mend-hosted command allowlisting is
+   unavailable because we are not using or paying for Mend. Any idea that
+   depends on Mend-hosted `postUpgradeTasks` allowlisting is out of scope. A
+   self-hosted Renovate experiment would be a separate decision.
 2. What is the exact agent workflow commercetools uses when `renovate-review`
    and Context7 appear in the same CLAUDE.md?
 3. Are there public examples of a Renovate PR triggering a GitHub issue (not
@@ -419,4 +422,4 @@ documented triage workflow, and commercetools CLAUDE.md evidence leads.
 Jamie Tanna's agentic Renovate work is relevant as evidence that building
 agents on top of Renovate tooling is tractable - his specific agent writes
 valid Renovate *config*, not reviews Renovate *PRs*. Subagent critique at
-`docs/subagents/renovate-combinator-critique.md`.*
+`docs/inspiration/subagents/renovate-combinator-critique.md`.*

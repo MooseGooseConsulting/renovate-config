@@ -4,7 +4,10 @@ date: 2026-06-20
 status: subagent-report
 authoritative: false
 sources_read: 7
-critiques: docs/proposals/renovate-as-combinator-and-dead-code-agent.md
+critiques: docs/inspiration/renovate-as-combinator-and-dead-code-agent.md
+mend_policy: >
+  Any Enterprise/AppSec allowlisting or Mend-hosted behavior mentioned here is
+  unavailable for this repo. We are not going to pay for Mend.
 ---
 
 # Critique: "Renovate as Combinator and Dead Code Agent"
@@ -104,11 +107,17 @@ in CLAUDE.md files, but none expose their skill implementations.
 
 ## Mend-Hosted postUpgradeTasks (Exact Constraint)
 
+No-Mend overlay: this section is useful because it explains why hosted
+`postUpgradeTasks` allowlisting is not a candidate for us. Unfortunately, we
+cannot use it; we were never going to pay for Mend.
+
 From official docs:
 
 > "In Mend-hosted Renovate apps, commands remain blocked by default but **can be allowed on-request for any paying ('Renovate Enterprise' or Mend Appsec) customers** or trusted OSS repositories."
 
-**For this repo (free-tier Mend app):** Custom `postUpgradeTasks` commands are not available. The proposal's scoping decision (don't use postUpgradeTasks in shared presets) is correct.
+**For this repo (no Mend app):** Custom Mend-hosted `postUpgradeTasks`
+allowlisting is unavailable. The proposal's scoping decision (do not use
+`postUpgradeTasks` in shared presets) is correct.
 
 The language "may not support them" in the proposal should be strengthened: for the free app tier, custom postUpgradeTasks are **not** available, not merely uncertain.
 
@@ -123,7 +132,7 @@ The language "may not support them" in the proposal should be strengthened: for 
 | commercetools CLAUDE.md evidences Context7 usage in renovate-review | **Partially accurate** | context7 is co-located as MCP server; skill internals are not exposed. Should be framed as "consistent with" not "evidenced by" |
 | Dead dep detection triggered by Renovate PRs -> separate removal artifacts | **Separation principle supported; event-trigger is original design** | Lancini flags in PR comment only; Ona uses independent schedule; no event-triggered production example found |
 | Major upgrade -> agent opens GitHub Issue for architectural review | **Speculative - no production analogue found** | Renovate maintainers explicitly declined native issue creation; no practitioner has documented doing this as agent behavior |
-| Mend-hosted postUpgradeTasks constraint | **Direction correct; framing imprecise** | Free-tier: unavailable. Enterprise: requestable. "May not" understates the constraint |
+| Mend-hosted postUpgradeTasks constraint | **Direction correct; framing imprecise** | Unavailable for us. Enterprise/AppSec allowlisting exists for paying Mend customers, but this repo is not going to pay for Mend. |
 | Jamie Tanna's work as evidence for PR review agents | **Wrong citation** | Tanna's agent writes Renovate config; it does not review Renovate PRs |
 
 ---
@@ -149,8 +158,8 @@ is this proposal's original design. Label it explicitly. Proposed callout:
 
 ### 4. Strengthen postUpgradeTasks constraint language
 Replace "may not support" with:
-"For free-tier Mend app users (this repo's current setup), custom
-`postUpgradeTasks` commands are not available."
+"For this no-Mend repo, custom Mend-hosted `postUpgradeTasks` command
+allowlisting is unavailable."
 
 ### 5. Label the GitHub Issue creation workflow as proposed design
 The `Step 3 (HIGH only): Agent opens a GitHub issue` section should carry a

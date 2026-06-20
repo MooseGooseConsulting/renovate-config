@@ -9,6 +9,11 @@ Promote an idea from these reports only after it passes the North Star,
 architecture invariants, current Renovate docs, validation, and consumer-repo
 evidence.
 
+No-Mend overlay: when an archived report recommends or admires Mend-hosted
+inheritance, Mend Developer Portal credentials, Mend merge-confidence gates, or
+hosted command allowlisting, treat that idea as unavailable for this repo. We
+are not going to pay for Mend.
+
 | Report | Use |
 | --- | --- |
 | `config-inventory.md` | Local snapshot of current config surfaces and tensions. |

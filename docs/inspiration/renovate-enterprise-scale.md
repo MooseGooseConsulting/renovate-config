@@ -6,6 +6,9 @@ review_by: 2026-09-20
 status: inspirational
 authoritative: false
 sources_read: 13
+mend_policy: >
+  Mend-only ideas are unavailable for this repo. We are not paying for Mend; keep
+  such items as external examples only.
 description: >
   Research into how real organizations — Coveo, Swissquote, Grafana Labs, Fullscript,
   Evri, KloudVin, Microsoft M365, commercetools, Deliveroo, Jamie Tanna — operate
@@ -473,7 +476,7 @@ This document covers 13 organizations. Across them, the recurring patterns are:
 | 32 | Bulk-merge TUI tools fill the gap between "zero automation" and "full agent" | lazyreno |
 | 33 | `internalChecksFilter: "strict"` makes Renovate internal checks explicit | Multiple |
 | 34 | `prCreation: "not-pending"` prevents agents from seeing phantom pending PRs | Multiple |
-| 35 | `mergeConfidence:all-badges` surfaces ecosystem adoption signals in PR body | Multiple |
+| 35 | `mergeConfidence:all-badges` surfaces ecosystem adoption signals in PR body, but is Mend-dependent and unavailable here | Multiple |
 | 36 | `rebaseWhen: "conflicted"` avoids unnecessary CI reruns on already-green PRs | Multiple |
 | 37 | Fleet-wide `prConcurrentLimit` is always needed; per-repo is the exception | Multiple |
 | 38 | Security-exempt `minimumReleaseAge: 0` bypass via `matchCategories: ["security"]` | Multiple |

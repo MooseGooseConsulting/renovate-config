@@ -6,6 +6,9 @@ review_by: 2026-09-20
 status: inspirational
 authoritative: false
 sources_read: 20
+mend_policy: >
+  Mend-only patterns are unavailable for this repo. Self-hosted Renovate
+  features remain possible only as separate non-Mend decisions.
 description: >
   A survey of advanced, creative, and unusual Renovate configuration patterns found
   by reading GitHub repos, official docs, and community blog posts in June 2026.
@@ -619,7 +622,7 @@ available.
 
 This is not a replacement for `vulnerabilityAlerts`. Official Renovate docs mark
 OSV alerting as experimental and limited by datasource/dependency shape, so it
-belongs in the "evaluate with docs and hosted-version evidence" bucket before
+belongs in the "evaluate with docs and runner-version evidence" bucket before
 shared adoption.
 
 **Agent-first implication:** if adopted, OSV PRs need deterministic security

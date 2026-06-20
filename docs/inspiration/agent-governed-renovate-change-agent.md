@@ -23,7 +23,7 @@ The Dependency Dashboard is not the operating surface. The operating surface is
 GitHub PR state, comments, labels, checks, and follow-up issues.
 
 For the more concrete workflow design, see
-`docs/proposals/renovate-as-combinator-and-dead-code-agent.md`.
+`docs/inspiration/renovate-as-combinator-and-dead-code-agent.md`.
 
 ## Why This Is Interesting
 
@@ -89,9 +89,9 @@ architecture is correct or delete code by itself.
 - **Major upgrades can become architecture work.** Renovate should not smuggle a
   framework migration into a routine dependency PR. It should surface the need
   and let an agent write a proposal.
-- **Hosted behavior may lag docs.** Mend-hosted Renovate can trail the latest
-  OSS release. Do not promise brand-new options until validation and job logs
-  show the hosted environment supports them.
+- **Runner behavior may lag docs.** The actual Renovate runner may trail the
+  latest OSS docs. Do not promise brand-new options until validation and job
+  logs show the runner supports them. Do not depend on Mend-hosted behavior.
 
 ## Recommended Operating Model
 
@@ -129,7 +129,7 @@ Security and vulnerability PRs should stay separate from routine noise:
   and recommendation
 
 Candidate future config: evaluate `osvVulnerabilityAlerts` after confirming the
-current Renovate version and official behavior for the hosted environment.
+current Renovate version and actual runner behavior.
 Treat it as experimental: official docs currently mark OSV alerts as
 experimental, direct-dependency-oriented, and limited to specific datasources.
 

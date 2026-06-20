@@ -3,6 +3,9 @@ title: Exceptional Renovate Configs & AI-First Patterns Research
 date: 2026-06-20
 status: research
 authoritative: false
+mend_policy: >
+  Mend-only signals such as mergeConfidence and minimumConfidence are
+  unavailable for this repo. Keep them as external examples only.
 review_note: >
   Raw subagent report. Useful as an idea mine, but several claims are deliberately
   softened by the canonical docs. Verify against current official Renovate docs,
@@ -770,7 +773,11 @@ A security-conscious release-age pattern seen in several examples:
 
 **Sources:** Angular dev-infra preset, bestremotetools.com article
 
-The `{{{table}}}` section in Renovate PR bodies is a structured HTML table of all updated packages with their old versions, new versions, changelogs, and merge confidence scores. By controlling `prBodyTemplate`, organizations can make this table the canonical machine-readable signal for agents.
+The `{{{table}}}` section in Renovate PR bodies is a structured HTML table of
+all updated packages with their old versions, new versions, changelogs, and,
+when a Mend-backed setup enables it, merge confidence scores. By controlling
+`prBodyTemplate`, organizations can make this table the canonical
+machine-readable signal for agents.
 
 ```json
 // Angular dev-infra: trim PR body to essentials
@@ -780,7 +787,7 @@ The `{{{table}}}` section in Renovate PR bodies is a structured HTML table of al
 An AI triage agent reading a Renovate PR can:
 1. Fetch the PR body via `gh api /repos/{owner}/{repo}/pulls/{number}`
 2. Parse the `{{{table}}}` HTML to extract package name, old version, new version, and merge confidence badge
-3. Use the merge confidence score (from `mergeConfidence:all-badges` preset) as a pre-computed community signal: packages with `high` merge confidence can be fast-tracked
+3. In Mend-backed setups only, use the merge confidence score from `mergeConfidence:all-badges` as a pre-computed community signal. Unfortunately, we can't use this; we were never going to pay for Mend.
 
 **Merge confidence preset (used by Angular dev-infra):**
 
@@ -788,7 +795,9 @@ An AI triage agent reading a Renovate PR can:
 "extends": ["mergeConfidence:all-badges"]
 ```
 
-This adds Renovate's `merge confidence` badges (based on how many repos have successfully merged the same update without rollback) directly to every PR. An agent can parse these badges to classify updates without any external API call.
+This adds Renovate's `merge confidence` badges directly to every PR. It depends
+on Mend-backed merge confidence data, so it is unavailable for this repo. The
+portable idea is structured PR-body parsing, not the Mend signal itself.
 
 **Important:** The Renovate team notes that PR bodies are frequently truncated at ~65K characters for large monorepos. The Lancini skill handles this by falling back to parsing the `patch` field from the GitHub Files API rather than the PR body.
 
@@ -926,7 +935,7 @@ b) actually detects and updates the targeted dependency in a real repo
 | `addLabels: ["major-upgrade"]` on major updates | Low | High - enables label-based triage from the PR list |
 | `commitMessageSuffix` with `[SECURITY]` on vuln alerts | Low | Medium — useful for git log audit trail |
 | `printConfig: true` | Very low | Candidate - useful log debugging aid, but evaluate noise first |
-| `mergeConfidence:all-badges` in extends | Low | Medium — community merge signal in PR body |
+| `mergeConfidence:all-badges` in extends | Low | Unavailable - Mend-dependent signal, useful only as an external example |
 | `prBodyTemplate` customization | Medium | Low — only if agent parsing PR bodies |
 | `customManagers` for Makefile/Dockerfile comment syntax | Medium | Low — relevant if consumers have non-standard files |
 | Structured `commitMessagePrefix` per stack/project | Medium | Medium — useful for multi-project orgs using event-driven agents |

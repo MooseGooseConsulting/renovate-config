@@ -8,7 +8,11 @@ authoritative: false
 # Renovate Change Agent Critique
 
 This read-only critique was requested to stress-test the proposal in
-`docs/proposals/agent-governed-renovate-change-agent.md`.
+`docs/inspiration/agent-governed-renovate-change-agent.md`.
+
+No-Mend overlay: this report predates the explicit no-Mend decision. Any
+Mend-hosted behavior mentioned below is external context only, not a candidate
+for repo policy.
 
 ## Findings
 
@@ -39,8 +43,8 @@ This read-only critique was requested to stress-test the proposal in
   substitutes.
 - OSV vulnerability alerts are useful but experimental and limited; they should
   be evaluated before enabling as shared policy.
-- Mend-hosted Renovate may lag the latest OSS behavior, so validation and logs
-  matter more than docs alone.
+- The actual Renovate runner may lag the latest OSS behavior, so validation and
+  logs matter more than docs alone. Do not depend on Mend-hosted behavior.
 
 ## Recommendation
 

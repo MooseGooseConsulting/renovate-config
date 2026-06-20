@@ -32,7 +32,9 @@ G1-R2. Current official Renovate documentation is consulted before changing Reno
 
 G2-R1. Consumer repositories can opt into the shared default with `extends: ["github>MooseGooseConsulting/renovate-config"]`.
 
-G2-R2. `org-inherited-config.json` stays a thin Mend-hosted inheritance bridge unless a maintainer explicitly chooses otherwise.
+G2-R2. The shared preset must work without a Mend account, Mend-hosted app, Mend Developer Portal, or paid Mend features.
+
+G2-R3. `org-inherited-config.json` is a compatibility artifact only; it is not part of the planned operating model unless Patrick explicitly reverses the no-Mend decision.
 
 G3-R1. Local overrides in consumer repositories should be narrow, intentional, and explainable from repo-specific constraints.
 
@@ -51,6 +53,8 @@ A2. **This is not a repo-specific exception dump.** One-off behavior belongs in 
 A3. **This is not a secret store.** Host tokens, registry passwords, `.env` values, and private credentials do not belong in this repository.
 
 A4. **This is not a dashboard-first operating model.** A repository may opt into dashboard workflows when needed, but the shared default treats Renovate PRs as the operational inbox.
+
+A5. **This is not a Mend adoption path.** Ideas that require a paid Mend account, Mend-hosted command allowlisting, Mend Developer Portal credentials, or Mend-only telemetry are out of scope for this repo. If research finds a good Mend-only feature, mark it as unavailable instead of promoting it.
 
 ## Pillars
 

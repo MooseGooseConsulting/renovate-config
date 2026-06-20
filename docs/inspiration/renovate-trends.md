@@ -5,6 +5,9 @@ discovered: 2026-06-20
 review_by: 2026-09-20
 status: inspirational
 authoritative: false
+mend_policy: >
+  Mend-only ideas in this catalog are unavailable for this repo. Keep them as
+  examples of what others do, not candidates for shared policy.
 description: >
   Research notes from public renovate.json / .renovaterc.json / renovate.json5
   examples. Each entry includes excerpts, what made the example interesting, and
@@ -191,9 +194,9 @@ description: >
 }
 ```
 
-**What's notable:** Self-hosted Renovate global config — includes `platform`, `gitAuthor`, and `repositories` fields. Uses `mergeConfidence:all-badges` to surface Mend merge confidence in PRs. `internalChecksFilter: "strict"` makes Renovate internal checks explicit. `prPriority` differentiates urgency without complex rule overlaps.
+**What's notable:** Self-hosted Renovate global config — includes `platform`, `gitAuthor`, and `repositories` fields. Uses `mergeConfidence:all-badges` to surface Mend merge confidence in PRs. That confidence signal is unavailable for us because we are not paying for Mend. `internalChecksFilter: "strict"` makes Renovate internal checks explicit. `prPriority` differentiates urgency without complex rule overlaps.
 
-**Agent-first inspiration:** `mergeConfidence:all-badges` adds ecosystem-wide adoption signals into PR descriptions. `prPriority` is useful for "security updates first, major updates last" without conflicting rules. `internalChecksFilter: "strict"` means the release-age/internal-check intent is explicit; agents still need to verify repository CI.
+**Agent-first inspiration:** `mergeConfidence:all-badges` is a cool Mend-dependent signal, but unfortunately we can't use it; we were never going to pay for Mend. The portable ideas are `prPriority` for "security updates first, major updates last" and `internalChecksFilter: "strict"` so release-age/internal-check intent is explicit; agents still need to verify repository CI.
 
 ---
 
@@ -780,7 +783,7 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 **What's notable:** `minimumReleaseAge: "60 days"` — one of the longest release-age windows seen in the wild. Paired with `minimumConfidence: "high"` (Mend's merge confidence data), only packages with both 60 days of release history AND high community adoption get updated. Extremely conservative.
 
-**Agent-first inspiration:** `minimumConfidence` is a Mend-proprietary feature that uses community adoption data to score update safety. `60 days + high confidence` is the right combination for production infrastructure that cannot tolerate surprise breakage.
+**Unavailable for us:** `minimumConfidence` is a Mend-proprietary feature that uses community adoption data to score update safety. It is interesting, but we are not paying for Mend, so the portable takeaway is only the long `minimumReleaseAge` idea.
 
 ---
 
@@ -1146,8 +1149,8 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 | 3 | `automergeSchedule` business hours | circleci-docs, k8s-home-ops | Merge only when humans are monitoring |
 | 4 | `matchBaseBranches` per-branch policies | argo-workflows, verdaccio, calico, mimir | Different rules per release branch |
 | 5 | `abandonmentThreshold` + `rollbackPrs` | meerkat, avishj/blueprints | Auto-flag zombie deps; auto-rollback on CI failure |
-| 6 | `mergeConfidence:all-badges` | Automattic/wp-calypso, midokura | Adds community adoption signal to PR descriptions |
-| 7 | `minimumConfidence: "high"` | midokura/phoenix-documentation | Merge only when community evidence is strong |
+| 6 | `mergeConfidence:all-badges` | Automattic/wp-calypso, midokura | Mend-dependent; unavailable for this repo |
+| 7 | `minimumConfidence: "high"` | midokura/phoenix-documentation | Mend-proprietary; unavailable for this repo |
 | 8 | `prBodyNotes` with structured content | ampproject/amphtml, prometheus | Machine-readable blocks for downstream tools |
 | 9 | Datasource-scoped label taxonomy | onedr0p, nshores, LedgerHQ | `renovate/container`, `renovate/helm` etc. for routing |
 | 10 | `dependencyDashboardOSVVulnerabilitySummary: "all"` | meerkat, avishj | Shows all OSV vulnerability data in dashboard issue |

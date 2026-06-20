@@ -7,6 +7,13 @@ This repo includes a local `renovate-config` skill, but it is an operating aid,
 not a source of policy truth. Official Renovate docs, this repo's authority docs,
 and `renovate-config-validator` remain the references for config behavior.
 
+## No Mend Dependency
+
+This repo is not planning to use a Mend account, the Mend-hosted Renovate app,
+the Mend Developer Portal, or paid Mend features. If research finds a useful
+idea that requires Mend, mark it as unavailable for this repo instead of
+promoting it into shared policy.
+
 ## Documentation Map
 
 - `docs/NORTH_STAR.md` defines the goals, anti-goals, and review pillars.
@@ -17,15 +24,15 @@ and `renovate-config-validator` remain the references for config behavior.
 - `docs/inspiration/` holds non-authoritative research seeds. Treat them as
   idea sources, audit them within three months, and promote only evidence-backed
   patterns into the shared config or architecture docs.
-- `docs/proposals/agent-governed-renovate-change-agent.md` proposes how to use
+- `docs/inspiration/agent-governed-renovate-change-agent.md` proposes how to use
   Renovate PRs as an agent-governed inbox for updates, dead-dependency
   candidates, and larger refactor proposals.
-- `docs/proposals/renovate-as-combinator-and-dead-code-agent.md` expands that
+- `docs/inspiration/renovate-as-combinator-and-dead-code-agent.md` expands that
   into concrete workflows for major upgrades, dead dependency investigations,
   and Context7-backed review experiments.
-- `docs/subagents/` holds static research reports from delegated agents. These
-  are evidence leads, not runnable subagents and not policy authority.
-- `docs/subagents/renovate-change-agent-critique.md` captures the independent
+- `docs/inspiration/subagents/` holds static research reports from delegated
+  agents. These are evidence leads, not runnable subagents and not policy authority.
+- `docs/inspiration/subagents/renovate-change-agent-critique.md` captures the independent
   source-check and critique of that proposal.
 
 ## Use From A Repo
@@ -39,8 +46,9 @@ Add this to `renovate.json`:
 }
 ```
 
-MooseGooseConsulting repos can also inherit the same policy automatically through
-`org-inherited-config.json` when the Mend Renovate app is installed for the org.
+`org-inherited-config.json` exists only as a compatibility artifact. The planned
+operating model is explicit repo opt-in with `extends`, not Mend-hosted inherited
+configuration.
 
 ## Policy Shape
 
@@ -85,6 +93,9 @@ The best next candidates are:
 More aggressive ideas, such as codemods in `postUpgradeTasks` or self-hosted
 fleet orchestration, are powerful but should start as consumer-repo experiments
 until the rubrics show they belong in shared policy.
+
+Do not carry forward Mend-only ideas such as paid hosted command allowlisting,
+Mend Developer Portal credentials, or Mend-specific merge-confidence gates.
 
 ## Local Guardrails
 
