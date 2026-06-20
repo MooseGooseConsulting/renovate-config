@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/master)
+      branch="${remote_ref#refs/heads/}"
+      echo "Refusing to push directly to $branch. Push a PR branch instead." >&2
+      exit 1
+      ;;
+  esac
+done
+
+echo "Running Renovate config validation before push..."
+npm run renovate:validate

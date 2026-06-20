@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates.",
   "extends": [
-    "config:recommended"
+    "config:best-practices"
   ],
   "timezone": "America/Chicago",
   "dependencyDashboard": false,
@@ -22,14 +22,23 @@
   "branchConcurrentLimit": 2,
   "prHourlyLimit": 1,
   "prCreation": "not-pending",
+  "internalChecksFilter": "strict",
   "schedule": [
     "* 4-8 * * 1-5"
   ],
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
-  "minimumReleaseAge": "3 days",
   "automerge": false,
   "packageRules": [
+    {
+      "description": "Label major updates for agent triage.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "addLabels": [
+        "major-upgrade"
+      ]
+    },
     {
       "description": "Group npm production dependency minor and patch updates.",
       "matchManagers": [

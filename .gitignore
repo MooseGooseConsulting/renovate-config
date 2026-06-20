@@ -3,3 +3,6 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Temporary research workspace - cloned repos for config evaluation
+tmp/
