@@ -13,6 +13,8 @@ Use this workflow to keep the shared Renovate preset useful, quiet, and aligned 
 
 - Current `default.json` and `org-inherited-config.json`.
 - Official Renovate docs or refreshed `.agents/skills/renovate-config/references/renovate-docs-snapshot.md`.
+- Local hook status from `git config --get core.hooksPath` and `.githooks/pre-push`.
+- GitHub branch protection or rulesets for `main`.
 - A sample of consumer `renovate.json` files.
 - Open, merged, closed, and stale Renovate PRs across representative repositories.
 - CI status and failure patterns on Renovate PRs.

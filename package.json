@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "docs:update": "node scripts/update-renovate-docs.mjs",
+    "hooks:install": "git config core.hooksPath .githooks",
     "renovate:validate": "npx --yes --package renovate@latest renovate-config-validator --no-global --strict default.json org-inherited-config.json",
     "verify": "npm run docs:update && npm run renovate:validate"
   }

@@ -30,3 +30,15 @@ MooseGooseConsulting repos can also inherit the same policy automatically throug
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
 
 This repository intentionally contains no secrets or host rules.
+
+## Local Guardrails
+
+Install repo-managed hooks after cloning:
+
+```sh
+npm run hooks:install
+```
+
+The pre-push hook runs `npm run renovate:validate` and refuses direct pushes from
+`main`/`master`. GitHub branch protection on `main` enforces the same PR flow
+remotely.

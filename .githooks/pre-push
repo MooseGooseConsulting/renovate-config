@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+branch="$(git branch --show-current 2>/dev/null || true)"
+
+case "$branch" in
+  main|master)
+    echo "Refusing to push directly from $branch. Push a PR branch instead." >&2
+    exit 1
+    ;;
+esac
+
+echo "Running Renovate config validation before push..."
+npm run renovate:validate

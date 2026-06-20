@@ -3,7 +3,9 @@ Before Renovate config edits, use `.agents/skills/renovate-config/SKILL.md`.
 Docs authority: `docs/NORTH_STAR.md` -> `docs/architecture.md` -> workflows/rubrics.
 Config surfaces: shared policy in `default.json`; Mend inheritance in `org-inherited-config.json`; repo-specific behavior in consumer `renovate.json`.
 Commands: `npm run docs:update`; `npm run renovate:validate`; `npm run verify`.
+Install repo hooks with `npm run hooks:install`; pre-push runs Renovate validation and blocks direct pushes from `main`.
 Run `npm run renovate:validate` before committing config changes.
+Work on PR branches, not `main`; completed scoped work goes through a non-draft PR.
 Keep this repo public and secret-free; no host tokens, registry passwords, or `.env` values.
 Treat Renovate PRs as the default inbox; dashboard workflows are opt-in exceptions.
 For effectiveness reviews, use `docs/rubrics/renovate-effectiveness-rubric.md`.
