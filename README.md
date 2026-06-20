@@ -17,6 +17,11 @@ and `renovate-config-validator` remain the references for config behavior.
 - `docs/inspiration/` holds non-authoritative research seeds. Treat them as
   idea sources, audit them within three months, and promote only evidence-backed
   patterns into the shared config or architecture docs.
+- `docs/proposals/agent-governed-renovate-change-agent.md` proposes how to use
+  Renovate PRs as an agent-governed inbox for updates, dead-dependency
+  candidates, and larger refactor proposals.
+- `docs/subagents/renovate-change-agent-critique.md` captures the independent
+  source-check and critique of that proposal.
 
 ## Use From A Repo
 
