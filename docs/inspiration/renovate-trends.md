@@ -1,25 +1,26 @@
 ---
-title: Real-World Renovate Config Catalog — 35 Repos Read and Analyzed
+title: Real-World Renovate Config Catalog
 date: 2026-06-20
 discovered: 2026-06-20
 review_by: 2026-09-20
 status: inspirational
 authoritative: false
 description: >
-  35 real GitHub repositories whose renovate.json / .renovaterc.json / renovate.json5
-  files were read in full via GitHub API. Each entry includes key excerpts, what makes
-  it distinctive, and what it might inspire for an agent-first shared config strategy.
-  Inspirational only — validate against docs/NORTH_STAR.md before adopting anything.
+  Research notes from public renovate.json / .renovaterc.json / renovate.json5
+  examples. Each entry includes excerpts, what made the example interesting, and
+  what it might inspire for an agent-first shared config strategy.
+  Inspirational only - validate against docs/NORTH_STAR.md before adopting anything.
 ---
 
 # Real-World Renovate Config Catalog (June 2026)
 
-> **Methodology:** 10 GitHub code searches executed across `filename:renovate.json`,
+> **Methodology note:** The research pass reported GitHub code searches across `filename:renovate.json`,
 > `filename:.renovaterc.json`, and `filename:renovate.json5` targeting advanced fields
 > (`postUpgradeTasks`, `customManagers`, `automergeSchedule`, `groupName`, `prHourlyLimit`,
 > `branchPrefix`, `vulnerabilityAlerts`, `dependencyDashboard`, `mergeConfidence`,
-> `internalChecksFilter`). All 35 config files were read in full via GitHub API.
-> Inspirational only — not authoritative.
+> `internalChecksFilter`). Treat entries as pattern leads, not proof that a pattern
+> is common or ready for this shared preset.
+> Inspirational only - not authoritative.
 
 ---
 
@@ -39,10 +40,10 @@ description: >
 
 ### 1. angular/angular
 
-**URL:** https://github.com/angular/angular/blob/main/renovate.json  
-**Org:** Google / Angular  
-**Ecosystem:** Node (pnpm), Bazel, TypeScript  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/angular/angular/blob/main/renovate.json
+**Org:** Google / Angular
+**Ecosystem:** Node (pnpm), Bazel, TypeScript
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -72,16 +73,16 @@ description: >
 
 **What's notable:** Extends a private org preset at `github>angular/dev-infra//renovate-presets/default.json5` (double-slash path into subdirectory). Uses `postUpgradeTasks` to rebuild Bazel lockfiles and locale data artifacts — Renovate runs pnpm inside the PR branch and commits the generated artifacts. `executionMode: "branch"` means tasks run once per PR, not once per package.
 
-**Agent-first inspiration:** This is the canonical pattern for monorepos needing generated artifacts committed alongside the dep bump. An agent reviewing such a PR can trust the branch is self-consistent. The `baseBranchPatterns` also shows how to scope Renovate to actively maintained release lines only.
+**Agent-first inspiration:** This is a useful pattern for monorepos needing generated artifacts committed alongside the dep bump. An agent reviewing such a PR can inspect whether the branch is self-consistent. The `baseBranchPatterns` also shows how to scope Renovate to actively maintained release lines only.
 
 ---
 
 ### 2. pulumi/pulumi
 
-**URL:** https://github.com/pulumi/pulumi/blob/master/renovate.json5  
-**Org:** Pulumi  
-**Ecosystem:** Go, Node, Python (multi-language SDK)  
-**Config format:** `renovate.json5`  
+**URL:** https://github.com/pulumi/pulumi/blob/master/renovate.json5
+**Org:** Pulumi
+**Ecosystem:** Go, Node, Python (multi-language SDK)
+**Config format:** `renovate.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -125,10 +126,10 @@ description: >
 
 ### 3. ampproject/amphtml
 
-**URL:** https://github.com/ampproject/amphtml/blob/main/.renovaterc.json  
-**Org:** Google / AMP  
-**Ecosystem:** Node (npm), large monorepo  
-**Config format:** `.renovaterc.json`  
+**URL:** https://github.com/ampproject/amphtml/blob/main/.renovaterc.json
+**Org:** Google / AMP
+**Ecosystem:** Node (npm), large monorepo
+**Config format:** `.renovaterc.json`
 **Found:** 2026-06-20
 
 ```json
@@ -160,10 +161,10 @@ description: >
 
 ### 4. Automattic/wp-calypso
 
-**URL:** https://github.com/Automattic/wp-calypso/blob/trunk/renovate.json5  
-**Org:** Automattic  
-**Ecosystem:** Node (Yarn), React monorepo  
-**Config format:** `renovate.json5`  
+**URL:** https://github.com/Automattic/wp-calypso/blob/trunk/renovate.json5
+**Org:** Automattic
+**Ecosystem:** Node (Yarn), React monorepo
+**Config format:** `renovate.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -190,18 +191,18 @@ description: >
 }
 ```
 
-**What's notable:** Self-hosted Renovate global config — includes `platform`, `gitAuthor`, and `repositories` fields. Uses `mergeConfidence:all-badges` to surface Mend merge confidence in PRs. `internalChecksFilter: "strict"` prevents PRs from landing until all CI passes. `prPriority` differentiates urgency without complex rule overlaps.
+**What's notable:** Self-hosted Renovate global config — includes `platform`, `gitAuthor`, and `repositories` fields. Uses `mergeConfidence:all-badges` to surface Mend merge confidence in PRs. `internalChecksFilter: "strict"` makes Renovate internal checks explicit. `prPriority` differentiates urgency without complex rule overlaps.
 
-**Agent-first inspiration:** `mergeConfidence:all-badges` adds ecosystem-wide adoption signals into PR descriptions. `prPriority` is the right tool for "security updates first, major updates last" without conflicting rules. `internalChecksFilter: "strict"` means an agent can assume any open PR has already passed CI.
+**Agent-first inspiration:** `mergeConfidence:all-badges` adds ecosystem-wide adoption signals into PR descriptions. `prPriority` is useful for "security updates first, major updates last" without conflicting rules. `internalChecksFilter: "strict"` means the release-age/internal-check intent is explicit; agents still need to verify repository CI.
 
 ---
 
 ### 5. LedgerHQ/ledger-live
 
-**URL:** https://github.com/LedgerHQ/ledger-live/blob/develop/renovate.json  
-**Org:** Ledger (hardware wallet)  
-**Ecosystem:** Node (npm), React Native, Electron  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/LedgerHQ/ledger-live/blob/develop/renovate.json
+**Org:** Ledger (hardware wallet)
+**Ecosystem:** Node (npm), React Native, Electron
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -246,10 +247,10 @@ description: >
 
 ### 6. renovatebot/renovate (self-referential)
 
-**URL:** https://github.com/renovatebot/renovate/blob/main/renovate.json  
-**Org:** Mend / Renovate maintainers  
-**Ecosystem:** Node (npm), Docker  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/renovatebot/renovate/blob/main/renovate.json
+**Org:** Mend / Renovate maintainers
+**Ecosystem:** Node (npm), Docker
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -288,10 +289,10 @@ description: >
 
 ### 7. prometheus/prometheus
 
-**URL:** https://github.com/prometheus/prometheus/blob/main/renovate.json  
-**Org:** CNCF / Prometheus  
-**Ecosystem:** Go, TypeScript (React)  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/prometheus/prometheus/blob/main/renovate.json
+**Org:** CNCF / Prometheus
+**Ecosystem:** Go, TypeScript (React)
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -321,10 +322,10 @@ description: >
 
 ### 8. grafana/mimir
 
-**URL:** https://github.com/grafana/mimir/blob/main/renovate.json5  
-**Org:** Grafana Labs  
-**Ecosystem:** Go, Jsonnet, Docker (distroless), GitHub Actions  
-**Config format:** `renovate.json5`  
+**URL:** https://github.com/grafana/mimir/blob/main/renovate.json5
+**Org:** Grafana Labs
+**Ecosystem:** Go, Jsonnet, Docker (distroless), GitHub Actions
+**Config format:** `renovate.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -371,10 +372,10 @@ description: >
 
 ### 9. oapi-codegen/oapi-codegen
 
-**URL:** https://github.com/oapi-codegen/oapi-codegen/blob/main/renovate.json  
-**Org:** oapi-codegen  
-**Ecosystem:** Go multi-module monorepo  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/oapi-codegen/oapi-codegen/blob/main/renovate.json
+**Org:** oapi-codegen
+**Ecosystem:** Go multi-module monorepo
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -409,10 +410,10 @@ description: >
 
 ### 10. elastic/terraform-provider-elasticstack
 
-**URL:** https://github.com/elastic/terraform-provider-elasticstack/blob/main/renovate.json  
-**Org:** Elastic  
-**Ecosystem:** Go, Terraform, Docker  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/elastic/terraform-provider-elasticstack/blob/main/renovate.json
+**Org:** Elastic
+**Ecosystem:** Go, Terraform, Docker
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -454,10 +455,10 @@ description: >
 
 ### 11. go-gitea/gitea
 
-**URL:** https://github.com/go-gitea/gitea/blob/main/renovate.json5  
-**Org:** Gitea  
-**Ecosystem:** Go, Node (pnpm), Python, Nix, Docker  
-**Config format:** `renovate.json5`  
+**URL:** https://github.com/go-gitea/gitea/blob/main/renovate.json5
+**Org:** Gitea
+**Ecosystem:** Go, Node (pnpm), Python, Nix, Docker
+**Config format:** `renovate.json5`
 **Found:** 2026-06-20
 
 Key patterns:
@@ -467,16 +468,16 @@ Key patterns:
 - `osvVulnerabilityAlerts: true` + `minimumReleaseAge: "5 days"`
 - `semanticCommits: "enabled"`
 
-**Agent-first inspiration:** `allowedVersions` with explanatory comments (json5 allows `//`) is the canonical pattern for intentional version holds. SVG regeneration in `postUpgradeTasks` means the branch always builds.
+**Agent-first inspiration:** `allowedVersions` with explanatory comments (json5 allows `//`) is a clear pattern for intentional version holds. SVG regeneration in `postUpgradeTasks` can make the branch more self-consistent when it is tightly filtered and tested.
 
 ---
 
 ### 12. buildkite/docs
 
-**URL:** https://github.com/buildkite/docs/blob/main/renovate.json  
-**Org:** Buildkite  
-**Ecosystem:** Ruby (Bundler), Node, Docker, GitHub Actions, Buildkite pipelines, git-submodules  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/buildkite/docs/blob/main/renovate.json
+**Org:** Buildkite
+**Ecosystem:** Ruby (Bundler), Node, Docker, GitHub Actions, Buildkite pipelines, git-submodules
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -511,10 +512,10 @@ Key patterns:
 
 ### 13. icoretech/pgbouncer-docker
 
-**URL:** https://github.com/icoretech/pgbouncer-docker/blob/main/renovate.json  
-**Org:** icoretech  
-**Ecosystem:** Docker only  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/icoretech/pgbouncer-docker/blob/main/renovate.json
+**Org:** icoretech
+**Ecosystem:** Docker only
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -549,10 +550,10 @@ Key patterns:
 
 ### 15. argoproj/argo-workflows
 
-**URL:** https://github.com/argoproj/argo-workflows/blob/main/renovate.json  
-**Org:** CNCF / Argo  
-**Ecosystem:** Go, Node (Yarn), Nix, Docker  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/argoproj/argo-workflows/blob/main/renovate.json
+**Org:** CNCF / Argo
+**Ecosystem:** Go, Node (Yarn), Nix, Docker
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -579,10 +580,10 @@ Key patterns:
 
 ### 16. verdaccio/verdaccio
 
-**URL:** https://github.com/verdaccio/verdaccio/blob/master/renovate.json  
-**Org:** Verdaccio  
-**Ecosystem:** Node (npm), Docker, GitHub Actions  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/verdaccio/verdaccio/blob/master/renovate.json
+**Org:** Verdaccio
+**Ecosystem:** Node (npm), Docker, GitHub Actions
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -609,10 +610,10 @@ Key patterns:
 
 ### 17. projectcalico/calico
 
-**URL:** https://github.com/projectcalico/calico/blob/master/renovate.json  
-**Org:** CNCF / Calico (Tigera)  
-**Ecosystem:** Go, Node, Docker  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/projectcalico/calico/blob/master/renovate.json
+**Org:** CNCF / Calico (Tigera)
+**Ecosystem:** Go, Node, Docker
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 Key patterns:
@@ -636,10 +637,10 @@ Release branches (`release-3.1`, `release-3.0`) completely disabled via `enabled
 
 ### 19. cypress-io/eslint-plugin-cypress
 
-**URL:** https://github.com/cypress-io/eslint-plugin-cypress/blob/master/renovate.json  
-**Org:** Cypress.io  
-**Ecosystem:** Node (npm)  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/cypress-io/eslint-plugin-cypress/blob/master/renovate.json
+**Org:** Cypress.io
+**Ecosystem:** Node (npm)
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -662,16 +663,16 @@ Release branches (`release-3.1`, `release-3.0`) completely disabled via `enabled
 
 **What's notable:** Vulnerability alerts bypass the 7-day wait via `vulnerabilityAlerts.minimumReleaseAge: "0 days"`. Peer dependencies disabled. Cypress itself (their own product) bypasses the stability wait. Lock file maintenance enabled.
 
-**Agent-first inspiration:** The two-tier release age is the canonical security fast-lane. An agent can reliably identify security PRs by the zero-delay trait.
+**Agent-first inspiration:** The two-tier release age is a useful security fast-lane pattern. An agent should identify security PRs by labels and advisory metadata, not by timing alone.
 
 ---
 
 ### 20. stakater/Reloader
 
-**URL:** https://github.com/stakater/Reloader/blob/master/renovate.json  
-**Org:** Stakater  
-**Ecosystem:** Go, Docker, Helm  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/stakater/Reloader/blob/master/renovate.json
+**Org:** Stakater
+**Ecosystem:** Go, Docker, Helm
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -698,10 +699,10 @@ Release branches (`release-3.1`, `release-3.0`) completely disabled via `enabled
 
 ### 21. dev-sec/ansible-collection-hardening
 
-**URL:** https://github.com/dev-sec/ansible-collection-hardening/blob/master/renovate.json  
-**Org:** dev-sec  
-**Ecosystem:** Ansible  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/dev-sec/ansible-collection-hardening/blob/master/renovate.json
+**Org:** dev-sec
+**Ecosystem:** Ansible
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -723,10 +724,10 @@ Release branches (`release-3.1`, `release-3.0`) completely disabled via `enabled
 
 ### 22. meerkat-lang/meerkat
 
-**URL:** https://github.com/meerkat-lang/meerkat/blob/main/renovate.json  
-**Org:** meerkat-lang  
-**Ecosystem:** Rust (Cargo), GitHub Actions, pre-commit  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/meerkat-lang/meerkat/blob/main/renovate.json
+**Org:** meerkat-lang
+**Ecosystem:** Rust (Cargo), GitHub Actions, pre-commit
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -750,10 +751,10 @@ Release branches (`release-3.1`, `release-3.0`) completely disabled via `enabled
 
 ### 23. avishj/blueprints
 
-**URL:** https://github.com/avishj/blueprints/blob/main/renovate.json  
-**Org:** avishj  
-**Ecosystem:** Python (pep621), Dockerfile, GitHub Actions, pre-commit  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/avishj/blueprints/blob/main/renovate.json
+**Org:** avishj
+**Ecosystem:** Python (pep621), Dockerfile, GitHub Actions, pre-commit
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentThreshold`, `dependencyDashboardOSVVulnerabilitySummary`. Blueprint/template repo baking these into defaults. Python PEP 621 + pre-commit + Actions + Dockerfile managers enabled together.
@@ -762,9 +763,9 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 24. midokura/phoenix-documentation
 
-**URL:** https://github.com/midokura/phoenix-documentation/blob/main/renovate.json  
-**Org:** midokura  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/midokura/phoenix-documentation/blob/main/renovate.json
+**Org:** midokura
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -787,10 +788,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 25. nshores/k8s-home-ops
 
-**URL:** https://github.com/nshores/k8s-home-ops/blob/main/renovate.json5  
-**Org:** personal  
-**Ecosystem:** Kubernetes (Docker + Helm), Flux CD  
-**Config format:** `renovate.json5`  
+**URL:** https://github.com/nshores/k8s-home-ops/blob/main/renovate.json5
+**Org:** personal
+**Ecosystem:** Kubernetes (Docker + Helm), Flux CD
+**Config format:** `renovate.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -826,10 +827,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 26. onedr0p/cluster-template
 
-**URL:** https://github.com/onedr0p/cluster-template/blob/main/.renovaterc.json5  
-**Org:** onedr0p  
-**Ecosystem:** Kubernetes, Flux, Helm, Mise tools  
-**Config format:** `.renovaterc.json5`  
+**URL:** https://github.com/onedr0p/cluster-template/blob/main/.renovaterc.json5
+**Org:** onedr0p
+**Ecosystem:** Kubernetes, Flux, Helm, Mise tools
+**Config format:** `.renovaterc.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -856,10 +857,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 27. imagegenius/docker-immich
 
-**URL:** https://github.com/imagegenius/docker-immich/blob/main/.renovaterc.json5  
-**Org:** imagegenius  
-**Ecosystem:** Docker, Docker Bake (HCL)  
-**Config format:** `.renovaterc.json5`  
+**URL:** https://github.com/imagegenius/docker-immich/blob/main/.renovaterc.json5
+**Org:** imagegenius
+**Ecosystem:** Docker, Docker Bake (HCL)
+**Config format:** `.renovaterc.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -887,10 +888,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 28. angristan/openvpn-install (shell script only)
 
-**URL:** https://github.com/angristan/openvpn-install/blob/master/renovate.json  
-**Org:** angristan  
-**Ecosystem:** Shell script  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/angristan/openvpn-install/blob/master/renovate.json
+**Org:** angristan
+**Ecosystem:** Shell script
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -917,10 +918,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 29. UI5/openui5 (SAP)
 
-**URL:** https://github.com/UI5/openui5/blob/master/renovate.json  
-**Org:** SAP  
-**Ecosystem:** Node (npm), enterprise framework  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/UI5/openui5/blob/master/renovate.json
+**Org:** SAP
+**Ecosystem:** Node (npm), enterprise framework
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -949,10 +950,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 30. PaulWoitaschek/Voice (Android/Kotlin)
 
-**URL:** https://github.com/PaulWoitaschek/Voice/blob/main/renovate.json  
-**Org:** personal  
-**Ecosystem:** Android (Gradle, Maven), Kotlin  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/PaulWoitaschek/Voice/blob/main/renovate.json
+**Org:** personal
+**Ecosystem:** Android (Gradle, Maven), Kotlin
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -979,10 +980,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 31. appium/appium
 
-**URL:** https://github.com/appium/appium/blob/master/.renovaterc.json  
-**Org:** Appium (OpenJS Foundation)  
-**Ecosystem:** Node (npm)  
-**Config format:** `.renovaterc.json`  
+**URL:** https://github.com/appium/appium/blob/master/.renovaterc.json
+**Org:** Appium (OpenJS Foundation)
+**Ecosystem:** Node (npm)
+**Config format:** `.renovaterc.json`
 **Found:** 2026-06-20
 
 ```json
@@ -1001,10 +1002,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 32. google/osv.dev
 
-**URL:** https://github.com/google/osv.dev/blob/master/renovate.json  
-**Org:** Google  
-**Ecosystem:** Go, Python, Docker, Terraform, git-submodules  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/google/osv.dev/blob/master/renovate.json
+**Org:** Google
+**Ecosystem:** Go, Python, Docker, Terraform, git-submodules
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -1040,10 +1041,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 33. Unstructured-IO/unstructured
 
-**URL:** https://github.com/Unstructured-IO/unstructured/blob/main/renovate.json5  
-**Org:** Unstructured-IO (AI/ML)  
-**Ecosystem:** Python  
-**Config format:** `renovate.json5`  
+**URL:** https://github.com/Unstructured-IO/unstructured/blob/main/renovate.json5
+**Org:** Unstructured-IO (AI/ML)
+**Ecosystem:** Python
+**Config format:** `renovate.json5`
 **Found:** 2026-06-20
 
 ```json5
@@ -1067,10 +1068,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 34. circleci/circleci-docs
 
-**URL:** https://github.com/circleci/circleci-docs/blob/master/renovate.json  
-**Org:** CircleCI  
-**Ecosystem:** Go, Node  
-**Config format:** `renovate.json`  
+**URL:** https://github.com/circleci/circleci-docs/blob/master/renovate.json
+**Org:** CircleCI
+**Ecosystem:** Go, Node
+**Config format:** `renovate.json`
 **Found:** 2026-06-20
 
 ```json
@@ -1101,10 +1102,10 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 
 ### 35. ik-automation/my-mixed-pipelines
 
-**URL:** https://github.com/ik-automation/my-mixed-pipelines/blob/master/renovate/003.renovate.json  
-**Org:** ik-automation  
-**Ecosystem:** Helm (Tanka), Jsonnet, `.tool-versions`  
-**Config format:** `renovate.json` (multi-file pattern, stored in subdirectory)  
+**URL:** https://github.com/ik-automation/my-mixed-pipelines/blob/master/renovate/003.renovate.json
+**Org:** ik-automation
+**Ecosystem:** Helm (Tanka), Jsonnet, `.tool-versions`
+**Config format:** `renovate.json` (multi-file pattern, stored in subdirectory)
 **Found:** 2026-06-20
 
 ```json
@@ -1160,7 +1161,7 @@ Similar pattern to #22 (meerkat): `platformCommit`, `rollbackPrs`, `abandonmentT
 | `versioningTemplate` regex | Parses non-semver tag formats | icoretech/pgbouncer-docker |
 | `additionalBranchPrefix` with handlebars | Per-package/per-directory branch namespacing | oapi-codegen, grafana/mimir |
 | `separateMultipleMajor: true` | Splits multiple major versions into separate PRs | meerkat, prometheus |
-| `internalChecksFilter: "strict"` | Holds PRs until all CI checks pass | Automattic/wp-calypso, midokura, circleci |
+| `internalChecksFilter: "strict"` | Suppresses branches until Renovate internal checks pass | Automattic/wp-calypso, midokura, circleci |
 | `dependencyDashboardAutoclose: true` | Closes dashboard issue when no pending work | dev-sec/ansible-hardening |
 | `gitIgnoredAuthors` | Prevents bot commits from triggering rebase loops | grafana/mimir |
 | `minimumGroupSize` | Requires at least N packages to form a group PR | renovatebot/renovate |

@@ -9,8 +9,8 @@ sources_read: 10
 description: >
   Research into how teams are making Renovate configurations readable, actionable,
   and safely operable by AI agents and automated systems. Covers PR metadata, risk
-  matrices, automated triage, structured labels, and the 2026 "supply chain defense
-  trinity." Inspirational only — validate against docs/NORTH_STAR.md before adopting.
+  matrices, automated triage, structured labels, and release-age/security-gate
+  combinations. Inspirational only - validate against docs/NORTH_STAR.md before adopting.
 ---
 
 # Renovate AI and Agent-First Patterns
@@ -102,16 +102,17 @@ Renovate normally opens a PR and then runs branch CI. During the window between 
 creation and first CI result, the PR is "pending." An agent polling for actionable PRs
 may see this PR and attempt to triage or merge it before CI has finished.
 
-`"not-pending"` tells Renovate: don't open the PR until CI has either passed or failed
-at least once. The PR arrives in the agent's queue already having a CI result.
+`"not-pending"` tells Renovate to delay PR creation while branch status checks are
+pending. The PR should arrive in the agent's queue with more signal than an
+immediate PR, but agents still need to read the current check state.
 
-**The agent-first implication:** With `not-pending`, an agent can adopt the policy "any
-PR with `renovate/*` label and no pending CI is actionable." Without it, agents must
-defensively check CI status on every PR evaluation.
+**The agent-first implication:** With `not-pending`, an agent sees fewer
+not-yet-actionable PRs. Without it, agents must expect more false starts on
+freshly opened Renovate PRs.
 
 ---
 
-## 3. `internalChecksFilter: "strict"` — CI as a Hard Gate
+## 3. `internalChecksFilter: "strict"` - Release-Age Gate
 
 **Source:** Automattic/wp-calypso, renovatebot/.github, google/osv-scanner (all read June 2026)
 
@@ -121,23 +122,27 @@ defensively check CI status on every PR evaluation.
 }
 ```
 
-Renovate's "internal checks" include its own stability age check and merge confidence
-badge checks. `"strict"` means: if any internal check is pending or failed, do NOT
-automerge even if the repo's required CI checks pass.
+Renovate's "internal checks" include its own stability-age check, such as
+`renovate/stability-days` when `minimumReleaseAge` is configured. Current
+official docs recommend `internalChecksFilter: "strict"` with
+`minimumReleaseAge`; they also state that `strict` is the default when this is
+not configured.
 
-**Without this:** Renovate may automerge a PR during the `minimumReleaseAge` waiting
-period if the external CI passes, bypassing the stability gate.
+**Without this:** older or unusual configurations can make the relationship
+between PR creation and release-age checks harder for agents to reason about.
 
-**With this:** The stability gate is inviolable. An agent can trust that any PR Renovate
-has automerged has passed all gates, not just CI.
+**With this:** the release-age intent is explicit: ordinary branches and PRs
+should not appear before Renovate's own internal checks are satisfied. Agents
+still need to inspect repository CI separately.
 
 ---
 
-## 4. The 2026 Supply Chain Defense Trinity
+## 4. Release-Age Plus Security Alert Pattern
 
 **Source:** renovatebot/.github, google/osv-scanner, safeguard.sh (all read June 2026)
 
-Three settings that security-conscious organizations universally combine in 2026:
+Several security-conscious configurations combine these ideas, but this is an
+adoption candidate rather than a universal rule:
 
 ```json
 {
@@ -153,16 +158,17 @@ Three settings that security-conscious organizations universally combine in 2026
 often target the first 24–72 hours after a popular package release. A 7-day buffer
 gives the ecosystem time to detect malicious packages before they merge.
 
-**`internalChecksFilter: "strict"`:** Ensures the stability gate cannot be bypassed
-even when CI is passing. Without this, `minimumReleaseAge` can be effectively nullified.
+**`internalChecksFilter: "strict"`:** Makes the stability gate explicit and
+suppresses branches before Renovate's internal checks pass.
 
-**`osvVulnerabilityAlerts: true`:** The exemption: if a package has a known CVE, Renovate
-bypasses `minimumReleaseAge` and opens an immediate security PR. The fast lane exists
-precisely because the stability gate would otherwise slow down emergency patches.
+**`osvVulnerabilityAlerts: true`:** A candidate extra signal for OSV-based
+security PRs. Official docs currently describe it as experimental and limited to
+direct dependencies for supported datasources, so it needs validation before
+shared adoption.
 
-**Together:** Normal updates wait 7 days and must pass CI + internal checks. Security
-updates skip the wait and create an immediate PR. Agents can distinguish the two by
-the presence of the security label.
+**Together:** ordinary updates get a release-age buffer, while security updates
+retain a faster path where Renovate supports it. Agents should distinguish the
+two by labels, PR metadata, advisory evidence, and CI state.
 
 ---
 
@@ -355,9 +361,9 @@ The patterns above converge on a checklist for making a Renovate deployment agen
 | Setting | Why | Source |
 |---------|-----|--------|
 | `prCreation: "not-pending"` | No phantom PRs in agent queue | renovatebot team |
-| `internalChecksFilter: "strict"` | CI is a hard gate, not advisory | Multiple |
+| `internalChecksFilter: "strict"` | Release-age/internal checks are explicit | Multiple |
 | `minimumReleaseAge: "7 days"` | Supply chain stability window | Safeguard.sh, Renovate team |
-| `osvVulnerabilityAlerts: true` | Security fast lane | google/osv-scanner, Grafana |
+| `osvVulnerabilityAlerts: true` | Candidate extra security signal; validate first | google/osv-scanner, Grafana |
 | Deterministic label taxonomy | Agent queue management by query | TSS Yonder, Multiple |
 | Conventional Commits prefixes | `git log` parseable without API | Renovate team, oapi-codegen |
 | `commitMessageTopic` with context | Service/stack identification | Deliveroo |

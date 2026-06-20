@@ -20,6 +20,11 @@ and `renovate-config-validator` remain the references for config behavior.
 - `docs/proposals/agent-governed-renovate-change-agent.md` proposes how to use
   Renovate PRs as an agent-governed inbox for updates, dead-dependency
   candidates, and larger refactor proposals.
+- `docs/proposals/renovate-as-combinator-and-dead-code-agent.md` expands that
+  into concrete workflows for major upgrades, dead dependency investigations,
+  and Context7-backed review experiments.
+- `docs/subagents/` holds static research reports from delegated agents. These
+  are evidence leads, not runnable subagents and not policy authority.
 - `docs/subagents/renovate-change-agent-critique.md` captures the independent
   source-check and critique of that proposal.
 
@@ -42,8 +47,11 @@ MooseGooseConsulting repos can also inherit the same policy automatically throug
 - Do not require the Dependency Dashboard. Renovate PRs are the inbox.
 - Wait for checks to finish before opening ordinary PRs when possible.
 - Keep only a small number of Renovate branches/PRs active per repo.
+- Make release-age/internal checks explicit so ordinary PRs are not created
+  before Renovate's own stability gate is satisfied.
 - Request Patrick's review on Renovate PRs.
 - Group minor/patch updates by dependency family.
+- Label major updates for agent triage.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
 
 This repository intentionally contains no secrets or host rules.

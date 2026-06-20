@@ -603,7 +603,7 @@ the `5.x` series. Useful for controlled major upgrades without permanent version
 
 ## J. Security-Specific Patterns
 
-### J1. `osvVulnerabilityAlerts` — The New Standard
+### J1. `osvVulnerabilityAlerts` - Candidate Extra Security Signal
 
 **Source:** google/osv-scanner repo (read June 2026), Renovate docs (June 2026)
 
@@ -613,16 +613,17 @@ the `5.x` series. Useful for controlled major upgrades without permanent version
 }
 ```
 
-Enables Renovate to query the OSV (Open Source Vulnerabilities) database for any
-managed dependency. When a CVE is published, Renovate opens a security-update PR
-immediately, bypassing `minimumReleaseAge` and `schedule`.
+Enables Renovate to query the OSV (Open Source Vulnerabilities) database for
+supported direct dependencies and open vulnerability-fix PRs once fixes are
+available.
 
-This is the current best practice, superseding the older `vulnerabilityAlerts` config
-which relied on GitHub's advisory database only.
+This is not a replacement for `vulnerabilityAlerts`. Official Renovate docs mark
+OSV alerting as experimental and limited by datasource/dependency shape, so it
+belongs in the "evaluate with docs and hosted-version evidence" bucket before
+shared adoption.
 
-**Agent-first implication:** Security PRs opened by `osvVulnerabilityAlerts` always have
-a `renovate/security` label (or equivalent). An agent can prioritize the queue by
-filtering for this label.
+**Agent-first implication:** if adopted, OSV PRs need deterministic security
+labels so agents can prioritize them from the PR list.
 
 ### J2. `[SECURITY]` Commit Suffix for Vulnerability PRs
 

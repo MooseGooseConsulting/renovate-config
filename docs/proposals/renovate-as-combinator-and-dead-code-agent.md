@@ -106,9 +106,9 @@ This separation matters because:
 > **This event-driven trigger design has no current production analogue.**
 > The separation of concerns is documented: Marco Lancini flags `[DEAD]` as
 > a verdict in the PR comment; Ona Automation opens one small removal PR per
-> daily Knip run, independent of any Renovate event. The specific chain —
-> "Renovate PR opens → dead-dep analysis runs → separate GitHub issue created"
-> — is this proposal's original design. Pilot manually before automating.
+> daily Knip run, independent of any Renovate event. The specific chain -
+> "Renovate PR opens -> dead-dep analysis runs -> separate GitHub issue created"
+> - is this proposal's original design. Pilot manually before automating.
 
 ---
 
@@ -259,10 +259,10 @@ Agent step 7: Post structured comment OR open architectural proposal issue
 Reported evidence from the research pass:
 - Marco Lancini's published `renovate-review` skill text explicitly states:
   *"Query Context7 for documented breaking changes. Do this only for framework
-  bumps and 0.x bumps — it's not worth the token cost for minor lucide-react."*
+  bumps and 0.x bumps - it's not worth the token cost for minor lucide-react."*
   This is a direct quote from a published skill, not an inference.
 - commercetools CLAUDE.md files co-locate a `/renovate-review` skill with a
-  `context7` MCP server configuration — consistent with the Lancini pattern,
+  `context7` MCP server configuration - consistent with the Lancini pattern,
   but the skill internals are not exposed in the CLAUDE.md file. This shows
   the workflow shape is present, not that context7 is called internally.
 
@@ -315,8 +315,9 @@ ON TOP of Renovate, not inside Renovate.
 context creates a command injection surface. The security implications of
 allowing arbitrary shell commands - especially in a shared preset that applies
 to all consumer repos - are serious. Commands need explicit allowlists on every
-self-hosted runner. The Mend-hosted runner may not support them at all for
-some command classes.
+self-hosted runner. For free-tier Mend-hosted app users, custom
+`postUpgradeTasks` commands are not available; Enterprise/AppSec customers may
+be able to request allowlisting.
 
 **Custom managers can silently stop working.** A regex that matched a file
 format in 2025 may not match after a toolchain update. There is no automatic
@@ -416,6 +417,6 @@ or pending updates.
 *Written 2026-06-20. Based on existing proposal analysis, Marco Lancini's
 documented triage workflow, and commercetools CLAUDE.md evidence leads.
 Jamie Tanna's agentic Renovate work is relevant as evidence that building
-agents on top of Renovate tooling is tractable — his specific agent writes
+agents on top of Renovate tooling is tractable - his specific agent writes
 valid Renovate *config*, not reviews Renovate *PRs*. Subagent critique at
 `docs/subagents/renovate-combinator-critique.md`.*

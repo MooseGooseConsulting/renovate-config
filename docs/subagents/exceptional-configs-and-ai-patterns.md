@@ -3,10 +3,15 @@ title: Exceptional Renovate Configs & AI-First Patterns Research
 date: 2026-06-20
 status: research
 authoritative: false
+review_note: >
+  Raw subagent report. Useful as an idea mine, but several claims are deliberately
+  softened by the canonical docs. Verify against current official Renovate docs,
+  validation, and consumer-repo evidence before promoting any pattern.
 description: >
   Deep-dive research into 10 exceptional open-source Renovate configurations and
   emerging AI/agent-first patterns for automated PR triage and risk assessment.
-  Sourced by reading full configs and full articles. Inspirational, not prescriptive.
+  Sourced by a subagent research pass. Inspirational, not prescriptive; verify
+  claims before promotion.
 ---
 
 # Exceptional Renovate Configurations & AI-Agent-First Patterns
@@ -391,7 +396,7 @@ description: >
 
 ### 7. `google/osv-scanner` — Supply Chain Dogfooding
 
-**Why it's exceptional:** Google's own vulnerability scanner uses Renovate with `osvVulnerabilityAlerts: true`, meaning the team that builds the vulnerability database is using that same database to gate their own dependency updates. The config is minimal but principled.
+**Why it's interesting:** Google's own vulnerability scanner uses Renovate with `osvVulnerabilityAlerts: true`, meaning the team that builds vulnerability tooling is also exploring OSV-backed dependency update signals. The config is minimal but still needs to be read as an example, not as automatic policy for this repo.
 
 ```json
 {
@@ -423,7 +428,7 @@ description: >
 
 - **`ignoreDeprecated + ignoreDeps: ["golang.org/x/vuln"]`:** The OSV scanner project explicitly pins out the `vuln` package as unmanaged — it is managed separately as a core infrastructure dependency.
 - **`matchFileNames: [".github/**"]`, `groupName: "workflows"`:** GitHub Actions updates are grouped into a single PR. On a security-focused project, a grouped "workflows" PR is safer to review than individual Action version bumps.
-- **`minimumReleaseAge: "7 days"` + `osvVulnerabilityAlerts: true`:** The canonical supply chain pattern: 7-day age gate blocks fresh releases, OSV alerts bypass the gate for known-vulnerable versions. This combination is documented as best practice in the Renovate upgrade-best-practices guide.
+- **`minimumReleaseAge: "7 days"` + `osvVulnerabilityAlerts: true`:** A security-conscious pattern: the age gate slows ordinary fresh releases, while vulnerability alerts provide a faster path where Renovate supports them. Official docs describe OSV alerting as experimental and direct-dependency-oriented, so it must be evaluated before adoption.
 - **`ignorePaths: ["**/testdata/**"]`:** Test fixture data is explicitly excluded. This is important for a security scanner — test data may contain intentionally vulnerable or pinned old versions.
 
 ---
@@ -460,7 +465,7 @@ description: >
 
 **What's exceptional:**
 
-- **`printConfig: true`:** This tells Renovate to write its merged configuration to the Dependency Dashboard issue. This is invaluable for debugging preset inheritance — you can see exactly what configuration is in effect after all extends are resolved, without having to trace the preset chain manually. It's especially useful for shared-config architectures.
+- **`printConfig: true`:** This tells Renovate to log its resolved configuration for troubleshooting. It can help debug preset inheritance, but it is not a Dependency Dashboard output and should be evaluated for log noise before shared adoption.
 - **`prHourlyLimit: 2`:** Extremely conservative rate limiting. Only 2 PRs per hour means that even during a major version wave, the team will receive a manageable number of PRs per day across their fleet. With `prConcurrentLimit: 10` open at once, this produces a slow, steady trickle rather than bursts.
 - **Modular named presets:** The extends list references named sub-presets (`dependencyDashboardMajor`, `groupReact`, `pinActions`). This modular design allows consumer repos to cherry-pick behaviors (`github>microsoft/m365-renovate-config:groupReact`) without taking all defaults.
 - **`commitMessageTopic: "devDependency {{{depName}}}"`** for devDeps: Changes the commit message format for dev dependencies, which is useful for teams that use commit messages as the primary signal for change type — dev deps get a visually distinct commit message that's easier to filter in changelogs and triage queues.
@@ -583,7 +588,7 @@ description: >
 
 **Source:** [Automating Security Operations with AI: Triaging Renovate PRs](https://blog.marcolancini.it/2026/blog-automating-security-operations-with-ai-triage-renovate/)
 
-The most complete publicly documented example of an AI-native Renovate review pipeline, published May 2026. The architecture is:
+A useful publicly documented example of an AI-assisted Renovate review pipeline, published May 2026. The architecture is:
 
 ```
 Renovate (GitHub Actions, monthly cron)
@@ -732,7 +737,7 @@ This is the cheapest possible signal — available from the PR list API, no diff
 
 **Source:** Renovate official docs + [GitHub Discussion #38070](https://github.com/renovatebot/renovate/discussions/38070) + [Discussion #42269](https://github.com/renovatebot/renovate/discussions/42269)
 
-The canonical supply chain defense pattern in 2025-2026, used by Google OSV Scanner, Lancini, Grafana Mimir, and the `renovatebot/.github` preset:
+A security-conscious release-age pattern seen in several examples:
 
 ```json
 {
@@ -867,11 +872,13 @@ OSV covers supply chain attacks (e.g., malicious npm packages) faster than the G
 
 ---
 
-### Pattern 9: `reRequestApprovedReviews` — Keeping Reviewer State Fresh
+### Pattern 9: `reRequestApprovedReviews` - Do Not Promote Yet
 
 **Source:** [renovatebot/renovate PR #43463](https://github.com/renovatebot/renovate/pull/43463)
 
-A new experimental Renovate config option added in May 2026 that re-requests review from users whose approvals were dismissed (by a rebase or force push):
+The cited PR was closed and the option was not found in the current official
+configuration docs during the follow-up audit. Treat this as an idea to watch,
+not as a valid configuration option:
 
 ```json
 {
@@ -879,7 +886,10 @@ A new experimental Renovate config option added in May 2026 that re-requests rev
 }
 ```
 
-**Why this matters for agentic review pipelines:** When a bot (or human) reviews and approves a Renovate PR, and then the PR is rebased, the approval is dismissed. Without `reRequestApprovedReviews`, the PR sits with zero active reviewers indefinitely. With it, the previous approver is automatically re-pinged after each rebase, keeping the review loop alive. For agent-reviewed PRs (where the review comment is posted by an AI agent with a dedicated GitHub App), this keeps the agent as an active reviewer after rebases.
+**Why the idea is still relevant:** when a bot or human approves a Renovate PR
+and that approval is dismissed after a rebase, an agent workflow still needs a
+way to notice and re-review. Use GitHub PR state, review requests, or a separate
+agent workflow until Renovate ships and documents a native option.
 
 ---
 
@@ -912,14 +922,18 @@ b) actually detects and updates the targeted dependency in a real repo
 |---------|-----------|------------------------|
 | `prCreation: "not-pending"` | Low | High — directly serves G5 (agent-reviewable PRs) |
 | `minimumReleaseAge` + `internalChecksFilter: "strict"` | Low | High — directly serves G4-R2 (security fast lane) |
-| `osvVulnerabilityAlerts: true` | Low | High — broader vulnerability coverage, free to enable |
-| `addLabels: ["breaking"]` on major updates | Low | High — enables label-based triage without opening PRs |
+| `osvVulnerabilityAlerts: true` | Low | Candidate only - experimental/direct-dependency limitations require validation |
+| `addLabels: ["major-upgrade"]` on major updates | Low | High - enables label-based triage from the PR list |
 | `commitMessageSuffix` with `[SECURITY]` on vuln alerts | Low | Medium — useful for git log audit trail |
-| `printConfig: true` | Very low | High — invaluable for debugging preset inheritance |
+| `printConfig: true` | Very low | Candidate - useful log debugging aid, but evaluate noise first |
 | `mergeConfidence:all-badges` in extends | Low | Medium — community merge signal in PR body |
 | `prBodyTemplate` customization | Medium | Low — only if agent parsing PR bodies |
 | `customManagers` for Makefile/Dockerfile comment syntax | Medium | Low — relevant if consumers have non-standard files |
 | Structured `commitMessagePrefix` per stack/project | Medium | Medium — useful for multi-project orgs using event-driven agents |
-| Claude Code Routine on `PR_open` event | High | Aspirational — solid architecture when ready to implement |
+| PR-open agent review event | High | Aspirational - evaluate after the PR metadata and rubric loop are stable |
 
-The lowest-effort, highest-leverage changes for making Renovate PRs agent-reviewable: add `prCreation: "not-pending"`, `osvVulnerabilityAlerts: true`, `minimumReleaseAge` paired with `internalChecksFilter: "strict"`, and `addLabels: ["breaking"]` for major updates.
+Promote now only the low-risk items that fit current policy and validate cleanly:
+make `internalChecksFilter: "strict"` explicit next to `minimumReleaseAge`, and
+label major updates for agent triage. Evaluate OSV alerts, `printConfig`, custom
+managers, and PR-open automation separately with current official docs and
+consumer-repo evidence.

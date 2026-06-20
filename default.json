@@ -22,6 +22,7 @@
   "branchConcurrentLimit": 2,
   "prHourlyLimit": 1,
   "prCreation": "not-pending",
+  "internalChecksFilter": "strict",
   "schedule": [
     "* 4-8 * * 1-5"
   ],
@@ -30,6 +31,15 @@
   "minimumReleaseAge": "3 days",
   "automerge": false,
   "packageRules": [
+    {
+      "description": "Label major updates for agent triage.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "addLabels": [
+        "major-upgrade"
+      ]
+    },
     {
       "description": "Group npm production dependency minor and patch updates.",
       "matchManagers": [

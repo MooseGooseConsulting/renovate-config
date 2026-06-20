@@ -22,6 +22,9 @@ open a larger refactor proposal.
 The Dependency Dashboard is not the operating surface. The operating surface is
 GitHub PR state, comments, labels, checks, and follow-up issues.
 
+For the more concrete workflow design, see
+`docs/proposals/renovate-as-combinator-and-dead-code-agent.md`.
+
 ## Why This Is Interesting
 
 Renovate is normally described as a dependency update bot, but the deeper pattern
@@ -98,8 +101,10 @@ Use the current default stance:
 
 - `dependencyDashboard: false`
 - `prCreation: "not-pending"`
+- `internalChecksFilter: "strict"`
 - low concurrency limits
 - grouped minor/patch updates
+- explicit `major-upgrade` label for major updates
 - no default automerge
 - clear `dependencies` and `agent-review` labels
 
@@ -258,8 +263,8 @@ Do these first:
 4. Add fixture/dry-run expectations before any shared custom manager.
 5. Evaluate labels for majors, security, and possible dead dependency candidates
    so agents can query PRs without opening every PR.
-6. Evaluate explicit `internalChecksFilter: "strict"` alongside the existing
-   `minimumReleaseAge` and `prCreation: "not-pending"` policy.
+6. Keep the explicit `internalChecksFilter: "strict"` and `major-upgrade` label
+   as the first promoted research ideas, assuming validation stays clean.
 7. Evaluate `osvVulnerabilityAlerts` and security labels with official docs
    before changing shared config.
 

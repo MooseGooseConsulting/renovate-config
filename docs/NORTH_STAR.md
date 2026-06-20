@@ -10,7 +10,7 @@ last_confirmed: 2026-06-20
 
 ## Why This Exists
 
-This repository exists so MooseGooseConsulting repositories can use Renovate effectively for whatever Renovate is good at managing, without turning dependency maintenance into noisy, repo-by-repo babysitting.
+This repository exists so MooseGooseConsulting and selected Coldaine repositories can use Renovate effectively for whatever Renovate is good at managing, without turning dependency maintenance into noisy, repo-by-repo babysitting.
 
 ## Goals
 
@@ -28,7 +28,7 @@ G5. **Make Renovate PRs agent-reviewable.** Label, assign, and describe dependen
 
 G1-R1. The shared preset remains valid under `renovate-config-validator --no-global --strict`.
 
-G1-R2. Official Renovate documentation is refreshed before changing Renovate config behavior.
+G1-R2. Current official Renovate documentation is consulted before changing Renovate config behavior. The generated local docs snapshot is an optional cache, not a policy source.
 
 G2-R1. Consumer repositories can opt into the shared default with `extends: ["github>MooseGooseConsulting/renovate-config"]`.
 

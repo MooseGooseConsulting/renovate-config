@@ -9,8 +9,8 @@ sources_read: 13
 description: >
   Research into how real organizations — Coveo, Swissquote, Grafana Labs, Fullscript,
   Evri, KloudVin, Microsoft M365, commercetools, Deliveroo, Jamie Tanna — operate
-  Renovate across hundreds to thousands of repositories. Drawn from articles fully
-  read in June 2026. Inspirational only; validate against docs/NORTH_STAR.md before
+  Renovate across many repositories. Drawn from article and public-config research
+  in June 2026. Inspirational only; validate against docs/NORTH_STAR.md before
   adopting anything.
 ---
 
@@ -33,7 +33,7 @@ pattern into the shared preset or deciding how to handle PR volume at scale.
 
 ## 1. Coveo — Kubernetes CronJob Sharding at 400–500 Repositories
 
-**Source:** source.coveo.com (read June 2026)  
+**Source:** source.coveo.com (read June 2026)
 **Scale:** 400–500 repositories across multiple GitHub organizations
 
 ### What they built
@@ -67,7 +67,7 @@ occurs.
 
 ## 2. Swissquote — 857 Repositories and Log4Shell Response Time
 
-**Source:** Official Renovate/Mend case study (read June 2026)  
+**Source:** Official Renovate/Mend case study (read June 2026)
 **Scale:** 857 of ~2,000 repositories running Renovate
 
 ### What they built
@@ -95,7 +95,7 @@ produced measurable incident response time reductions.
 
 ## 3. Grafana Labs — 1,300 Repositories, Loki Monitoring, OSV Integration
 
-**Source:** SCALE 23x conference talk (March 2026)  
+**Source:** SCALE 23x conference talk (March 2026)
 **Scale:** 1,300 repositories
 
 ### What they built
@@ -132,7 +132,7 @@ essentially opt-in, but we don't have the staged rollout discipline yet.
 
 ## 4. Jamie Tanna / Elastic / Deliveroo — SLO Monitoring and Config Drift Scanning
 
-**Sources:** jvt.me blog, elasticpath.dev, deliveroo.engineering (read June 2026)  
+**Sources:** jvt.me blog, elasticpath.dev, deliveroo.engineering (read June 2026)
 **Scale:** 100s to 1,000 repositories per org
 
 ### SLO monitoring (Jamie Tanna)
@@ -173,7 +173,7 @@ preset's safety features. Both patterns serve G5 directly.
 
 ## 5. KloudVin — The Payments-Service Automerge Incident
 
-**Source:** KloudVin engineering blog (May 2026)  
+**Source:** KloudVin engineering blog (May 2026)
 **Scale:** 280 repositories
 
 ### What happened
@@ -209,7 +209,7 @@ The KloudVin incident is a cautionary tale for why `minimumReleaseAge` and
 
 ## 6. Fullscript Engineering — 16-Manager Platform and Sorbet RBI postUpgradeTasks
 
-**Source:** Fullscript engineering blog (April 2026)  
+**Source:** Fullscript engineering blog (April 2026)
 **Scale:** GitLab fleet, ~100 repositories
 
 ### What they built
@@ -249,7 +249,7 @@ the highest-risk footguns in the Renovate advanced configuration space.
 
 ## 7. Evri Engineering — GPG-Signed Commits and S3 Cache
 
-**Source:** Evri engineering blog (2023)  
+**Source:** Evri engineering blog (2023)
 **Scale:** GitLab + Jenkins fleet
 
 ### What they built
@@ -276,7 +276,7 @@ against a frozen release.
 
 ## 8. TSS Yonder — Repository Topic Classification and Preset Taxonomy
 
-**Source:** TSS Yonder engineering blog (December 2023)  
+**Source:** TSS Yonder engineering blog (December 2023)
 **Scale:** Hundreds of repositories
 
 ### What they built
@@ -307,7 +307,7 @@ directly relevant to G5 (agent-reviewable PRs) because an agent reading a repo's
 
 ## 9. Microsoft M365 — Versioned Preset Library and Modular Named Sub-Presets
 
-**Source:** github.com/microsoft/m365-renovate-config (read June 2026)  
+**Source:** github.com/microsoft/m365-renovate-config (read June 2026)
 **Scale:** M365 organization (hundreds of repos)
 
 ### What they built
@@ -330,7 +330,7 @@ preset, especially since consumer repos can't access Renovate instance logs.
 
 ## 10. commercetools — Composite Bundles and the 3-Repo Rule
 
-**Source:** commercetools engineering blog (2026)  
+**Source:** commercetools engineering blog (2026)
 **Scale:** Org-wide shared config
 
 ### What they built
@@ -381,7 +381,7 @@ PR review time within 3 months.
 
 ## 12. mogenius Renovate Operator — Kubernetes-Native Fleet Orchestration
 
-**Source:** mogenius.com/renovate-operator.html (April 2026)  
+**Source:** mogenius.com/renovate-operator.html (April 2026)
 **GitHub:** https://github.com/mogenius/renovate-operator
 
 ### What it does
@@ -408,7 +408,7 @@ Actions approach may need replacement.
 
 ## 13. lazyreno — Bulk Merge TUI for Fleet Operators
 
-**Source:** github.com/limehawk/lazyreno (March 2026)  
+**Source:** github.com/limehawk/lazyreno (March 2026)
 **Written in:** Rust
 
 ### What it is
@@ -446,7 +446,7 @@ This document covers 13 organizations. Across them, the recurring patterns are:
 | 5 | Tracking "CVE-to-PR" time as an SLO reframes Renovate as security tooling | Swissquote |
 | 6 | `prHourlyLimit` must be set before you need it, not after | Grafana Labs |
 | 7 | Opt-in model (topic gate) + staged onboarding avoids big-bang noise | Grafana Labs |
-| 8 | `osvVulnerabilityAlerts` + OSV database integration is now standard | Grafana Labs |
+| 8 | `osvVulnerabilityAlerts` + OSV database integration is an emerging security signal to evaluate | Grafana Labs |
 | 9 | PR age SLOs convert Renovate from noise to compliance instrument | Jamie Tanna |
 | 10 | SQLite config drift scanning finds repos that have disabled shared safety gates | Elastic |
 | 11 | `commitMessageTopic` with service name enables log correlation | Deliveroo |
@@ -461,7 +461,7 @@ This document covers 13 organizations. Across them, the recurring patterns are:
 | 20 | Repository topic taxonomy enables programmatic fleet classification | TSS Yonder |
 | 21 | Named preset vocabulary (8 named sub-presets) creates shared language for agents | TSS Yonder |
 | 22 | Versioned presets allow gradual consumer migration without a flag day | Microsoft M365 |
-| 23 | `printConfig: true` is the single best debugging aid for remote Renovate users | Microsoft M365 |
+| 23 | `printConfig: true` can help debug resolved config through Renovate logs | Microsoft M365 |
 | 24 | Composite bundle presets reduce consumer config to a single extends line | commercetools |
 | 25 | 3-repo rule: only promote patterns to shared config after 3 consumers demonstrate it | commercetools |
 | 26 | Digest pinning for Docker images prevents "latest" tag drift attacks | Safeguard.sh |
@@ -471,7 +471,7 @@ This document covers 13 organizations. Across them, the recurring patterns are:
 | 30 | K8s operators expose Prometheus metrics; GitHub Actions crons do not | mogenius |
 | 31 | Three signals to migrate to K8s operator: 100+ repos, 429 errors, silent failures | mogenius |
 | 32 | Bulk-merge TUI tools fill the gap between "zero automation" and "full agent" | lazyreno |
-| 33 | `internalChecksFilter: "strict"` makes CI a hard gate before any merge | Multiple |
+| 33 | `internalChecksFilter: "strict"` makes Renovate internal checks explicit | Multiple |
 | 34 | `prCreation: "not-pending"` prevents agents from seeing phantom pending PRs | Multiple |
 | 35 | `mergeConfidence:all-badges` surfaces ecosystem adoption signals in PR body | Multiple |
 | 36 | `rebaseWhen: "conflicted"` avoids unnecessary CI reruns on already-green PRs | Multiple |
