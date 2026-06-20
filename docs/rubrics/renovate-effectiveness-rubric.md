@@ -20,11 +20,34 @@ For each dimension below:
 1. Ask the listed questions.
 2. Record the evidence collected.
 3. Assign a score from 0 to 4.
-4. Note one concrete improvement if the score is below 4.
+4. Assign a confidence level of High, Medium, or Low.
+5. Note one concrete improvement if the score is below 4.
 
 Use exact numeric thresholds only when the org has already defined them. The
 examples in this rubric are calibration aids, not required service-level
 objectives.
+
+## Scoring Contract
+
+Score outcomes, not intentions. A Renovate option in config is evidence that the
+deployment is trying to create an outcome; it is not proof that the outcome is
+happening.
+
+- Score each dimension after collecting evidence from the sampled repositories.
+- Use `0` when evidence is missing, unusable, or shows the behavior is absent.
+  List the missing evidence under Evidence Gaps.
+- A score above `2` requires direct evidence from current repo state, recent
+  Renovate PRs, CI, security data, or a documented triage decision.
+- A score of `4` requires consistent evidence across the representative sample,
+  not one clean example.
+- Add a confidence level to every score:
+  - **High:** direct evidence from most sampled repos and the evidence agrees.
+  - **Medium:** direct evidence from some repos, with minor gaps or conflicts.
+  - **Low:** sparse, stale, indirect, or conflicting evidence.
+- Do not let Dependency Dashboard presence raise a score by itself. This repo's
+  default operating model treats Renovate PRs as the inbox.
+- Do not credit Mend-only features, paid Mend behavior, or Mend Developer Portal
+  workflows as available shared-policy options.
 
 ## Scoring Bands
 
@@ -46,7 +69,7 @@ evidence gap.
 | Security response | 15 |
 | PR noise and cadence | 15 |
 | Grouping and reviewability | 15 |
-| Test signal and merge confidence | 15 |
+| Test signal and merge readiness | 15 |
 | Mergeability and branch health | 10 |
 | Cross-repo drift control | 10 |
 | Human and agent triage loop | 5 |
@@ -61,9 +84,42 @@ evidence gap.
 | 1 | Weak: the deployment is mostly noisy, stale, blocked, or hard to trust. |
 | 0 | Missing or broken: no usable evidence, no meaningful Renovate coverage, or the behavior works against the goal. |
 
+## Minimum Evidence Gates
+
+These gates prevent generous scoring when the evaluator only has config or
+intent. If the listed evidence is unavailable, do not score the dimension above
+`2`; if no usable evidence exists, score it `0`.
+
+| Dimension | Evidence needed to score above 2 |
+| --- | --- |
+| Dependency freshness and coverage | Package/dependency surfaces from sampled repos plus current or recent Renovate PR/version evidence. |
+| Security response | Current security alert/vulnerability PR evidence, emergency update history, or an explicit check that no relevant current alerts were found. |
+| PR noise and cadence | Open and recently closed Renovate PR counts, age, throttling symptoms, and stale or superseded PR examples. |
+| Grouping and reviewability | Actual Renovate PR titles/bodies/labels plus the grouping rules that produced them. |
+| Test signal and merge readiness | Required checks, CI status, repeated failure patterns, and at least one passing or failing Renovate PR example. |
+| Mergeability and branch health | Branch status, conflicts, stale checks, superseded PRs, or evidence that Renovate refreshes old branches cleanly. |
+| Cross-repo drift control | Inventory of sampled repo `renovate.json` files and whether they extend the shared preset. |
+| Human and agent triage loop | Labels, reviewers, assignees, PR body content, review comments, close reasons, or triage notes. |
+
+## False Confidence Traps
+
+Do not award high scores for these signals on their own:
+
+- The shared config validates but sampled repos still carry stale or noisy PRs.
+- A package rule exists but no current PR shows it creates reviewable output.
+- A dashboard exists but PRs are not actionable from the GitHub PR list.
+- Security labels exist but vulnerability fixes are stale, blocked, or
+  unassigned.
+- Automerge is enabled without evidence that checks catch likely dependency
+  breakage.
+- A repo has no open Renovate PRs, but there is no evidence that dependencies
+  are current or intentionally ignored.
+
 ## Evidence To Collect
 
-- The shared Renovate preset, inherited config, and any repo-local overrides.
+- The shared Renovate preset and any repo-local overrides. Treat
+  `org-inherited-config.json` as compatibility-only unless Patrick explicitly
+  reverses the no-Mend decision.
 - A sample of open Renovate PRs across small, medium, and high-churn repos.
 - A sample of recent merged, closed, and abandoned Renovate PRs.
 - CI status, required checks, test failures, and rerun history on Renovate PRs.
@@ -302,19 +358,23 @@ One paragraph on whether Renovate is acting as a useful dependency-maintenance
 system or just generating work.
 
 ## Scores
-| Dimension | Score | Weighted result | Evidence | Main improvement |
-| --- | ---: | ---: | --- | --- |
-| Dependency freshness and coverage | __/4 | __/15 | __ | __ |
-| Security response | __/4 | __/15 | __ | __ |
-| PR noise and cadence | __/4 | __/15 | __ | __ |
-| Grouping and reviewability | __/4 | __/15 | __ | __ |
-| Test signal and merge confidence | __/4 | __/15 | __ | __ |
-| Mergeability and branch health | __/4 | __/10 | __ | __ |
-| Cross-repo drift control | __/4 | __/10 | __ | __ |
-| Human and agent triage loop | __/4 | __/5 | __ | __ |
+| Dimension | Score | Weighted result | Confidence | Evidence | Main improvement |
+| --- | ---: | ---: | --- | --- | --- |
+| Dependency freshness and coverage | __/4 | __/15 | High/Medium/Low | __ | __ |
+| Security response | __/4 | __/15 | High/Medium/Low | __ | __ |
+| PR noise and cadence | __/4 | __/15 | High/Medium/Low | __ | __ |
+| Grouping and reviewability | __/4 | __/15 | High/Medium/Low | __ | __ |
+| Test signal and merge readiness | __/4 | __/15 | High/Medium/Low | __ | __ |
+| Mergeability and branch health | __/4 | __/10 | High/Medium/Low | __ | __ |
+| Cross-repo drift control | __/4 | __/10 | High/Medium/Low | __ | __ |
+| Human and agent triage loop | __/4 | __/5 | High/Medium/Low | __ | __ |
 
 ## Evidence Gaps
 - __
+
+## False Confidence Checks
+- Scores that depend only on config, docs, labels, or dashboards:
+- Scores capped because minimum evidence gates were not met:
 
 ## Recommended Next Actions
 - __
