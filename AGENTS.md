@@ -1,4 +1,9 @@
 Read `docs/NORTH_STAR.md` first. Do not infer project intent from config alone.
+
+This document is the agent operating contract for Renovate configuration work in this repo.
+Review `AGENTS.md` when a PR changes Renovate policy, docs authority, hooks, skills, or agent workflow.
+Audit `docs/inspiration/` entries by their `review_by` date, or within three months of discovery when no `review_by` is set; remove stale inspiration instead of letting it become ambient policy.
+
 Before Renovate config edits, use `.agents/skills/renovate-config/SKILL.md`.
 Docs authority: `docs/NORTH_STAR.md` -> `docs/architecture.md` -> workflows/rubrics.
 Config surfaces: shared policy in `default.json`; Mend inheritance in `org-inherited-config.json`; repo-specific behavior in consumer `renovate.json`.
