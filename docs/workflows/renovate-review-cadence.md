@@ -169,8 +169,8 @@ Coordination band: __
 ## Follow-Up Rules
 
 - If the review recommends changing Renovate config behavior, consult current
-  official Renovate docs before editing config and run `npm run
-  renovate:validate` before committing the config change.
+  official Renovate docs before editing config and run
+  `npm run renovate:validate` before committing the config change.
 - If repeated repo-local overrides appear, decide whether they should become a
   shared default, a documented optional preset, or intentionally local behavior.
 - If a recommendation depends on unavailable evidence, list the evidence request

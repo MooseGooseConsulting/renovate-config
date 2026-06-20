@@ -278,7 +278,9 @@ Confirmed strong evidence:
   greps source usage, queries Context7 for framework breaking changes, and posts
   a read-only risk matrix as a PR comment.
 - Jamie Tanna documents a Renovate config agent that uses current docs,
-  `renovate-config-validator`, and Renovate dry runs to check proposed config.
+  validator checks, and Renovate dry runs to check proposed config. In this
+  repo, actionable config changes use `.agents/skills/renovate-config/SKILL.md`
+  and `npm run renovate:validate`.
 
 Confirmed weaker evidence:
 

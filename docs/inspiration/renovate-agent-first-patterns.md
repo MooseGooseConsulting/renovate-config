@@ -325,10 +325,11 @@ validation step in CI:
 do — without creating any PRs. Used in a PR workflow, this validates that the config
 change doesn't accidentally disable major update paths.
 
-**For us:** We already use `renovate-config-validator`. This pattern goes further: it
-validates that the *logical behavior* of the config is correct, not just its syntax.
-An agent modifying `default.json` should run this dry-run check and report back on
-what changed.
+**For us:** Agents modifying `default.json` must first follow
+`.agents/skills/renovate-config/SKILL.md` and run `npm run renovate:validate`.
+This pattern goes further: it validates that the *logical behavior* of the
+config is correct, not just its syntax. An agent modifying `default.json` should
+run this dry-run check and report back on what changed.
 
 ---
 

@@ -27,7 +27,7 @@ The repository uses a small public Renovate preset as the technical center of gr
 | No-Mend operating model | Current | The shared policy must remain runnable through ordinary Renovate config, such as self-hosted Renovate or GitHub Actions. Mend-only features are not candidates for shared policy. |
 | Mend inherited config | Deferred | `org-inherited-config.json` exists as a compatibility artifact only. It is not part of the planned operating model. |
 | Renovate docs grounding | Current | Agents consult current official Renovate docs through Context7 or direct `docs.renovatebot.com` pages before config edits; the generated snapshot is only an optional local cache. |
-| Validation | Current | `npm run renovate:validate` runs `renovate-config-validator --no-global --strict` against the shared and inherited config files. |
+| Validation | Current | `npm run renovate:validate` validates the shared and inherited config files. |
 | Local push guard | Current | `.githooks/pre-push` runs Renovate validation and blocks direct pushes from `main` once installed with `npm run hooks:install`. |
 | Remote PR gate | Current | GitHub branch protection on `main` requires pull requests and enforces the rule for admins. |
 | Agent workflow | Current | `.agents/skills/renovate-config/SKILL.md` routes agents through official docs and validation before config edits. |

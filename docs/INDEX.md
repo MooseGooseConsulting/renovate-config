@@ -6,6 +6,7 @@ Start here when navigating the Renovate config docs.
 | --- | --- |
 | Project intent, goals, anti-goals, and pillars | `docs/NORTH_STAR.md` |
 | Technical shape, current components, invariants, and review cadence | `docs/architecture.md` |
+| Renovate config edit workflow for agents | `.agents/skills/renovate-config/SKILL.md` |
 | How to review whether Renovate is working well | `docs/rubrics/renovate-effectiveness-rubric.md` |
 | How to review shared preset vs repo-local coordination | `docs/rubrics/repository-coordination-rubric.md` |
 | How often to run reviews and what evidence to collect | `docs/workflows/renovate-review-cadence.md` |

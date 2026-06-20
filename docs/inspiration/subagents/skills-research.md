@@ -29,15 +29,15 @@ commands, and non-obvious workflow constraints.
 
 Inspected roots:
 
-- `D:\_projects\renovate-config\.agents\skills`
-- `C:\Users\pmacl\.agents\skills`
-- `C:\Users\pmacl\.codex\skills`
+- repo-local `.agents/skills`
+- user-local personal skills root
+- user-local Codex skills root
 
 The repo has one repo-local skill:
 
-- `.agents\skills\renovate-config\SKILL.md`
+- `.agents/skills/renovate-config/SKILL.md`
 
-The user-level `.agents\skills` root contains:
+The user-local personal skills root contains:
 
 - `skill-install`
 - `nlm-skill`
@@ -51,8 +51,7 @@ The user-level `.agents\skills` root contains:
 - `chat-history`
 - `project-docs`
 
-The user-level `.codex\skills` root contains bundled system skills under
-`.system`:
+The user-local Codex skills root contains bundled system skills under `.system`:
 
 - `imagegen`
 - `openai-docs`
@@ -60,7 +59,7 @@ The user-level `.codex\skills` root contains bundled system skills under
 - `skill-creator`
 - `skill-installer`
 
-There is also a `llm-archiver` link under `C:\Users\pmacl\.codex\skills`, but
+There is also a `llm-archiver` link under the user-local Codex skills root, but
 its target was not readable during this pass, so it was not treated as relevant
 evidence for this repository.
 
@@ -68,7 +67,7 @@ evidence for this repository.
 
 ### `renovate-config`
 
-Source: `.agents\skills\renovate-config\SKILL.md`
+Source: `.agents/skills/renovate-config/SKILL.md`
 
 This is the most important repo-local skill. It says it is not official
 Renovate-authored content and exists to force agents toward the official
@@ -80,7 +79,7 @@ Influence on this repo:
   consumer `renovate.json`, package rules, schedules, grouping, reviewers,
   PR throttles, or dashboard behavior.
 - Refresh docs with `npm run docs:update` and read
-  `.agents\skills\renovate-config\references\renovate-docs-snapshot.md` before
+  `.agents/skills/renovate-config/references/renovate-docs-snapshot.md` before
   making config changes.
 - Validate config changes with `npm run renovate:validate`.
 - Keep the shared preset public and secret-free.
@@ -97,7 +96,7 @@ conditional evidence, not a universal maturity requirement.
 
 ### `project-docs`
 
-Source: `C:\Users\pmacl\.agents\skills\project-docs\SKILL.md`
+Source: user-local `project-docs/SKILL.md`
 
 This skill defines the documentation authority stack:
 
@@ -119,7 +118,7 @@ should carry the project authority.
 
 ### `skill-creator`
 
-Source: `C:\Users\pmacl\.codex\skills\.system\skill-creator\SKILL.md`
+Source: bundled system `skill-creator/SKILL.md`
 
 This system skill gives the clearest definition of a skill in this environment.
 It emphasizes that skills are modular folders with a required `SKILL.md`,
@@ -140,8 +139,8 @@ Influence on this repo:
 
 Sources:
 
-- `C:\Users\pmacl\.agents\skills\skill-finder\SKILL.md`
-- `C:\Users\pmacl\.agents\skills\skill-finder\references\best-practices-checklist.md`
+- user-local `skill-finder/SKILL.md`
+- user-local `skill-finder/references/best-practices-checklist.md`
 
 This skill is for query-driven skill search and quality evaluation. Its
 best-practices checklist is useful even when not installing anything.
@@ -160,30 +159,30 @@ Influence on this repo:
 
 Sources:
 
-- `C:\Users\pmacl\.agents\skills\skill-install\SKILL.md`
-- `C:\Users\pmacl\.codex\skills\.system\skill-installer\SKILL.md`
+- user-local `skill-install/SKILL.md`
+- bundled system `skill-installer/SKILL.md`
 
 These skills cover installing and consolidating skills across tools. The local
 `skill-install` guidance says one physical user-authored copy should live under
-`~\.agents\skills`, with junctions or tool-specific exceptions only where a
+the user-local personal skills root, with junctions or tool-specific exceptions only where a
 client requires them. The system `skill-installer` covers installing Codex skills
 from curated or GitHub sources.
 
 Influence on this repo:
 
-- Treat `.agents\skills` as a live discovery surface, not an archival dump.
+- Treat `.agents/skills` as a live discovery surface, not an archival dump.
 - Avoid copy-pasting the same skill into several tool roots.
 - Keep repo-local skills in the repo only when they encode repo-specific
   behavior.
-- Do not edit bundled `.codex\skills\.system` skills as if they were project
+- Do not edit bundled system skills as if they were project
   source.
 
 ### `chat-history` and `retrospective`
 
 Sources:
 
-- `C:\Users\pmacl\.agents\skills\chat-history\SKILL.md`
-- `C:\Users\pmacl\.agents\skills\retrospective\SKILL.md`
+- user-local `chat-history/SKILL.md`
+- user-local `retrospective/SKILL.md`
 
 These are relevant when auditing what an earlier agent actually did or when
 turning session lessons into improved process.
@@ -199,7 +198,7 @@ Influence on this repo:
 
 ### `doppler`
 
-Source: `C:\Users\pmacl\.agents\skills\doppler\SKILL.md`
+Source: user-local `doppler/SKILL.md`
 
 This is not Renovate-specific, but it matters because Renovate config can touch
 registries, host rules, and tokens.

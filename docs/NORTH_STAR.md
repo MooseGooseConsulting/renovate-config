@@ -26,9 +26,9 @@ G5. **Make Renovate PRs agent-reviewable.** Label, assign, and describe dependen
 
 ## Requirements
 
-G1-R1. The shared preset remains valid under `renovate-config-validator --no-global --strict`.
+G1-R1. The shared preset remains valid under `npm run renovate:validate`.
 
-G1-R2. Current official Renovate documentation is consulted before changing Renovate config behavior. The generated local docs snapshot is an optional cache, not a policy source.
+G1-R2. Current official Renovate documentation and `.agents/skills/renovate-config/SKILL.md` are consulted before changing Renovate config behavior. The generated local docs snapshot is an optional cache, not a policy source.
 
 G2-R1. Consumer repositories can opt into the shared default with `extends: ["github>MooseGooseConsulting/renovate-config"]`.
 

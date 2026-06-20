@@ -77,5 +77,5 @@ Use these official docs as the primary references:
 - `https://docs.renovatebot.com/key-concepts/minimum-release-age/`
 - `https://docs.renovatebot.com/modules/manager/regex/`
 
-If you intentionally need an offline/cacheable reference, run `npm run
-docs:update` and then read `references/renovate-docs-snapshot.md`.
+If you intentionally need an offline/cacheable reference, run `npm run docs:update`
+and then read `references/renovate-docs-snapshot.md`.

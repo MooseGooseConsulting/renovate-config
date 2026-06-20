@@ -3,9 +3,10 @@
 Shared, secret-free Renovate policy for MooseGooseConsulting and Coldaine repositories.
 
 There does not appear to be an official Renovate-authored agent `SKILL.md`.
-This repo includes a local `renovate-config` skill, but it is an operating aid,
-not a source of policy truth. Official Renovate docs, this repo's authority docs,
-and `renovate-config-validator` remain the references for config behavior.
+This repo includes a local Renovate config skill at
+`.agents/skills/renovate-config/SKILL.md`, but it is an operating aid, not a
+source of policy truth. Official Renovate docs, this repo's authority docs, and
+`npm run renovate:validate` remain the references for config behavior.
 
 ## No Mend Dependency
 
@@ -59,7 +60,7 @@ configuration.
 - Keep internal checks explicit so release-age gates inherited from
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
-- Request Patrick's review on Renovate PRs.
+- Request `@Coldaine` review on Renovate PRs.
 - Group minor/patch updates by dependency family.
 - Label major updates for agent triage.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.

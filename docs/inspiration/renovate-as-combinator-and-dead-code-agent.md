@@ -243,6 +243,10 @@ data alone.
 
 ### Workflow Pattern (from Marco Lancini's documented implementation, May 2026)
 
+Exploratory note: this is review workflow context, not the operating guide for
+Renovate config edits in this repo. Any actionable config change still follows
+`.agents/skills/renovate-config/SKILL.md`.
+
 ```
 On: Renovate PR opened with label=major or breaking
 
