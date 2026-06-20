@@ -89,11 +89,11 @@ Influence on this repo:
 - Preserve the guardrail against combining `prCreation=approval` with
   `dependencyDashboardApproval=true`.
 
-Rubric implication: `docs\rubrics\effectiveness_rubric.md` currently rewards
-Dependency Dashboard utilization. The repo-local skill points in the opposite
-default direction: prefer `dependencyDashboard=false` unless a repo explicitly
-needs dashboard tracking. Future rubric work should reconcile that tension
-instead of letting the rubric and skill disagree.
+Rubric implication: any effectiveness rubric should not reward Dependency
+Dashboard utilization as a default. The repo-local skill points in the opposite
+direction: prefer `dependencyDashboard=false` unless a repo explicitly needs
+dashboard tracking. The canonical rubric should treat dashboard state as
+conditional evidence, not a universal maturity requirement.
 
 ### `project-docs`
 

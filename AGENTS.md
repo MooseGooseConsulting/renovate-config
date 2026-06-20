@@ -1,0 +1,12 @@
+Read `docs/NORTH_STAR.md` first. Do not infer project intent from config alone.
+Before Renovate config edits, use `.agents/skills/renovate-config/SKILL.md`.
+Docs authority: `docs/NORTH_STAR.md` -> `docs/architecture.md` -> workflows/rubrics.
+Config surfaces: shared policy in `default.json`; Mend inheritance in `org-inherited-config.json`; repo-specific behavior in consumer `renovate.json`.
+Commands: `npm run docs:update`; `npm run renovate:validate`; `npm run verify`.
+Run `npm run renovate:validate` before committing config changes.
+Keep this repo public and secret-free; no host tokens, registry passwords, or `.env` values.
+Treat Renovate PRs as the default inbox; dashboard workflows are opt-in exceptions.
+For effectiveness reviews, use `docs/rubrics/renovate-effectiveness-rubric.md`.
+For shared-vs-local coordination reviews, use `docs/rubrics/repository-coordination-rubric.md`.
+For cadence and evidence collection, use `docs/workflows/renovate-review-cadence.md`.
+If a change crosses a North Star goal, anti-goal, pillar, or architecture invariant, stop and surface the conflict.
