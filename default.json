@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates.",
+  "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates. Validated 2026-08-10.",
   "extends": [
     "config:best-practices"
   ],
@@ -112,3 +112,4 @@
     "prCreation": "immediate"
   }
 }
+
