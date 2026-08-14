@@ -1,25 +1,28 @@
-/** First-wave self-hosted diagnostic only. Not shared preset policy. */
+/** Self-hosted runner config. Not shared preset policy. */
 module.exports = {
   platform: "github",
   onboarding: false,
   requireConfig: "required",
-  // Manual dispatch can run outside the shared weekday window. Force
-  // unrestricted scheduling so DRY-RUN evidence is not skipped.
-  // Shared preset uses prCreation: not-pending + internalChecksFilter:
-  // strict, which creates branches and waits. Diagnostic must open PRs.
+  // Manual/scheduled dispatch can run outside the shared weekday window.
   force: {
     schedule: [],
     updateNotScheduled: true,
   },
   prCreation: "immediate",
   internalChecksFilter: "relaxed",
-  // Keep this list in sync with the App-token scan targets in
-  // .github/workflows/renovate-diagnostic.yml (workflow also includes
-  // renovate-config so the App can read this repo).
+  prHourlyLimit: 0,
+  // Keep in sync with App-token repositories in renovate-diagnostic.yml
+  // (workflow also includes renovate-config so the App can read this repo).
   repositories: [
     "MooseGooseConsulting/ColdSearch",
     "MooseGooseConsulting/NorthStarGuardian",
     "MooseGooseConsulting/RoccatMouse",
     "MooseGooseConsulting/frozenSkillz",
+    "MooseGooseConsulting/ai-config-registry",
+    "MooseGooseConsulting/ColdVox",
+    "MooseGooseConsulting/coldaine-homelab",
+    "MooseGooseConsulting/open-swe",
+    "MooseGooseConsulting/screenpipe",
+    "MooseGooseConsulting/the-watchman",
   ],
 };
