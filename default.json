@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates. Validated 2026-08-10.",
+  "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates. Validated 2026-08-10; ecosystem grouping extended 2026-08-14.",
   "extends": [
     "config:best-practices"
   ],
@@ -99,6 +99,56 @@
         "patch"
       ],
       "groupName": "devcontainer images and features"
+    },
+    {
+      "description": "Group Python minor and patch updates. 28 repos carry a Python surface; ungrouped this is the fleet's largest PR source.",
+      "matchManagers": [
+        "pip_requirements",
+        "pip_setup",
+        "pipenv",
+        "poetry",
+        "pep621",
+        "pip-compile",
+        "setup-cfg"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "python dependencies"
+    },
+    {
+      "description": "Group docker-compose minor and patch updates.",
+      "matchManagers": [
+        "docker-compose"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "docker compose images"
+    },
+    {
+      "description": "Group Cargo minor and patch updates.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "cargo dependencies"
+    },
+    {
+      "description": "Group Go module minor and patch updates.",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "go modules"
     }
   ],
   "vulnerabilityAlerts": {
@@ -112,4 +162,3 @@
     "prCreation": "immediate"
   }
 }
-
