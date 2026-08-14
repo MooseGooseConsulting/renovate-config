@@ -1,6 +1,8 @@
 # Diagnostic only. Does not run until the owner adds GitHub App secrets
 # (APP_CLIENT_ID + APP_PRIVATE_KEY) or RENOVATE_TOKEN. GITHUB_TOKEN is not
-# supported. $0 / no Mend.
+# a valid Renovate auth token (checkout may still use it). $0 / no Mend.
+# Manual dispatch is allowed any time; renovate-diagnostic.cjs forces an
+# unrestricted schedule so inherited weekday windows do not hide DRY-RUN output.
 name: Renovate diagnostic
 
 on:
@@ -30,7 +32,7 @@ jobs:
           elif [ -n "$RENOVATE_TOKEN" ]; then
             echo "mode=pat" >> "$GITHUB_OUTPUT"
           else
-            echo "::error::Owner click required. Create an org GitHub App (Contents/Issues/PRs/Workflows write), install it on renovate-config plus ColdSearch, NorthStarGuardian, RoccatMouse, frozenSkillz, and add APP_CLIENT_ID + APP_PRIVATE_KEY. Or add RENOVATE_TOKEN (classic PAT, repo scope). Do not use GITHUB_TOKEN. No Mend."
+            echo "::error::Owner click required. Create an org GitHub App (Contents/Issues/PRs/Workflows write; Checks/Commit statuses/Dependabot alerts read), install it on renovate-config plus ColdSearch, NorthStarGuardian, RoccatMouse, frozenSkillz, and add APP_CLIENT_ID + APP_PRIVATE_KEY. Or add RENOVATE_TOKEN (classic PAT, repo + workflow scopes). Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
             exit 1
           fi
 
@@ -41,9 +43,13 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
+          # v3 accepts client-id (preferred) or legacy app-id. Secret is the App Client ID.
           client-id: ${{ secrets.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          # Include renovate-config (this repo) plus the four first-wave scan
+          # targets. Keep those four names in sync with repositories in
+          # .github/renovate-diagnostic.cjs.
           repositories: |
             renovate-config
             ColdSearch
@@ -51,12 +57,17 @@ jobs:
             RoccatMouse
             frozenSkillz
 
+      - name: Map dry-run input
+        if: inputs.dryRun
+        run: echo "RENOVATE_DRY_RUN=full" >> "$GITHUB_ENV"
+
       - name: Self-hosted Renovate (first wave)
         uses: renovatebot/github-action@v46.2.2
         with:
-          configurationFile: .github/renovate-diagnostic.js
+          configurationFile: .github/renovate-diagnostic.cjs
           token: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
+          # Wrapper v46.2.2; pin Renovate 44.29.4 (documented github-action pin)
+          # so the diagnostic image stays reproducible.
           renovate-version: 44.29.4
         env:
-          RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
           LOG_LEVEL: info
