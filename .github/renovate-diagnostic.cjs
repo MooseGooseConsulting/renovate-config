@@ -1,28 +1,32 @@
-/** Self-hosted runner config. Not shared preset policy. */
-module.exports = {
+/** Self-hosted runner config. Not shared preset policy.
+ *
+ * Cron and default dispatch inherit default.json throttles
+ * (prCreation: not-pending, prConcurrentLimit: 2, prHourlyLimit: 1,
+ * America/Chicago weekday schedule). Do not set prCreation: immediate,
+ * prHourlyLimit: 0, or force-unrestricted schedule on that path.
+ *
+ * Diagnostic force applies only when the workflow sets
+ * RENOVATE_DIAGNOSTIC_FORCE=true (workflow_dispatch, dryRun false,
+ * unrestricted true). github-action default env-regex passes RENOVATE_*.
+ */
+const applyDiagnosticForce = process.env.RENOVATE_DIAGNOSTIC_FORCE === "true";
+
+const config = {
   platform: "github",
   onboarding: false,
   requireConfig: "required",
-  // Manual/scheduled dispatch can run outside the shared weekday window.
-  force: {
+  autodiscover: true,
+  autodiscoverFilter: ["MooseGooseConsulting/*"],
+};
+
+if (applyDiagnosticForce) {
+  config.force = {
     schedule: [],
     updateNotScheduled: true,
-  },
-  prCreation: "immediate",
-  internalChecksFilter: "relaxed",
-  prHourlyLimit: 0,
-  // Keep in sync with App-token repositories in renovate-diagnostic.yml
-  // (workflow also includes renovate-config so the App can read this repo).
-  repositories: [
-    "MooseGooseConsulting/ColdSearch",
-    "MooseGooseConsulting/NorthStarGuardian",
-    "MooseGooseConsulting/RoccatMouse",
-    "MooseGooseConsulting/frozenSkillz",
-    "MooseGooseConsulting/ai-config-registry",
-    "MooseGooseConsulting/ColdVox",
-    "MooseGooseConsulting/coldaine-homelab",
-    "MooseGooseConsulting/open-swe",
-    "MooseGooseConsulting/screenpipe",
-    "MooseGooseConsulting/the-watchman",
-  ],
-};
+  };
+  config.prCreation = "immediate";
+  config.internalChecksFilter = "relaxed";
+  config.prHourlyLimit = 0;
+}
+
+module.exports = config;

@@ -1,13 +1,19 @@
-# Diagnostic only. Does not run until the owner adds GitHub App secrets
-# (APP_CLIENT_ID + APP_PRIVATE_KEY) or RENOVATE_TOKEN. GITHUB_TOKEN is not
-# a valid Renovate auth token (checkout may still use it). $0 / no Mend.
-# Manual dispatch is allowed any time; renovate-diagnostic.cjs forces an
-# unrestricted schedule so inherited weekday windows do not hide DRY-RUN output.
+# Self-hosted fleet runner. $0 / no Mend. GITHUB_TOKEN is not a valid
+# Renovate auth token (checkout may still use it).
+#
+# Auth today: PAT secret RENOVATE_TOKEN (classic, repo + workflow).
+# App-token step stays for when APP_CLIENT_ID + APP_PRIVATE_KEY exist.
+# repositories is omitted so an org-wide App install can mint a
+# fleet-scoped token later; do not block on creating that App.
+#
+# Weekday cron inherits default.json throttles. workflow_dispatch
+# defaults to dry-run. Unrestricted diagnostic force is opt-in and
+# wet-only (see renovate-diagnostic.cjs).
 name: Renovate diagnostic
 
 on:
   schedule:
-    # 05:00 America/Chicago CDT (UTC-5). Shared preset still owns PR pacing.
+    # 05:00 America/Chicago CDT (UTC-5). Shared preset owns PR pacing.
     - cron: "0 10 * * 1-5"
   workflow_dispatch:
     inputs:
@@ -15,6 +21,10 @@ on:
         description: Dry run (no update PRs)
         type: boolean
         default: true
+      unrestricted:
+        description: Wet-run only. Force unrestricted schedule and PR throttles (diagnostic). Leave off so cron and normal dispatch inherit default.json.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -35,7 +45,7 @@ jobs:
           elif [ -n "$RENOVATE_TOKEN" ]; then
             echo "mode=pat" >> "$GITHUB_OUTPUT"
           else
-            echo "::error::Owner click required. Create an org GitHub App (Contents/Issues/PRs/Workflows write; Checks/Commit statuses/Dependabot alerts read), install it on renovate-config plus ColdSearch, NorthStarGuardian, RoccatMouse, frozenSkillz, and add APP_CLIENT_ID + APP_PRIVATE_KEY. Or add RENOVATE_TOKEN (classic PAT, repo + workflow scopes). Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
+            echo "::error::Missing Renovate auth. Add RENOVATE_TOKEN (classic PAT, repo + workflow scopes) or APP_CLIENT_ID + APP_PRIVATE_KEY for an org-installed GitHub App (Contents/Issues/PRs/Workflows write; Checks/Commit statuses/Dependabot alerts read). Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
             exit 1
           fi
 
@@ -47,36 +57,26 @@ jobs:
         uses: actions/create-github-app-token@v3
         with:
           # v3 accepts client-id (preferred) or legacy app-id. Secret is the App Client ID.
+          # owner without repositories = all repos in the owner's App installation.
           client-id: ${{ secrets.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          # Include renovate-config (this repo) plus the four first-wave scan
-          # targets. Keep those four names in sync with repositories in
-          # .github/renovate-diagnostic.cjs.
-          repositories: |
-            renovate-config
-            ColdSearch
-            NorthStarGuardian
-            RoccatMouse
-            frozenSkillz
-            ai-config-registry
-            ColdVox
-            coldaine-homelab
-            open-swe
-            screenpipe
-            the-watchman
 
       - name: Map dry-run input
         if: inputs.dryRun
         run: echo "RENOVATE_DRY_RUN=full" >> "$GITHUB_ENV"
 
-      - name: Self-hosted Renovate (first wave)
+      - name: Map diagnostic force (wet + unrestricted only)
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.dryRun && inputs.unrestricted }}
+        run: echo "RENOVATE_DIAGNOSTIC_FORCE=true" >> "$GITHUB_ENV"
+
+      - name: Self-hosted Renovate (fleet)
         uses: renovatebot/github-action@v46.2.2
         with:
           configurationFile: .github/renovate-diagnostic.cjs
           token: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
           # Wrapper v46.2.2; pin Renovate 44.29.4 (documented github-action pin)
-          # so the diagnostic image stays reproducible.
+          # so the runner image stays reproducible.
           renovate-version: 44.29.4
         env:
           LOG_LEVEL: info
