@@ -6,6 +6,9 @@
 name: Renovate diagnostic
 
 on:
+  schedule:
+    # 05:00 America/Chicago CDT (UTC-5). Shared preset still owns PR pacing.
+    - cron: "0 10 * * 1-5"
   workflow_dispatch:
     inputs:
       dryRun:
@@ -56,6 +59,12 @@ jobs:
             NorthStarGuardian
             RoccatMouse
             frozenSkillz
+            ai-config-registry
+            ColdVox
+            coldaine-homelab
+            open-swe
+            screenpipe
+            the-watchman
 
       - name: Map dry-run input
         if: inputs.dryRun
