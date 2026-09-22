@@ -1,0 +1,17 @@
+name: Validate Renovate configuration
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm run renovate:validate
+      - run: npx --yes --package renovate@latest renovate-config-validator --strict .github/renovate-diagnostic.cjs

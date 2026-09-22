@@ -55,17 +55,69 @@ configuration.
 
 - Do not require the Dependency Dashboard. Renovate PRs are the inbox.
 - Extend Renovate's `config:best-practices` preset as the base policy.
-- Wait for checks to finish before opening ordinary PRs when possible.
-- Keep only a small number of Renovate branches/PRs active per repo.
+- Open PRs when branches are ready so pull-request-only CI can run; review CI
+  before merging. Release-age filtering remains enabled.
+- Keep at most two ordinary Renovate branches and PRs active per repository.
+  Security-fix PRs retain their existing exception to this cap.
 - Keep internal checks explicit so release-age gates inherited from
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
 - Request `@Coldaine` review on Renovate PRs.
-- Group minor/patch updates by dependency family.
-- Label major updates for agent triage.
+- Group routine minor, patch, digest, and pin updates by domain:
+  application dependencies, development tools, container images, infrastructure,
+  and CI/development environments. Later matching rules take precedence.
+- Propose major upgrades separately and label them `major-upgrade`; preserve
+  Renovate's known related-package groups such as Prisma CLI/client. Native
+  package-replacement proposals remain separate from routine groups too.
+- Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
 
 This repository intentionally contains no secrets or host rules.
+
+## Execution and Weekly Cadence
+
+The existing self-hosted [workflow](.github/workflows/renovate-diagnostic.yml)
+discovers `MooseGooseConsulting/*` using its existing GitHub credentials. It runs
+daily at 10:17 UTC to check security alerts; `default.json` permits ordinary
+updates all day Monday in `America/Chicago`. The full-day window tolerates
+GitHub scheduled-run delays and daylight-saving changes. A schedule in a preset
+does not itself start Renovate: the GitHub workflow is the executor. Lockfile
+maintenance uses the same full-Monday window, replacing the inherited before-4am
+window that this runner would miss.
+
+Repositories extending this preset receive changes centrally. Repositories
+without a config receive Renovate's standard onboarding PR and become active
+after it merges. Archived repositories and unconfigured forks retain native
+skip behavior. Repositories with independent configuration retain that policy;
+discovery does not silently overwrite their settings or disable another updater.
+Access is limited to repositories the runner credential can see.
+
+The two-PR limit is per repository, not per organization and not two new PRs
+every week. Major upgrades share those slots with routine groups. If both are
+occupied, other updates queue; with `updateNotScheduled: false`, new routine
+branches and ordinary branch updates wait for Monday. There is no additional
+one-PR-per-hour throttle. Urgent security fixes can bypass the schedule and cap,
+but still require review. Previously opened PRs are not closed merely to bring
+an existing queue under the cap.
+
+Renovate selects the newest eligible stable releases under each dependency's
+versioning, compatibility and local constraints; it does not promise to update
+arbitrary version strings it cannot extract. Native managers cover manifests,
+lockfiles, Actions and container files. Kubernetes YAML requires explicit file
+patterns in the consumer config; Flux defaults to `gotk-components.yaml` unless
+expanded. Use local patterns and rules for these repositories, not a bespoke
+dependency-update program. The GitHub Actions manager also updates this runner's
+`renovate-version` input.
+
+For an immediate run, dispatch the workflow with `dryRun=false` and
+`unrestricted=true`. Despite the legacy input name, this bypasses **time only**,
+not caps, release-age rules or review. Set `repository` to one full repository
+name or leave it blank for organization discovery. Dry runs from a feature
+branch automatically resolve that branch's proposed preset, rather than testing
+the old preset on main. Native Renovate logs are the execution evidence.
+
+See [cadence verification](docs/workflows/weekly-policy-verification.md) for the
+runner audit and the distinction between configuration validation and execution.
 
 ## Idea Criteria
 

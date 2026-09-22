@@ -40,7 +40,9 @@ The repository uses a small public Renovate preset as the technical center of gr
 
 | Component | Status | Responsibility |
 | --- | --- | --- |
-| `default.json` | Current | Shared Renovate behavior: `config:best-practices`, labels, reviewers, throttles, schedule, grouping, delayed PR creation, and vulnerability behavior. |
+| `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling and caps; the preset does not schedule execution. |
+| `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily scans using org discovery, native onboarding for missing configs, and manual targeted or run-now dispatch. Credential access determines reachable repositories. |
+| `.github/renovate-diagnostic.cjs` | Current | Native runner options, org discovery and explicit onboarding preset; branch dry runs resolve the proposed shared preset. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
 | `scripts/update-renovate-docs.mjs` | Current | Refreshes an optional local cache of selected official Renovate docs for offline/reference use. It is not policy truth. |
 | `.agents/skills/renovate-config/` | Current | Repo-local agent operating guide for Renovate config work. |
@@ -61,6 +63,10 @@ The repository uses a small public Renovate preset as the technical center of gr
 - **Exceptions are evidence-backed:** A local override is acceptable when it names a real repo constraint; repeated local overrides should be considered for shared policy.
 
 ## Review Cadence
+
+The September 2026 weekly-policy change is a scoped configuration/runner review,
+not a full architecture or inspiration-library reconfirmation. Its evidence is
+recorded in [weekly policy verification](workflows/weekly-policy-verification.md).
 
 - Run the rubrics in `docs/rubrics/` monthly while the shared preset is actively changing.
 - Run the rubrics after any broad change to grouping, schedules, throttles, dashboard behavior, automerge policy, or vulnerability handling.

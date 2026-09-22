@@ -6,15 +6,14 @@
 # repositories is omitted so an org-wide App install can mint a
 # fleet-scoped token later; do not block on creating that App.
 #
-# Weekday cron inherits default.json throttles. workflow_dispatch
-# defaults to dry-run. Unrestricted diagnostic force is opt-in and
-# wet-only (see renovate-diagnostic.cjs).
-name: Renovate diagnostic
+# Daily scans service security alerts; ordinary updates use the shared Monday
+# window. Manual runs can bypass time, but never caps, release age, or review.
+name: Renovate
 
 on:
   schedule:
-    # 05:00 America/Chicago CDT (UTC-5). Shared preset owns PR pacing.
-    - cron: "0 10 * * 1-5"
+    # 05:17 CDT / 04:17 CST. The all-day Monday window tolerates runner delays.
+    - cron: "17 10 * * *"
   workflow_dispatch:
     inputs:
       dryRun:
@@ -22,12 +21,20 @@ on:
         type: boolean
         default: true
       unrestricted:
-        description: Wet-run only. Force unrestricted schedule and PR throttles (diagnostic). Leave off so cron and normal dispatch inherit default.json.
+        description: Run now outside Monday (preserves two-PR cap, release age, and review).
         type: boolean
         default: false
+      repository:
+        description: Optional MooseGooseConsulting/repository; blank discovers the organization.
+        type: string
+        default: ""
 
 permissions:
   contents: read
+
+concurrency:
+  group: renovate-fleet
+  cancel-in-progress: false
 
 jobs:
   renovate:
@@ -49,7 +56,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Create GitHub App token
         if: steps.auth.outputs.mode == 'app'
@@ -66,17 +73,16 @@ jobs:
         if: inputs.dryRun
         run: echo "RENOVATE_DRY_RUN=full" >> "$GITHUB_ENV"
 
-      - name: Map diagnostic force (wet + unrestricted only)
-        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.dryRun && inputs.unrestricted }}
-        run: echo "RENOVATE_DIAGNOSTIC_FORCE=true" >> "$GITHUB_ENV"
-
       - name: Self-hosted Renovate (fleet)
-        uses: renovatebot/github-action@v46.2.2
+        uses: renovatebot/github-action@v46.3.3
         with:
           configurationFile: .github/renovate-diagnostic.cjs
           token: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
-          # Wrapper v46.2.2; pin Renovate 44.29.4 (documented github-action pin)
+          # Wrapper v46.3.3; pin Renovate 44.107.0 (documented github-action pin)
           # so the runner image stays reproducible.
-          renovate-version: 44.29.4
+          renovate-version: 44.107.0
         env:
           LOG_LEVEL: info
+          RENOVATE_TARGET_REPOSITORY: ${{ inputs.repository }}
+          RENOVATE_DIAGNOSTIC_FORCE: ${{ inputs.unrestricted || false }}
+          RENOVATE_PRESET_REF: ${{ inputs.dryRun && github.ref_name != github.event.repository.default_branch && github.ref_name || '' }}

@@ -48,7 +48,7 @@ replacement for Renovate's official documentation.
 - Renovate PRs are the inbox; do not depend on Patrick opening Dependency Dashboards.
 - Do not depend on a Mend account, Mend-hosted app, Mend Developer Portal, or
   paid Mend feature.
-- Keep Renovate quiet by grouping, throttling, and delaying PR creation until checks finish.
+- Keep Renovate quiet through weekly domain grouping and the two-PR cap. Open PRs promptly so PR-triggered CI can run; check CI before merging.
 - Request review/assignment on PR creation so agents can triage PRs from GitHub directly.
 - Keep the shared preset public and secret-free.
 - Never add host tokens, registry passwords, or private credentials to this repo.
