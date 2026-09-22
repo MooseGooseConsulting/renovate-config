@@ -17,9 +17,8 @@ const config = {
   autodiscover: true,
   autodiscoverFilter: [
     ...(target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"]),
-    // Existing exceptions are not silently enrolled around unresolved decisions/checks.
+    // Keep the unresolved design-only repository out of automatic enrollment.
     "!MooseGooseConsulting/coldaine-ci", // design-only policy; retirement status unresolved
-    "!MooseGooseConsulting/beast-ros", // runtime-preserving config pending in PR #56
   ],
   forkProcessing: "enabled",
 };
