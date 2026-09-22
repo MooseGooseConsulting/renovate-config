@@ -28,7 +28,9 @@
   ],
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["* * * * 1"]
+    "schedule": [
+      "* * * * 1"
+    ]
   },
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
@@ -36,14 +38,13 @@
   "separateMajorMinor": true,
   "packageRules": [
     {
-      "description": "Group routine minor, patch, digest, pin, and replacement updates; later rules split operational domains.",
+      "description": "Group routine minor, patch, digest, and pin updates; later rules split operational domains.",
       "matchUpdateTypes": [
         "minor",
         "patch",
         "digest",
         "pin",
-        "pinDigest",
-        "replacement"
+        "pinDigest"
       ],
       "groupName": "application dependencies"
     },
@@ -66,8 +67,7 @@
         "patch",
         "digest",
         "pin",
-        "pinDigest",
-        "replacement"
+        "pinDigest"
       ],
       "groupName": "development tools"
     },
@@ -81,8 +81,7 @@
         "patch",
         "digest",
         "pin",
-        "pinDigest",
-        "replacement"
+        "pinDigest"
       ],
       "groupName": "container images"
     },
@@ -97,8 +96,7 @@
         "patch",
         "digest",
         "pin",
-        "pinDigest",
-        "replacement"
+        "pinDigest"
       ],
       "groupName": "infrastructure"
     },
@@ -114,17 +112,15 @@
         "patch",
         "digest",
         "pin",
-        "pinDigest",
-        "replacement"
+        "pinDigest"
       ],
       "groupName": "ci and development environment"
     },
     {
-      "description": "Propose major upgrades separately, never inside routine groups or through automatic merging.",
+      "description": "Keep major upgrades separate from routine groups and preserve Renovate's related-package groups; never automerge.",
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": null,
       "automerge": false,
       "addLabels": [
         "major-upgrade"

@@ -63,10 +63,12 @@ configuration.
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
 - Request `@Coldaine` review on Renovate PRs.
-- Group routine minor, patch, digest, pin, and replacement updates by domain:
+- Group routine minor, patch, digest, and pin updates by domain:
   application dependencies, development tools, container images, infrastructure,
   and CI/development environments. Later matching rules take precedence.
-- Propose major upgrades separately and label them `major-upgrade`.
+- Propose major upgrades separately and label them `major-upgrade`; preserve
+  Renovate's known related-package groups such as Prisma CLI/client. Native
+  package-replacement proposals remain separate from routine groups too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
 

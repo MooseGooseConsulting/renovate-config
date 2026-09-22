@@ -33,7 +33,8 @@ repositories use the shared preset. Native onboarding should surface missing
 configuration rather than silently replace another dependency owner.
 
 Grouping has a fallback for ordinary updates across supported managers, then
-domain-specific overrides. Majors have `groupName: null` and remain separate.
+domain-specific overrides. Majors do not match routine groups; Renovate's
+upstream related-package grouping remains intact for coordinated major updates.
 The explicit two-slot choice can leave domains or majors queued across weeks;
 it cannot guarantee every dependency receives a PR in the same Monday run.
 Opening a major PR does not implement its application migration.
@@ -48,6 +49,16 @@ checkout, setup-node, TypeScript and Node major branches. Dry-run branch logging
 is not evidence that live PR concurrency was enforced; no PRs were written.
 The inherited lockfile-maintenance window was separately found to end before
 the daily runner starts; it now uses the same full-Monday window.
+
+Hosted dry run [35747965329](https://github.com/MooseGooseConsulting/renovate-config/actions/runs/35747965329)
+processed `MooseGooseWebsiteServices`: 188 references across 13 files and four
+managers, with application, tools, container and CI groups. Its Prisma CLI/client
+major branches exposed that a blanket `groupName: null` wrongly dismantled
+upstream related-package groups. The corrected major rule leaves those groups
+intact while `separateMajorMinor` keeps them out of routine PRs. Native package
+replacement proposals are also kept separate. The run reported existing
+nonbreaking-space warnings in two HTML files and the existing default git-author
+warning; neither was an extraction/registry error.
 
 - Run `npm run renovate:validate` for native schema and preset validation.
 - Dispatch a full dry run from the PR branch. The runner maps the shared preset

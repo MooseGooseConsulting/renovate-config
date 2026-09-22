@@ -31,7 +31,7 @@ if (previewRef) {
     throw new Error("Preset previews require a full dry run.");
   }
   config.migratePresets = { [preset]: `${preset}#${previewRef}` };
-  config.configMigration = false;
+  config.force = { ...config.force, configMigration: false };
 }
 
 module.exports = config;
