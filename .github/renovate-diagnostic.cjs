@@ -15,11 +15,7 @@ const config = {
   onboarding: false,
   requireConfig: "optional",
   autodiscover: true,
-  autodiscoverFilter: [
-    ...(target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"]),
-    // Keep the unresolved design-only repository out of automatic enrollment.
-    "!MooseGooseConsulting/coldaine-ci", // design-only policy; retirement status unresolved
-  ],
+  autodiscoverFilter: target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"],
   forkProcessing: "enabled",
 };
 
