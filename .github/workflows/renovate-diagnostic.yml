@@ -25,7 +25,7 @@ on:
         type: boolean
         default: false
       repository:
-        description: Optional MooseGooseConsulting/repository; blank discovers the organization.
+        description: Optional MooseGooseConsulting/repository or Coldaine/repository; blank discovers both owners.
         type: string
         default: ""
 
