@@ -79,7 +79,9 @@ discovers `MooseGooseConsulting/*` using its existing GitHub credentials. It run
 daily at 10:17 UTC to check security alerts; `default.json` permits ordinary
 updates all day Monday in `America/Chicago`. The full-day window tolerates
 GitHub scheduled-run delays and daylight-saving changes. A schedule in a preset
-does not itself start Renovate: the GitHub workflow is the executor.
+does not itself start Renovate: the GitHub workflow is the executor. Lockfile
+maintenance uses the same full-Monday window, replacing the inherited before-4am
+window that this runner would miss.
 
 Repositories extending this preset receive changes centrally. Repositories
 without a config receive Renovate's standard onboarding PR and become active

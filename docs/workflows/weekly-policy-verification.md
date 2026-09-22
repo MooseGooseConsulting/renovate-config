@@ -40,6 +40,15 @@ Opening a major PR does not implement its application migration.
 
 ## Verification levels
 
+Hosted dry run [35747463832](https://github.com/MooseGooseConsulting/renovate-config/actions/runs/35747463832)
+processed `ColdSearch` successfully using Renovate 44.107.0 and the candidate
+preset. It extracted 17 dependencies across six files and five managers, and
+proposed application, development-tool and container groups, plus separate
+checkout, setup-node, TypeScript and Node major branches. Dry-run branch logging
+is not evidence that live PR concurrency was enforced; no PRs were written.
+The inherited lockfile-maintenance window was separately found to end before
+the daily runner starts; it now uses the same full-Monday window.
+
 - Run `npm run renovate:validate` for native schema and preset validation.
 - Dispatch a full dry run from the PR branch. The runner maps the shared preset
   to that branch using native `migratePresets`; otherwise consumer configs would
