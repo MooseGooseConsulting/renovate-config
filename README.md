@@ -36,9 +36,14 @@ promoting it into shared policy.
 - `docs/inspiration/subagents/renovate-change-agent-critique.md` captures the independent
   source-check and critique of that proposal.
 
-## Use From A Repo
+## Automatic Enrollment and Local Customization
 
-Add this to `renovate.json`:
+New non-archived repositories owned by MooseGooseConsulting or Coldaine are
+discovered automatically and receive the shared policy without an onboarding PR
+or a `renovate.json` file. No per-repository registration is required.
+
+Existing repository configs remain supported. For explicit inheritance when
+adding local customizations or using another runner, use:
 
 ```json
 {
@@ -47,9 +52,9 @@ Add this to `renovate.json`:
 }
 ```
 
-`org-inherited-config.json` exists only as a compatibility artifact. The planned
-operating model is explicit repo opt-in with `extends`, not Mend-hosted inherited
-configuration.
+`org-inherited-config.json` remains an unused compatibility artifact. The runner
+supplies `extends`, `onboarding: false`, and `requireConfig: "optional"` using
+ordinary self-hosted Renovate options; no Mend service is involved.
 
 ## Policy Shape
 
@@ -85,15 +90,26 @@ does not itself start Renovate: the GitHub workflow is the executor. Lockfile
 maintenance uses the same full-Monday window, replacing the inherited before-4am
 window that this runner would miss.
 
-Repositories extending this preset receive changes centrally. Repositories
-without a config receive Renovate's standard onboarding PR and become active
-after it merges. Active forks are included; archived repositories retain native
-skip behavior. Repositories with independent configuration retain that policy;
-discovery does not silently overwrite their settings or disable another updater.
+The runner supplies the shared preset centrally, including for repositories
+without config files. Existing local config still participates in Renovate's
+normal merging rules and can supply custom managers, dependency constraints, or
+`enabled: false` to opt out. Active forks are included; archived repositories
+retain native skip behavior. Enrollment does not merge dependency upgrades or
+disable another updater.
 Access is limited to repositories the runner credential can see.
-The current PAT supports cross-owner discovery. The optional App-token path is
-scoped to one installation owner; switching to it requires separately covering
-the personal account rather than assuming an organization token can access it.
+The current cross-owner PAT is preferred when present. The optional App-token
+path is scoped to one installation owner and only allowed for manually targeted
+organization runs. Full-fleet runs fail visibly without a cross-owner PAT rather
+than silently losing personal-account coverage.
+
+Two existing exceptions remain explicitly excluded in the runner, not silently
+enrolled around unfinished decisions or compatibility work: `coldaine-ci` (design-only policy
+and unresolved retirement status), and `beast-ros` ([runtime-aware config #56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)).
+Remove a repository's exclusion when its specific adoption blocker is resolved.
+These exceptions do not impose onboarding on future repositories.
+`proxmox-stateful` and `oh-my-openagent` no longer need their config-only setup PRs
+merged to receive this central policy. Their dependency PRs remain subject to
+their normal CI and review requirements; automatic enrollment bypasses neither.
 
 The two-PR limit is per repository, not per organization and not two new PRs
 every week. Major upgrades share those slots with routine groups. If both are
