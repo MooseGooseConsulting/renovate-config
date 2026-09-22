@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "MooseGoose shared Renovate preset: agent-review-first, weekly routine updates with low-noise ecosystem grouping. Validated 2026-09-22.",
+  "description": "Weekly domain-grouped updates, two ordinary PRs per repository, separate majors, and review before every merge.",
   "extends": [
     "config:best-practices"
   ],
@@ -10,7 +10,7 @@
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Agent review expected: verify the dependency impact, summarize CI status, and merge only when the update is coherent for this repo.",
+  "prHeader": "Review required: check dependency impact and CI before merging. Routine domain groups and separate major upgrades share two PR slots per repository; queued updates wait for a slot and the next Monday run.",
   "reviewers": [
     "Coldaine"
   ],
@@ -20,138 +20,111 @@
   ],
   "prConcurrentLimit": 2,
   "branchConcurrentLimit": 2,
-  "prHourlyLimit": 1,
-  "prCreation": "not-pending",
+  "prHourlyLimit": 0,
+  "prCreation": "immediate",
   "internalChecksFilter": "strict",
   "schedule": [
-    "* 4-8 * * 1"
+    "* * * * 1"
   ],
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
   "automerge": false,
+  "separateMajorMinor": true,
   "packageRules": [
     {
-      "description": "Label major updates for agent triage.",
+      "description": "Group routine minor, patch, digest, pin, and replacement updates; later rules split operational domains.",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest",
+        "replacement"
+      ],
+      "groupName": "application dependencies"
+    },
+    {
+      "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",
+      "matchManagers": [
+        "npm"
+      ],
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "Group routine development dependencies separately from application runtime dependencies.",
+      "matchDepTypes": [
+        "devDependencies",
+        "dev-dependencies",
+        "build-dependencies"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest",
+        "replacement"
+      ],
+      "groupName": "development tools"
+    },
+    {
+      "description": "Group routine container tag, digest, and initial pin updates across Dockerfiles, Compose, and other image consumers.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest",
+        "replacement"
+      ],
+      "groupName": "container images"
+    },
+    {
+      "description": "Group routine infrastructure updates across Kubernetes, Flux, Helm, Kustomize, and Terraform.",
+      "matchCategories": [
+        "kubernetes",
+        "terraform"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest",
+        "replacement"
+      ],
+      "groupName": "infrastructure"
+    },
+    {
+      "description": "Group routine CI and development-environment updates, including action digests and the Renovate runner version.",
+      "matchManagers": [
+        "github-actions",
+        "devcontainer",
+        "pre-commit"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest",
+        "replacement"
+      ],
+      "groupName": "ci and development environment"
+    },
+    {
+      "description": "Propose major upgrades separately, never inside routine groups or through automatic merging.",
       "matchUpdateTypes": [
         "major"
       ],
+      "groupName": null,
+      "automerge": false,
       "addLabels": [
         "major-upgrade"
       ]
-    },
-    {
-      "description": "Group npm production dependency minor and patch updates.",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchDepTypes": [
-        "dependencies"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "npm production dependencies"
-    },
-    {
-      "description": "Group npm development dependency minor and patch updates.",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "npm development dependencies"
-    },
-    {
-      "description": "Group GitHub Actions minor and patch updates.",
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
-      ],
-      "groupName": "github actions"
-    },
-    {
-      "description": "Group Dockerfile minor and patch updates.",
-      "matchManagers": [
-        "dockerfile"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
-      ],
-      "groupName": "docker images"
-    },
-    {
-      "description": "Group devcontainer minor and patch updates.",
-      "matchManagers": [
-        "devcontainer"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "devcontainer images and features"
-    },
-    {
-      "description": "Group Python minor and patch updates. 28 repos carry a Python surface; ungrouped this is the fleet's largest PR source.",
-      "matchManagers": [
-        "pip_requirements",
-        "pip_setup",
-        "pipenv",
-        "poetry",
-        "pep621",
-        "pip-compile",
-        "setup-cfg"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "python dependencies"
-    },
-    {
-      "description": "Group docker-compose minor and patch updates.",
-      "matchManagers": [
-        "docker-compose"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
-      ],
-      "groupName": "docker compose images"
-    },
-    {
-      "description": "Group Cargo minor and patch updates.",
-      "matchManagers": [
-        "cargo"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "cargo dependencies"
-    },
-    {
-      "description": "Group Go module minor and patch updates.",
-      "matchManagers": [
-        "gomod"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "go modules"
     }
   ],
   "vulnerabilityAlerts": {
