@@ -102,9 +102,9 @@ path is scoped to one installation owner and only allowed for manually targeted
 organization runs. Full-fleet runs fail visibly without a cross-owner PAT rather
 than silently losing personal-account coverage.
 
-Only `coldaine-ci` remains explicitly excluded while its design-only policy and
-retirement status are unresolved. This does not impose onboarding on future
-repositories. `beast-ros` is enrolled after [#56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)
+There are no per-repository discovery exclusions. `coldaine-ci` is archived and
+therefore skipped by Renovate's native archived-repository handling.
+`beast-ros` is enrolled after [#56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)
 merged; it uses standard hosted runners without a Renovate Python-version freeze.
 `oh-my-openagent` receives the central policy without needing its config-only
 setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
