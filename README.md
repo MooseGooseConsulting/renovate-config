@@ -77,7 +77,7 @@ This repository intentionally contains no secrets or host rules.
 ## Execution and Weekly Cadence
 
 The existing self-hosted [workflow](.github/workflows/renovate-diagnostic.yml)
-discovers `MooseGooseConsulting/*` using its existing GitHub credentials. It runs
+discovers `MooseGooseConsulting/*` and `Coldaine/*` using its existing GitHub credentials. It runs
 daily at 10:17 UTC to check security alerts; `default.json` permits ordinary
 updates all day Monday in `America/Chicago`. The full-day window tolerates
 GitHub scheduled-run delays and daylight-saving changes. A schedule in a preset
@@ -87,10 +87,13 @@ window that this runner would miss.
 
 Repositories extending this preset receive changes centrally. Repositories
 without a config receive Renovate's standard onboarding PR and become active
-after it merges. Archived repositories and unconfigured forks retain native
+after it merges. Active forks are included; archived repositories retain native
 skip behavior. Repositories with independent configuration retain that policy;
 discovery does not silently overwrite their settings or disable another updater.
 Access is limited to repositories the runner credential can see.
+The current PAT supports cross-owner discovery. The optional App-token path is
+scoped to one installation owner; switching to it requires separately covering
+the personal account rather than assuming an organization token can access it.
 
 The two-PR limit is per repository, not per organization and not two new PRs
 every week. Major upgrades share those slots with routine groups. If both are
@@ -112,7 +115,7 @@ dependency-update program. The GitHub Actions manager also updates this runner's
 For an immediate run, dispatch the workflow with `dryRun=false` and
 `unrestricted=true`. Despite the legacy input name, this bypasses **time only**,
 not caps, release-age rules or review. Set `repository` to one full repository
-name or leave it blank for organization discovery. Dry runs from a feature
+name or leave it blank to discover both owners. Dry runs from a feature
 branch automatically resolve that branch's proposed preset, rather than testing
 the old preset on main. Native Renovate logs are the execution evidence.
 

@@ -42,7 +42,7 @@ The repository uses a small public Renovate preset as the technical center of gr
 | --- | --- | --- |
 | `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling and caps; the preset does not schedule execution. |
 | `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily scans using org discovery, native onboarding for missing configs, and manual targeted or run-now dispatch. Credential access determines reachable repositories. |
-| `.github/renovate-diagnostic.cjs` | Current | Native runner options, org discovery and explicit onboarding preset; branch dry runs resolve the proposed shared preset. |
+| `.github/renovate-diagnostic.cjs` | Current | Native runner options, MooseGooseConsulting and Coldaine discovery including active forks, and explicit onboarding preset; branch dry runs resolve the proposed shared preset. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
 | `scripts/update-renovate-docs.mjs` | Current | Refreshes an optional local cache of selected official Renovate docs for offline/reference use. It is not policy truth. |
 | `.agents/skills/renovate-config/` | Current | Repo-local agent operating guide for Renovate config work. |
