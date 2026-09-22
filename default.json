@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "MooseGoose shared Renovate preset: agent-review-first, low-noise dependency updates. Validated 2026-08-10; ecosystem grouping extended 2026-08-14.",
+  "description": "MooseGoose shared Renovate preset: agent-review-first, weekly routine updates with low-noise ecosystem grouping. Validated 2026-09-22.",
   "extends": [
     "config:best-practices"
   ],
@@ -24,7 +24,7 @@
   "prCreation": "not-pending",
   "internalChecksFilter": "strict",
   "schedule": [
-    "* 4-8 * * 1-5"
+    "* 4-8 * * 1"
   ],
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
@@ -74,7 +74,8 @@
       ],
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "digest"
       ],
       "groupName": "github actions"
     },
@@ -85,7 +86,8 @@
       ],
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "digest"
       ],
       "groupName": "docker images"
     },
@@ -124,7 +126,8 @@
       ],
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "digest"
       ],
       "groupName": "docker compose images"
     },

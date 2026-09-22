@@ -6,7 +6,8 @@
 # repositories is omitted so an org-wide App install can mint a
 # fleet-scoped token later; do not block on creating that App.
 #
-# Weekday cron inherits default.json throttles. workflow_dispatch
+# Weekday cron preserves the fast vulnerability lane; routine PRs are limited by
+# default.json to its Monday window. workflow_dispatch
 # defaults to dry-run. Unrestricted diagnostic force is opt-in and
 # wet-only (see renovate-diagnostic.cjs).
 name: Renovate diagnostic
@@ -71,12 +72,12 @@ jobs:
         run: echo "RENOVATE_DIAGNOSTIC_FORCE=true" >> "$GITHUB_ENV"
 
       - name: Self-hosted Renovate (fleet)
-        uses: renovatebot/github-action@v46.2.2
+        uses: renovatebot/github-action@v46.3.3
         with:
           configurationFile: .github/renovate-diagnostic.cjs
           token: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
-          # Wrapper v46.2.2; pin Renovate 44.29.4 (documented github-action pin)
+          # Wrapper v46.3.3; pin Renovate 44.107.0 (documented github-action pin)
           # so the runner image stays reproducible.
-          renovate-version: 44.29.4
+          renovate-version: 44.107.0
         env:
           LOG_LEVEL: info

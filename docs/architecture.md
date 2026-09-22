@@ -3,7 +3,7 @@ title: MooseGoose Renovate Config Architecture
 date: 2026-06-20
 author: Patrick
 status: living
-last_confirmed: 2026-06-20
+last_confirmed: 2026-09-22
 ---
 
 # MooseGoose Renovate Config Architecture
@@ -40,7 +40,7 @@ The repository uses a small public Renovate preset as the technical center of gr
 
 | Component | Status | Responsibility |
 | --- | --- | --- |
-| `default.json` | Current | Shared Renovate behavior: `config:best-practices`, labels, reviewers, throttles, schedule, grouping, delayed PR creation, and vulnerability behavior. |
+| `default.json` | Current | Shared Renovate behavior: `config:best-practices`, labels, reviewers, throttles, a weekly Monday routine-update window, grouping, delayed PR creation, and a weekday vulnerability lane. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
 | `scripts/update-renovate-docs.mjs` | Current | Refreshes an optional local cache of selected official Renovate docs for offline/reference use. It is not policy truth. |
 | `.agents/skills/renovate-config/` | Current | Repo-local agent operating guide for Renovate config work. |
