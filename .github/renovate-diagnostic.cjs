@@ -20,8 +20,6 @@ const config = {
     // Existing exceptions are not silently enrolled around unresolved decisions/checks.
     "!MooseGooseConsulting/coldaine-ci", // design-only policy; retirement status unresolved
     "!MooseGooseConsulting/beast-ros", // runtime-preserving config pending in PR #56
-    "!MooseGooseConsulting/proxmox-stateful", // required CI blocks adoption PR #90
-    "!MooseGooseConsulting/oh-my-openagent", // explicit repo review/CI requirements, PR #32
   ],
   forkProcessing: "enabled",
 };

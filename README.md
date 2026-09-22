@@ -101,13 +101,14 @@ The current PAT supports cross-owner discovery. The optional App-token path is
 scoped to one installation owner; switching to it requires separately covering
 the personal account rather than assuming an organization token can access it.
 
-Four existing exceptions remain explicitly excluded in the runner, not silently
-enrolled around unfinished decisions or checks: `coldaine-ci` (design-only policy
-and unresolved retirement status), `beast-ros` ([runtime-aware config #56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)),
-`proxmox-stateful` ([required CI #90](https://github.com/MooseGooseConsulting/proxmox-stateful/pull/90)),
-and `oh-my-openagent` ([required review/CI #32](https://github.com/MooseGooseConsulting/oh-my-openagent/pull/32)).
+Two existing exceptions remain explicitly excluded in the runner, not silently
+enrolled around unfinished decisions or compatibility work: `coldaine-ci` (design-only policy
+and unresolved retirement status), and `beast-ros` ([runtime-aware config #56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)).
 Remove a repository's exclusion when its specific adoption blocker is resolved.
 These exceptions do not impose onboarding on future repositories.
+`proxmox-stateful` and `oh-my-openagent` no longer need their config-only setup PRs
+merged to receive this central policy. Their dependency PRs remain subject to
+their normal CI and review requirements; automatic enrollment bypasses neither.
 
 The two-PR limit is per repository, not per organization and not two new PRs
 every week. Major upgrades share those slots with routine groups. If both are
