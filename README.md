@@ -102,14 +102,12 @@ path is scoped to one installation owner and only allowed for manually targeted
 organization runs. Full-fleet runs fail visibly without a cross-owner PAT rather
 than silently losing personal-account coverage.
 
-Two existing exceptions remain explicitly excluded in the runner, not silently
-enrolled around unfinished decisions or compatibility work: `coldaine-ci` (design-only policy
-and unresolved retirement status), and `beast-ros` ([runtime-aware config #56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)).
-Remove a repository's exclusion when its specific adoption blocker is resolved.
-These exceptions do not impose onboarding on future repositories.
-`proxmox-stateful` and `oh-my-openagent` no longer need their config-only setup PRs
-merged to receive this central policy. Their dependency PRs remain subject to
-their normal CI and review requirements; automatic enrollment bypasses neither.
+Only `coldaine-ci` remains explicitly excluded while its design-only policy and
+retirement status are unresolved. This does not impose onboarding on future
+repositories. `beast-ros` is enrolled after [#56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)
+merged; it uses standard hosted runners without a Renovate Python-version freeze.
+`oh-my-openagent` receives the central policy without needing its config-only
+setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
 
 The two-PR limit is per repository, not per organization and not two new PRs
 every week. Major upgrades share those slots with routine groups. If both are
