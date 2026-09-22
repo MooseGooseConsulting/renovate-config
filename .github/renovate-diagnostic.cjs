@@ -1,6 +1,6 @@
 /** Native self-hosted Renovate configuration; shared policy lives in default.json.
  * Discover organization and personal repositories without a rollout allowlist.
- * Missing configurations receive standard onboarding PRs with an explicit preset.
+ * Apply the shared default even when a repository has no Renovate config file.
  * Include owned forks; archived repositories retain Renovate's default skip.
  */
 const preset = "github>MooseGooseConsulting/renovate-config";
@@ -11,11 +11,18 @@ if (target && !/^(MooseGooseConsulting|Coldaine)\/[A-Za-z0-9_.-]+$/i.test(target
 
 const config = {
   platform: "github",
-  onboarding: true,
-  onboardingConfig: { extends: [preset] },
-  requireConfig: "required",
+  extends: [preset],
+  onboarding: false,
+  requireConfig: "optional",
   autodiscover: true,
-  autodiscoverFilter: target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"],
+  autodiscoverFilter: [
+    ...(target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"]),
+    // Existing exceptions are not silently enrolled around unresolved decisions/checks.
+    "!MooseGooseConsulting/coldaine-ci", // design-only policy; retirement status unresolved
+    "!MooseGooseConsulting/beast-ros", // runtime-preserving config pending in PR #56
+    "!MooseGooseConsulting/proxmox-stateful", // required CI blocks adoption PR #90
+    "!MooseGooseConsulting/oh-my-openagent", // explicit repo review/CI requirements, PR #32
+  ],
   forkProcessing: "enabled",
 };
 

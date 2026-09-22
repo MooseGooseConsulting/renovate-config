@@ -35,7 +35,9 @@ replacement for Renovate's official documentation.
    npm run renovate:validate
    ```
 
-5. If changing consumer repos, verify their config references this preset:
+5. The runner automatically supplies this preset to discovered repositories;
+   consumer configs are optional. If adding or changing a consumer's explicit
+   inheritance, verify it references this preset:
 
    ```json
    {

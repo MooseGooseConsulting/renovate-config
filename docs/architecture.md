@@ -10,7 +10,7 @@ last_confirmed: 2026-06-20
 
 ## Architecture Thesis
 
-The repository uses a small public Renovate preset as the technical center of gravity. Consumer repositories opt in explicitly, and no current architecture path depends on a Mend account, Mend-hosted app, Mend Developer Portal, or paid Mend features.
+The repository uses a small public Renovate preset as the technical center of gravity. The self-hosted runner supplies that preset automatically to non-archived MooseGooseConsulting and Coldaine repositories, with documented exclusions and optional local customizations. No current architecture path depends on a Mend account, Mend-hosted app, Mend Developer Portal, or paid Mend features.
 
 ## Status Legend
 
@@ -41,8 +41,8 @@ The repository uses a small public Renovate preset as the technical center of gr
 | Component | Status | Responsibility |
 | --- | --- | --- |
 | `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling and caps; the preset does not schedule execution. |
-| `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily scans using org discovery, native onboarding for missing configs, and manual targeted or run-now dispatch. Credential access determines reachable repositories. |
-| `.github/renovate-diagnostic.cjs` | Current | Native runner options, MooseGooseConsulting and Coldaine discovery including active forks, and explicit onboarding preset; branch dry runs resolve the proposed shared preset. |
+| `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily discovery scans and manual targeted or run-now dispatch. Credential access determines reachable repositories. |
+| `.github/renovate-diagnostic.cjs` | Current | Native `extends`, `onboarding: false`, `requireConfig: optional`; MooseGooseConsulting and Coldaine discovery including active forks and documented exclusions. No per-repo enrollment file is needed; branch dry runs resolve the proposed shared preset. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
 | `scripts/update-renovate-docs.mjs` | Current | Refreshes an optional local cache of selected official Renovate docs for offline/reference use. It is not policy truth. |
 | `.agents/skills/renovate-config/` | Current | Repo-local agent operating guide for Renovate config work. |

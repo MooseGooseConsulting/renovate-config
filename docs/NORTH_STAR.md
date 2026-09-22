@@ -30,7 +30,7 @@ G1-R1. The shared preset remains valid under `npm run renovate:validate`.
 
 G1-R2. Current official Renovate documentation and `.agents/skills/renovate-config/SKILL.md` are consulted before changing Renovate config behavior. The generated local docs snapshot is an optional cache, not a policy source.
 
-G2-R1. Consumer repositories can opt into the shared default with `extends: ["github>MooseGooseConsulting/renovate-config"]`.
+G2-R1. The runner automatically supplies the shared default to new non-archived MooseGooseConsulting and Coldaine repositories. No onboarding PR or consumer file is required. Existing consumers can retain explicit `extends: ["github>MooseGooseConsulting/renovate-config"]` and narrow local customizations.
 
 G2-R2. The shared preset must work without a Mend account, Mend-hosted app, Mend Developer Portal, or paid Mend features.
 
@@ -46,7 +46,7 @@ G5-R1. Renovate PR metadata should support PR-list triage without requiring a ma
 
 ## Anti-Goals
 
-A1. **This is not a hidden magic policy.** Repositories should be able to see and trace the shared preset they rely on.
+A1. **This is not a hidden magic policy.** The runner and this repository document the shared preset, enrollment scope, and explicit exclusions. Consumer configuration is optional, not a registration requirement.
 
 A2. **This is not a repo-specific exception dump.** One-off behavior belongs in the consumer repo unless it has become a repeated shared pattern.
 
@@ -60,7 +60,7 @@ A5. **This is not a Mend adoption path.** Ideas that require a paid Mend account
 
 ### Transparent Centralization
 
-Prefer explicit shared presets over invisible behavior. We accept a little local configuration ceremony so repository owners and agents can trace where Renovate behavior comes from.
+The September 22, 2026 owner decision makes enrollment automatic. Keep policy traceable through the documented runner and shared preset, without requiring local configuration ceremony in every future repository.
 
 ### Quiet, Not Silent
 
