@@ -97,9 +97,10 @@ normal merging rules and can supply custom managers, dependency constraints, or
 retain native skip behavior. Enrollment does not merge dependency upgrades or
 disable another updater.
 Access is limited to repositories the runner credential can see.
-The current PAT supports cross-owner discovery. The optional App-token path is
-scoped to one installation owner; switching to it requires separately covering
-the personal account rather than assuming an organization token can access it.
+The current cross-owner PAT is preferred when present. The optional App-token
+path is scoped to one installation owner and only allowed for manually targeted
+organization runs. Full-fleet runs fail visibly without a cross-owner PAT rather
+than silently losing personal-account coverage.
 
 Two existing exceptions remain explicitly excluded in the runner, not silently
 enrolled around unfinished decisions or compatibility work: `coldaine-ci` (design-only policy

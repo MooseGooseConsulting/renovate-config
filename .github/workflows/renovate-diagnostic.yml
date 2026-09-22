@@ -2,9 +2,8 @@
 # Renovate auth token (checkout may still use it).
 #
 # Auth today: PAT secret RENOVATE_TOKEN (classic, repo + workflow).
-# App-token step stays for when APP_CLIENT_ID + APP_PRIVATE_KEY exist.
-# repositories is omitted so an org-wide App install can mint a
-# fleet-scoped token later; do not block on creating that App.
+# Prefer the existing cross-owner PAT. The optional App-token path can only
+# serve a manually targeted organization repo, not both owners' full fleet.
 #
 # Daily scans service security alerts; ordinary updates use the shared Monday
 # window. Manual runs can bypass time, but never caps, release age, or review.
@@ -46,13 +45,19 @@ jobs:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
           APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+          TARGET_REPOSITORY: ${{ inputs.repository }}
         run: |
-          if [ -n "$APP_CLIENT_ID" ] && [ -n "$APP_PRIVATE_KEY" ]; then
-            echo "mode=app" >> "$GITHUB_OUTPUT"
-          elif [ -n "$RENOVATE_TOKEN" ]; then
+          if [ -n "$RENOVATE_TOKEN" ]; then
             echo "mode=pat" >> "$GITHUB_OUTPUT"
+          elif [ -n "$APP_CLIENT_ID" ] && [ -n "$APP_PRIVATE_KEY" ]; then
+            if [[ "${TARGET_REPOSITORY,,}" == moosegooseconsulting/* ]]; then
+              echo "mode=app" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::Full-fleet and Coldaine runs require RENOVATE_TOKEN with access to both owners. An organization App installation token cannot cover the personal account."
+              exit 1
+            fi
           else
-            echo "::error::Missing Renovate auth. Add RENOVATE_TOKEN (classic PAT, repo + workflow scopes) or APP_CLIENT_ID + APP_PRIVATE_KEY for an org-installed GitHub App (Contents/Issues/PRs/Workflows write; Checks/Commit statuses/Dependabot alerts read). Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
+            echo "::error::Missing Renovate auth. Full-fleet runs require RENOVATE_TOKEN (classic PAT, repo + workflow scopes) with access to both owners. An organization App is supported only for manually targeted organization runs. Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
             exit 1
           fi
 
