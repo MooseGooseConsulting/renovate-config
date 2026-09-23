@@ -37,7 +37,7 @@ concurrency:
 
 jobs:
   renovate:
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.CI_FORCE_HOSTED == 'true') && 'ubuntu-latest' || 'moosegoose-linux' }}
     steps:
       - name: Require owner auth secrets
         id: auth
