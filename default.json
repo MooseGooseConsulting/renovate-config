@@ -127,7 +127,7 @@
       ]
     },
     {
-      "description": "First-party codeOps workflows and actions follow its explicitly promoted prod branch; do not pin or bump their refs",
+      "description": "Preserve first-party codeOps workflow and action branch refs without digest pinning; retain other update handling",
       "matchManagers": [
         "github-actions"
       ],
@@ -135,7 +135,7 @@
         "MooseGooseConsulting/coldaine-codeOps",
         "MooseGooseConsulting/coldaine-codeOps/**"
       ],
-      "enabled": false
+      "pinDigests": false
     }
   ],
   "vulnerabilityAlerts": {
