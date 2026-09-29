@@ -132,7 +132,8 @@
         "github-actions"
       ],
       "matchPackageNames": [
-        "MooseGooseConsulting/coldaine-codeOps"
+        "MooseGooseConsulting/coldaine-codeOps",
+        "MooseGooseConsulting/coldaine-codeOps/**"
       ],
       "enabled": false
     }
