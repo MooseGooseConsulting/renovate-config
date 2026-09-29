@@ -76,6 +76,11 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   package-replacement proposals remain separate from routine groups too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
+- Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
+  branch is a centrally promoted delivery channel. This exception is shared
+  because the same pinning occurred across several consumers; it does not
+  disable other update handling or migrate existing `@main` callers. See the
+  [architecture evidence](docs/architecture.md#architectural-invariants).
 
 This repository intentionally contains no secrets or host rules.
 

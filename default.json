@@ -125,6 +125,17 @@
       "addLabels": [
         "major-upgrade"
       ]
+    },
+    {
+      "description": "Preserve first-party codeOps workflow and action branch refs without digest pinning; retain other update handling",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "MooseGooseConsulting/coldaine-codeOps",
+        "MooseGooseConsulting/coldaine-codeOps/**"
+      ],
+      "pinDigests": false
     }
   ],
   "vulnerabilityAlerts": {

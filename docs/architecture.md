@@ -40,7 +40,7 @@ The repository uses a small public Renovate preset as the technical center of gr
 
 | Component | Status | Responsibility |
 | --- | --- | --- |
-| `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling and caps; the preset does not schedule execution. |
+| `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling and caps; the preset does not schedule execution. First-party codeOps workflow/action refs retain branch refs instead of being digest-pinned. |
 | `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily discovery scans and manual targeted or run-now dispatch. Credential access determines reachable repositories. |
 | `.github/renovate-diagnostic.cjs` | Current | Native `extends`, `onboarding: false`, `requireConfig: optional`; MooseGooseConsulting and Coldaine discovery including active forks and documented exclusions. No per-repo enrollment file is needed; branch dry runs resolve the proposed shared preset. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
@@ -61,6 +61,8 @@ The repository uses a small public Renovate preset as the technical center of gr
 - **PR branch flow:** Work happens on non-`main` branches and is reviewed through pull requests; local hooks reinforce this and GitHub branch protection enforces it remotely.
 - **PRs are the inbox:** The default workflow assumes Renovate PRs, labels, reviewers, assignees, CI, and PR history are the operational surface.
 - **Exceptions are evidence-backed:** A local override is acceptable when it names a real repo constraint; repeated local overrides should be considered for shared policy.
+
+The codeOps digest-pinning exception is a repeated fleet pattern, not a general opt-out from dependency handling. Renovate opened first-party SHA-pin PRs in codeOps #163, capacitor #202, llm-rig #13 and coldaine-configurations #47; homelab-next #250 merged a local exception. The common policy prevents another pin PR while codeOps adopts a centrally promoted `prod` branch. It covers codeOps GitHub Actions references in every consumer of this preset, including callers not yet migrated from `@main`; it does not migrate them. Remove or narrow the rule if the shared publication model changes, and re-sample consumers before doing so.
 
 ## Review Cadence
 
