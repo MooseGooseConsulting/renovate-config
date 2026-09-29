@@ -125,6 +125,16 @@
       "addLabels": [
         "major-upgrade"
       ]
+    },
+    {
+      "description": "First-party codeOps workflows and actions follow its explicitly promoted prod branch; do not pin or bump their refs",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "MooseGooseConsulting/coldaine-codeOps"
+      ],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
