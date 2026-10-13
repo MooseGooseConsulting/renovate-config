@@ -81,10 +81,11 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   because the same pinning occurred across several consumers; it does not
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
-- Never propose Python minor or major upgrades (for example 3.14 to 3.15) in any
-  consuming repository. This is an owner rule, not a per-repository exception.
+- Never propose Python minor or major version upgrades (for example 3.14 to 3.15)
+  in any consuming repository. This is an owner rule, not a per-repository exception.
   Patch updates (3.14.7 to 3.14.8) and digest or pin updates still flow, so
-  security point releases are not held back. The rule matches Python by package
+  security point releases are not held back. A floating tag such as `python:latest`
+  can still cross minors through a digest update; no packageRule can stop that. The rule matches Python by package
   name across Docker image tags, `actions/setup-python` `python-version` inputs,
   `.python-version`, `requires-python`, `runtime.txt` and the mise, asdf, proto,
   devbox, pixi and devcontainer runtime pins. It does not hold the
