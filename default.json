@@ -136,6 +136,34 @@
         "MooseGooseConsulting/coldaine-codeOps/**"
       ],
       "pinDigests": false
+    },
+    {
+      "description": "Owner rule (1 of 2): report Python patch updates apart from minor ones so rule 2 can hold minors without hiding patches. No matchUpdateTypes here because Renovate reads separateMinorPatch before an update type exists.",
+      "matchPackageNames": [
+        "python",
+        "**/python",
+        "python/cpython",
+        "actions/python-versions",
+        "containerbase/python-prebuild",
+        "!ghcr.io/devcontainers/features/python"
+      ],
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Owner rule (2 of 2): never propose Python minor or major bumps such as 3.14 to 3.15; patch (3.14.7 to 3.14.8), digest and pin updates still flow. Matches by package name in every manager: python and other registry python images, setup-python python-version inputs, .python-version, requires-python, runtime.txt, and mise, asdf, proto, devbox, pixi, poetry and devcontainer pins. The setup-python action and the devcontainer python feature are not Python releases and are not matched. To move Python on purpose, edit the pin by hand or add a narrow enabled: true packageRule in the consumer repository.",
+      "matchPackageNames": [
+        "python",
+        "**/python",
+        "python/cpython",
+        "actions/python-versions",
+        "containerbase/python-prebuild",
+        "!ghcr.io/devcontainers/features/python"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
