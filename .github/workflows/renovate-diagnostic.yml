@@ -93,22 +93,42 @@ jobs:
           RENOVATE_PRESET_REF: ${{ inputs.dryRun && github.ref_name != github.event.repository.default_branch && github.ref_name || '' }}
 
       # The release-age soak holds updates without opening anything, and the Dependency Dashboard
-      # is off, so this summary is where held updates show up. Counts only: see renovate-held.jq.
+      # is off, so this summary is where held updates show up. This repository is public: it names
+      # only repositories GitHub serves publicly and aggregates the rest. It must not fail the run.
       - name: Summarize updates held by the release-age soak
         if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           report=/tmp/renovate-report.json
-          {
-            echo "## Release-age soak"
-            if [ -s "$report" ]; then
-              jq -r -f .github/renovate-held.jq "$report"
+          summary() { echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
+          summary "## Release-age soak"
+          if [ ! -s "$report" ]; then summary "Renovate wrote no report."; exit 0; fi
+          if ! rows=$(jq -r -f .github/renovate-held.jq "$report"); then
+            summary "The Renovate report could not be read."; exit 0
+          fi
+          if [ -z "$rows" ]; then
+            summary "No updates are held by the release-age soak and no lookups warned."; exit 0
+          fi
+          table=""; private_repos=0; undated_total=0
+          p_undated=0; p_aging=0; p_warnings=0
+          while IFS=$'\t' read -r repo undated aging warnings; do
+            undated_total=$((undated_total + undated))
+            # The workflow token reaches only this repository, so a private repository answers 404.
+            if [ "$(gh api "repos/$repo" --jq .private 2>/dev/null)" = "false" ]; then
+              table+="| $repo | $undated | $aging | $warnings |"$'\n'
             else
-              echo "Renovate wrote no report."
+              private_repos=$((private_repos + 1))
+              p_undated=$((p_undated + undated)); p_aging=$((p_aging + aging)); p_warnings=$((p_warnings + warnings))
             fi
-          } >> "$GITHUB_STEP_SUMMARY"
-          if [ -s "$report" ]; then
-            held=$(jq '[.repositories[].packageFiles[][].deps[] | (.updates // [])[] | select(.pendingChecks == true and (.releaseTimestamp | not))] | length' "$report")
-            if [ "$held" -gt 0 ]; then
-              echo "::warning title=Release-age soak::$held update(s) held with no release timestamp; see the job summary."
-            fi
+          done <<< "$rows"
+          summary "| Repository | Held, no release date | Held, aging | Lookup warnings |"
+          summary "| --- | ---: | ---: | ---: |"
+          [ -n "$table" ] && printf '%s' "$table" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$private_repos" -gt 0 ]; then
+            summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_warnings |"
+          fi
+          if [ "$undated_total" -gt 0 ]; then
+            echo "::warning title=Release-age soak::$undated_total update(s) held with no release date; see the job summary."
           fi

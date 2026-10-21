@@ -23,6 +23,9 @@
   "prHourlyLimit": 0,
   "prCreation": "immediate",
   "internalChecksFilter": "strict",
+  "statusCheckWhen": {
+    "minimumReleaseAge": "never"
+  },
   "schedule": [
     "* * * * 1"
   ],

@@ -76,15 +76,10 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   package-replacement proposals remain separate from routine groups too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
-- Hold every major, minor, patch and digest update for 4 days after its release
-  (owner rule, October 21, 2026, after the LiteLLM 1.107.0 supply-chain compromise).
-  A release without a publication timestamp stays held: Renovate dates Docker images
-  only on Docker Hub, so GHCR, Quay, registry.k8s.io and similar images wait until
-  the consumer maps them to a digest-identical Docker Hub repository with
-  `overridePackageName`. First-party MooseGooseConsulting and Coldaine images and
-  actions are exempt. The runner caps Docker Hub tag paging at 10 pages so large
-  images keep their dates, and each run's job summary counts held updates per
-  repository. See the [architecture notes](docs/architecture.md#architectural-invariants).
+- Hold every major, minor, patch and digest update for 4 days after its release,
+  and never propose a release without a publication date (owner rule, October 21,
+  2026). First-party MooseGooseConsulting and Coldaine images and actions are exempt.
+  See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not

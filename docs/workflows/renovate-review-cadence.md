@@ -12,7 +12,7 @@ should produce an evidence-backed audit, not a loose opinion about the config.
   even if the config has not changed.
 - **Event-triggered:** Run the relevant rubric after changes to grouping,
   schedules, throttles, dashboard behavior, automerge policy, vulnerability
-  behavior, or the no-Mend operating constraint.
+  behavior, release-age (soak) behavior, or the no-Mend operating constraint.
 - **Incident-triggered:** Run a focused review after repeated noisy PRs, stale
   Renovate queues, missed security updates, surprising repo-local overrides, or
   a repo opting out of the shared preset.
@@ -57,6 +57,10 @@ old notes.
 - Security alerts, vulnerability PRs, emergency update history, or an explicit
   check showing that no relevant current alerts were found.
 - CI status and repeated failure patterns on Renovate PRs.
+- The Renovate runner's "Release-age soak" job summary: updates held with no
+  release date, updates still aging, and lookup warnings. A rising count of
+  undated holds means images that need a Docker Hub mapping or an exemption
+  ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)).
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or
   repo-local override decisions.
 - Local hook status and branch protection for this repo only when the review

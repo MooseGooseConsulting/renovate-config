@@ -140,6 +140,10 @@ Questions:
   a separate upgrade lane?
 - Are closed or ignored updates revisited, or do they disappear into permanent
   drift?
+- Updates held by the release-age soak are an owner rule, not missing coverage
+  ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)). Score whether they
+  are visible in the runner's job summary and whether undated images that have a
+  digest-identical dated mirror have been mapped, not whether they have PRs.
 
 Good looks like:
 
