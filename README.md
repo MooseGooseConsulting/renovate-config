@@ -61,7 +61,7 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Do not require the Dependency Dashboard. Renovate PRs are the inbox.
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
-  before merging. Release-age filtering remains enabled.
+  before merging. Release-age filtering applies to every consumer (below).
 - Keep at most two ordinary Renovate branches and PRs active per repository.
   Security-fix PRs retain their existing exception to this cap.
 - Keep internal checks explicit so release-age gates inherited from
@@ -76,6 +76,15 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   package-replacement proposals remain separate from routine groups too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
+- Hold every major, minor, patch and digest update for 4 days after its release
+  (owner rule, October 21, 2026, after the LiteLLM 1.107.0 supply-chain compromise).
+  A release without a publication timestamp stays held: Renovate dates Docker images
+  only on Docker Hub, so GHCR, Quay, registry.k8s.io and similar images wait until
+  the consumer maps them to a digest-identical Docker Hub repository with
+  `overridePackageName`. First-party MooseGooseConsulting and Coldaine images and
+  actions are exempt. The runner caps Docker Hub tag paging at 10 pages so large
+  images keep their dates, and each run's job summary counts held updates per
+  repository. See the [architecture notes](docs/architecture.md#architectural-invariants).
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not

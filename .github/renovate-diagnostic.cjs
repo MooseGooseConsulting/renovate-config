@@ -17,6 +17,13 @@ const config = {
   autodiscover: true,
   autodiscoverFilter: target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"],
   forkProcessing: "enabled",
+  // Docker Hub refuses anonymous tag pagination past page 10 (renovatebot/renovate#46925). When
+  // that happens Renovate drops every timestamp it fetched, and the release-age soak in
+  // default.json then holds the image forever. Ten pages keeps the newest tags and their dates.
+  dockerMaxPages: 10,
+  // Per-repository lookup results for the job summary step (held and aging updates).
+  reportType: "file",
+  reportPath: "/tmp/renovate-report.json",
 };
 
 // A manual run-now bypasses time only, never PR caps, release age, or review.

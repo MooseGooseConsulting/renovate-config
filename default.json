@@ -164,6 +164,27 @@
         "minor"
       ],
       "enabled": false
+    },
+    {
+      "description": "Owner rule (2026-10-21): every major, minor, patch and digest update waits 4 days after publication before Renovate raises it, in every consumer. A release without a publication timestamp stays pending (timestamp-required, Renovate's default since v42, stated here so any consumer override is explicit). Renovate's docker datasource only reads timestamps from Docker Hub, so images on ghcr.io, quay.io, registry.k8s.io, mcr.microsoft.com and other registries stay pending until the consumer maps them to a digest-identical Docker Hub repository with overridePackageName. Pin, pinDigest, replacement, lockFileMaintenance, bump, lockfileUpdate and rollback updates carry no release timestamp and are not held, as in Renovate's own security:minimumReleaseAge presets. Vulnerability-fix PRs still bypass this through vulnerabilityAlerts.",
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "minimumReleaseAge": "4 days",
+      "minimumReleaseAgeBehaviour": "timestamp-required"
+    },
+    {
+      "description": "Owner rule (2026-10-21), part 2: first-party images and actions are built by this fleet's own CI, not by an upstream that could be compromised, so they are not held by the release-age soak. Without this, every ghcr.io/moosegooseconsulting and ghcr.io/coldaine image would be held forever because GHCR publishes no release timestamp. Matching is case-insensitive.",
+      "matchPackageNames": [
+        "ghcr.io/moosegooseconsulting/**",
+        "ghcr.io/coldaine/**",
+        "MooseGooseConsulting/**",
+        "Coldaine/**"
+      ],
+      "minimumReleaseAge": null
     }
   ],
   "vulnerabilityAlerts": {

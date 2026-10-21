@@ -91,3 +91,24 @@ jobs:
           RENOVATE_TARGET_REPOSITORY: ${{ inputs.repository }}
           RENOVATE_DIAGNOSTIC_FORCE: ${{ inputs.unrestricted || false }}
           RENOVATE_PRESET_REF: ${{ inputs.dryRun && github.ref_name != github.event.repository.default_branch && github.ref_name || '' }}
+
+      # The release-age soak holds updates without opening anything, and the Dependency Dashboard
+      # is off, so this summary is where held updates show up. Counts only: see renovate-held.jq.
+      - name: Summarize updates held by the release-age soak
+        if: always()
+        run: |
+          report=/tmp/renovate-report.json
+          {
+            echo "## Release-age soak"
+            if [ -s "$report" ]; then
+              jq -r -f .github/renovate-held.jq "$report"
+            else
+              echo "Renovate wrote no report."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -s "$report" ]; then
+            held=$(jq '[.repositories[].packageFiles[][].deps[] | (.updates // [])[] | select(.pendingChecks == true and (.releaseTimestamp | not))] | length' "$report")
+            if [ "$held" -gt 0 ]; then
+              echo "::warning title=Release-age soak::$held update(s) held with no release timestamp; see the job summary."
+            fi
+          fi
