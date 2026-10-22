@@ -67,6 +67,13 @@ old notes.
   one; a `git-refs`/`git-tags` or custom-datasource dependency needs a dated
   source (for example `github-tags`) or an owner-approved exemption
   ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)).
+- The same summary's rate-limited branches (a branch, PR or commit limit stopped
+  them this run; a later run retries them) and Renovate's WARN and ERROR
+  problems. Public repositories' problem messages are listed; private ones are
+  only counted. Each repository's Dependency Dashboard issue lists the same
+  queue under "Rate-Limited" and the soak's holds under "Pending Status Checks".
+  Security-fix branches are uncapped and Renovate exempts them from the commit
+  limits, so one listed as rate-limited is a defect.
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or
   repo-local override decisions.
 - Local hook status and branch protection for this repo only when the review

@@ -13,7 +13,7 @@ Run `npm run renovate:validate` before committing config changes.
 Work on PR branches, not `main`; completed scoped work goes through a non-draft PR.
 Keep this repo public and secret-free; no host tokens, registry passwords, or `.env` values.
 Do not recommend features that require paying for Mend or using the Mend Developer Portal.
-Treat Renovate PRs as the default inbox; dashboard workflows are opt-in exceptions.
+Treat Renovate PRs as the default inbox; the Dependency Dashboard is on for visibility only, never as an approval gate (no `dependencyDashboardApproval` in shared policy).
 For effectiveness reviews, use `docs/rubrics/renovate-effectiveness-rubric.md`.
 For shared-vs-local coordination reviews, use `docs/rubrics/repository-coordination-rubric.md`.
 For cadence and evidence collection, use `docs/workflows/renovate-review-cadence.md`.

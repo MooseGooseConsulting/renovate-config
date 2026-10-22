@@ -59,8 +59,15 @@ replacement for Renovate's official documentation.
 
 - Do not combine `prCreation=approval` with `dependencyDashboardApproval=true`.
 - Do not introduce options unless they validate with `renovate-config-validator`.
-- Prefer `dependencyDashboard=false` unless a repo explicitly needs dashboard tracking.
-- Vulnerability PRs may bypass schedule/throttles when Renovate's schema supports it.
+- Keep `dependencyDashboard=true` as a visibility surface and never set
+  `dependencyDashboardApproval=true` in shared policy: nothing waits for approval.
+- Vulnerability PRs bypass schedule, release age and caps: keep
+  `branchConcurrentLimit: 0` under `vulnerabilityAlerts` (it lifts the branch cap;
+  the top-level `branchConcurrentLimit` otherwise caps security branches) and
+  `prConcurrentLimit: 0` (Renovate's own default there, kept explicit). Re-check
+  both with a dry run when the runner's Renovate version changes; see ADR 0002.
+  `prPriority` is not valid there and is unnecessary, because Renovate already
+  sorts vulnerability branches first.
 - Treat `org-inherited-config.json` as compatibility-only Mend-hosted app
   behavior. Do not build new policy around it unless Patrick reverses the
   no-Mend decision.
