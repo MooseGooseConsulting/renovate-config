@@ -17,11 +17,14 @@ jobs:
       - run: npx --yes --package renovate@latest renovate-config-validator --strict .github/renovate-diagnostic.cjs
       # renovate.json dates the runner image on Docker Hub; the action pulls it from GHCR.
       - name: Check the pinned Renovate image exists on GHCR
+        shell: bash
         run: |
+          set -euo pipefail
           version=$(sed -nE 's/^[[:space:]]*renovate-version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/p' .github/workflows/renovate-diagnostic.yml)
           test -n "$version"
-          token=$(curl -fsS "https://ghcr.io/token?scope=repository:renovatebot/renovate:pull" | jq -r .token)
-          curl -fsSI -o /dev/null \
+          token=$(curl -fsS --retry 2 "https://ghcr.io/token?scope=repository:renovatebot/renovate:pull" | jq -r .token)
+          if [ -z "$token" ] || [ "$token" = "null" ]; then echo "::error::no anonymous GHCR token"; exit 1; fi
+          curl -fsSI --retry 2 -o /dev/null \
             -H "Authorization: Bearer $token" \
             -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json" \
             "https://ghcr.io/v2/renovatebot/renovate/manifests/$version"

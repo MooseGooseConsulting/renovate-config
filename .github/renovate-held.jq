@@ -4,11 +4,15 @@
 # repositories; this repository's job summary is public.
 #
 # A pure digest update never carries releaseTimestamp (renovatebot/renovate#45236): Renovate ages
-# it against the current version's timestamp, so a dated current version means it is aging.
+# it against the newest release matching the current value. The report holds only the current
+# version's date, so a digest counts as aging only when the current value is that dated version
+# (nginx:1.27); a floating or ranged value (latest, lts-alpine) counts as undated.
 .repositories // {} | to_entries[] | .key as $repo
 | [ (.value.packageFiles // {}) | to_entries[] | (.value // [])[] | (.deps // [])[] ] as $deps
 | [ $deps[] | . as $dep | (.updates // [])[] | select(.pendingChecks == true)
-    | if .releaseTimestamp or (.updateType == "digest" and $dep.currentVersionTimestamp)
+    | if .releaseTimestamp
+         or (.updateType == "digest" and $dep.currentVersionTimestamp
+             and $dep.currentVersion != null and $dep.currentValue == $dep.currentVersion)
       then "aging" else "undated" end ] as $held
 | [ $deps[] | (.warnings // [])[] ] as $warnings
 | select(($held | length) + ($warnings | length) > 0)

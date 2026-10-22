@@ -59,7 +59,10 @@ old notes.
 - CI status and repeated failure patterns on Renovate PRs.
 - The Renovate runner's "Release-age soak" job summary: updates held with no
   release date, updates still aging, and lookup warnings. A rising count of
-  undated holds means images that need a Docker Hub mapping, a versioned tag in place of a floating one, or an owner-approved exemption
+  undated holds needs a per-type answer: a container image needs a
+  digest-identical Docker Hub mapping or a versioned tag in place of a floating
+  one; a `git-refs`/`git-tags` or custom-datasource dependency needs a dated
+  source (for example `github-tags`) or an owner-approved exemption
   ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)).
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or
   repo-local override decisions.
