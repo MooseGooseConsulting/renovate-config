@@ -99,7 +99,8 @@ jobs:
         if: always()
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ github.token }}
+          # The runner's PAT reads both owners' repositories, so it can tell public from private.
+          GH_TOKEN: ${{ secrets.RENOVATE_TOKEN || github.token }}
         run: |
           report=/tmp/renovate-report.json
           summary() { echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
@@ -111,21 +112,23 @@ jobs:
           if [ -z "$rows" ]; then
             summary "No updates are held by the release-age soak and no lookups warned."; exit 0
           fi
-          table=""; private_repos=0; undated_total=0
+          table=""; private_repos=0; unknown_repos=0; undated_total=0
           p_undated=0; p_aging=0; p_partial=0; p_warnings=0
+          u_undated=0; u_aging=0; u_partial=0; u_warnings=0
           while IFS=$'\t' read -r repo undated aging partial warnings; do
             undated_total=$((undated_total + undated))
-            # Public means GitHub serves it to anyone. Ask with the workflow token, then without
-            # one; any other answer (404, rate limit, error) counts the repository as private.
-            visibility=$(gh api "repos/$repo" --jq .private 2>/dev/null) ||
-              visibility=$(curl -fsS "https://api.github.com/repos/$repo" 2>/dev/null | jq -r .private) ||
-              visibility=""
+            visibility=$(gh api "repos/$repo" --jq .private 2>/dev/null || true)
             if [ "$visibility" = "false" ]; then
               table+="| $repo | $undated | $aging | $partial | $warnings |"$'\n'
-            else
+            elif [ "$visibility" = "true" ]; then
               private_repos=$((private_repos + 1))
               p_undated=$((p_undated + undated)); p_aging=$((p_aging + aging))
               p_partial=$((p_partial + partial)); p_warnings=$((p_warnings + warnings))
+            else
+              # Not named: the lookup failed, so the repository may be private.
+              unknown_repos=$((unknown_repos + 1))
+              u_undated=$((u_undated + undated)); u_aging=$((u_aging + aging))
+              u_partial=$((u_partial + partial)); u_warnings=$((u_warnings + warnings))
             fi
           done <<< "$rows"
           summary "| Repository | Held, no release date | Held, aging | Newer releases withheld | Lookup warnings |"
@@ -133,6 +136,10 @@ jobs:
           [ -n "$table" ] && printf '%s' "$table" >> "$GITHUB_STEP_SUMMARY"
           if [ "$private_repos" -gt 0 ]; then
             summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_partial | $p_warnings |"
+          fi
+          if [ "$unknown_repos" -gt 0 ]; then
+            summary "| Visibility unknown ($unknown_repos) | $u_undated | $u_aging | $u_partial | $u_warnings |"
+            echo "::warning title=Release-age soak::$unknown_repos repository visibility lookup(s) failed; those rows are aggregated."
           fi
           if [ "$undated_total" -gt 0 ]; then
             echo "::warning title=Release-age soak::$undated_total update(s) held with no release date; see the job summary."

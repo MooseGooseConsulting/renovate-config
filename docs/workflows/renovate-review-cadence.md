@@ -59,7 +59,9 @@ old notes.
 - CI status and repeated failure patterns on Renovate PRs.
 - The Renovate runner's "Release-age soak" job summary: updates held with no
   release date, updates still aging, updates proposing an older release while
-  newer ones are withheld, and lookup warnings. A rising count of
+  newer ones are withheld, and lookup warnings. The undated count excludes
+  withheld releases; a withheld count that stays up across runs for a repository
+  needs a local dry run to see whether those releases are undated. A rising count of
   undated holds needs a per-type answer: a container image needs a
   digest-identical Docker Hub mapping or a versioned tag in place of a floating
   one; a `git-refs`/`git-tags` or custom-datasource dependency needs a dated

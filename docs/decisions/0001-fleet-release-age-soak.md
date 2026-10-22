@@ -22,7 +22,13 @@ Facts about Renovate 44.107.0, the runner's pinned version:
 - **The rule.** Major, minor, patch and digest updates wait 4 days after release, with `timestamp-required` stated explicitly. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates are not held, because they carry no date, matching Renovate's own `security:minimumReleaseAge*` presets; range bumps and lock-file-only updates are held with the updates they ride on.
 - **Exemptions.** First-party images on GHCR (`ghcr.io/moosegooseconsulting/**`, `ghcr.io/coldaine/**`) and first-party GitHub actions and releases (`MooseGooseConsulting/**`, `Coldaine/**`, scoped to the GitHub datasources so an unclaimed Docker Hub namespace of the same name stays soaked) are exempt, because this fleet builds them. `github-runners`, `python-version`, `java-version` and `dart-version` are exempt: they name official toolchain releases, and holding them forever would stop the Python patch releases the 2026-10-13 Python rule keeps flowing. Vulnerability-fix PRs keep their bypass.
 - **Status check.** `statusCheckWhen.minimumReleaseAge: never` turns off the stability status check. The gate is the lookup stage: `internalChecksFilter: strict` creates no branch until an update has aged.
-- **Runner settings.** The runner sets `dockerMaxPages: 10`, which is a global-only option. It also writes a file report, and a job-summary step counts held updates. Public repositories are named; private ones are aggregated.
+- **Runner settings.** The runner sets `dockerMaxPages: 10`, which is a global-only option, and writes a file report. A job-summary step turns it into four counts per repository:
+  - **Held, no release date:** waits forever unless the dependency gets a dated source or an exemption. Any count raises a warning annotation.
+  - **Held, aging:** under 4 days old, and clears by itself.
+  - **Newer releases withheld:** Renovate proposed an older release while newer ones wait. The report does not say whether those are dated, so they are excluded from the undated count. They normally age out.
+  - **Lookup warnings.**
+
+  Public repositories are named, checked with the runner's token; private ones are aggregated. Repositories whose visibility lookup fails get a separate "visibility unknown" row and a warning.
 - **Undated images.** Consumers keep undated images updating by mapping each one to a Docker Hub repository that serves identical index digests, using `overridePackageName`. The mapping is checked per tag before it is added. Images with no such mirror stay held, visibly.
 
 ## Consequences
@@ -39,4 +45,4 @@ Facts about Renovate 44.107.0, the runner's pinned version:
 - Renovate dates GHCR images natively (#39064), or opt-in OCI timestamps ([#43566](https://github.com/renovatebot/renovate/pull/43566)) merge.
 - The runner token gains `read:packages`, making a GitHub Packages API datasource possible ([#27](https://github.com/MooseGooseConsulting/renovate-config/issues/27)).
 - Renovate fixes #45236 or #46925.
-- The job summary shows undated holds growing without mappings being added.
+- The job summary shows undated holds growing without mappings being added, or a repository's "newer releases withheld" count staying up across runs (inspect it with a local dry run; it may hide undated releases).

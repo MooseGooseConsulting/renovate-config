@@ -3,7 +3,9 @@
 # release timestamp, held while aging, partially held, lookup warnings. The workflow names only
 # public repositories; this repository's job summary is public. "Partially held" is an update that
 # proposes an older release while newer ones wait (pendingVersions): the report does not say
-# whether those newer releases are dated, so they are counted apart and claimed as neither.
+# whether those newer releases are dated, so they are counted apart and claimed as neither: the
+# undated count excludes them. They are normally young releases that age out within 4 days; a
+# repository whose count stays up across runs needs a targeted local dry run (ADR 0001).
 #
 # A pure digest (or pinDigest) update never carries releaseTimestamp (renovatebot/renovate#45236): Renovate ages
 # it against the newest release matching the current value. The report holds only the current
