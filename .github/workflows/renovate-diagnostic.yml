@@ -1,7 +1,8 @@
 # Self-hosted fleet runner. $0 / no Mend. GITHUB_TOKEN is not a valid
 # Renovate auth token (checkout may still use it).
 #
-# Auth today: PAT secret RENOVATE_TOKEN (classic, repo + workflow).
+# Auth today: PAT secret RENOVATE_TOKEN (classic, repo + workflow + read:packages; read:packages
+# lets default.json date GHCR images through the GitHub Packages API).
 # Prefer the existing cross-owner PAT. The optional App-token path can only
 # serve a manually targeted organization repo, not both owners' full fleet.
 #
@@ -60,7 +61,7 @@ jobs:
               exit 1
             fi
           else
-            echo "::error::Missing Renovate auth. Full-fleet runs require RENOVATE_TOKEN (classic PAT, repo + workflow scopes) with access to both owners. An organization App is supported only for manually targeted organization runs. Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
+            echo "::error::Missing Renovate auth. Full-fleet runs require RENOVATE_TOKEN (classic PAT, repo, workflow and read:packages scopes) with access to both owners. An organization App is supported only for manually targeted organization runs. Do not use GITHUB_TOKEN as the Renovate auth token. No Mend."
             exit 1
           fi
 
@@ -76,6 +77,62 @@ jobs:
           client-id: ${{ secrets.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+
+      # default.json dates third-party GHCR images through the GitHub Packages API (custom.ghcr). A
+      # token that cannot read packages gets HTTP 403 there (401 with no token), and Renovate records only a "no-result"
+      # lookup warning, so every such image would stay held without anything failing. Probe the API
+      # with the token Renovate uses and report a failure as an error annotation and in the job
+      # summary. The run continues: undated images stay held either way (fail closed), and the rest
+      # of the fleet still gets its updates.
+      - name: Check the token can read GHCR release dates
+        continue-on-error: true
+        # Bounded so a stalled API connection cannot hold up the Renovate step behind it.
+        timeout-minutes: 3
+        env:
+          AUTH_MODE: ${{ steps.auth.outputs.mode }}
+          RENOVATE_TOKEN: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
+        run: |
+          probe() { curl -sS --connect-timeout 10 --max-time 20 --retry 2 --retry-max-time 60 "$@"; }
+          # X-OAuth-Scopes lists a classic PAT's scopes, which are not secret; App and fine-grained
+          # tokens send none.
+          scopes=$(probe -I -H "Authorization: token $RENOVATE_TOKEN" https://api.github.com/rate_limit |
+            tr -d '\r' | awk 'tolower($1) == "x-oauth-scopes:" { $1 = ""; sub(/^ /, ""); print }' || true)
+          # The probe is the real test: a public package, requested the way the datasource asks.
+          status=$(probe -o /dev/null -w '%{http_code}' -H "Authorization: token $RENOVATE_TOKEN" \
+            "https://api.github.com/users/renovatebot/packages/container/renovate/versions?per_page=1" || true)
+          echo "Auth mode: $AUTH_MODE. Token scopes: ${scopes:-none reported}. GitHub Packages API probe: HTTP ${status:-none}."
+          if [ "$status" = "200" ]; then
+            echo "GHCR release dates: available (token scopes: ${scopes:-none reported})." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$AUTH_MODE" = "app" ]; then
+            # GitHub's Packages REST API accepts only classic personal access tokens.
+            why="this run uses the GitHub App installation token, which the GitHub Packages API does not accept (API probe: HTTP ${status:-none})"
+            fix="Run with RENOVATE_TOKEN (a classic PAT with read:packages) to date GHCR images."
+          elif [ "$status" = "401" ]; then
+            why="GitHub rejected the token itself (HTTP 401: missing, invalid or expired)"
+            fix="Replace RENOVATE_TOKEN with a valid classic PAT that has read:packages."
+          elif [ "$status" = "403" ]; then
+            case ",${scopes// /}," in
+              *,read:packages,* | *,write:packages,*)
+                why="the token has a packages scope, but the GitHub Packages API refused it (HTTP $status)"
+                fix="Check that RENOVATE_TOKEN is a classic PAT that is still valid." ;;
+              *)
+                why="the token lacks read:packages (scopes: ${scopes:-none reported}; API probe: HTTP $status)"
+                fix="Add read:packages to the RENOVATE_TOKEN classic PAT." ;;
+            esac
+          else
+            # Not an authorization answer: a timeout, a network failure or a GitHub outage.
+            why="the GitHub Packages API probe did not get an authorization answer (HTTP ${status:-none}; 000 means no response)"
+            fix="Check the run log and GitHub's status; the token's scopes are ${scopes:-not reported}."
+          fi
+          echo "::error title=GHCR release dates unavailable::No third-party ghcr.io image can be dated, so none gets an update: $why. $fix"
+          {
+            echo "## GHCR release dates unavailable"
+            echo ""
+            echo "Third-party \`ghcr.io\` images are dated through the GitHub Packages API, and $why. $fix Until then no such image gets an update; they appear below as GHCR lookup warnings."
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Map dry-run input
         if: inputs.dryRun
@@ -119,17 +176,17 @@ jobs:
           if [ -z "$rows" ] && [ "$global_warn" -eq 0 ] && [ "$global_error" -eq 0 ]; then
             summary "No updates are held or rate-limited, no lookups warned, and Renovate logged no problems."; exit 0
           fi
-          table=""; problems_md=""; private_repos=0; unknown_repos=0; undated_total=0; limited_total=0
+          table=""; problems_md=""; private_repos=0; unknown_repos=0; undated_total=0; limited_total=0; ghcr_total=0
           error_total=$global_error
-          p_undated=0; p_aging=0; p_partial=0; p_warnings=0; p_limited=0; p_warn=0; p_error=0
-          u_undated=0; u_aging=0; u_partial=0; u_warnings=0; u_limited=0; u_warn=0; u_error=0
-          while IFS=$'\t' read -r repo undated aging partial warnings limited warn error; do
+          p_undated=0; p_aging=0; p_partial=0; p_warnings=0; p_ghcr=0; p_limited=0; p_warn=0; p_error=0
+          u_undated=0; u_aging=0; u_partial=0; u_warnings=0; u_ghcr=0; u_limited=0; u_warn=0; u_error=0
+          while IFS=$'\t' read -r repo undated aging partial warnings ghcr limited warn error; do
             [ -n "$repo" ] || continue
             undated_total=$((undated_total + undated)); limited_total=$((limited_total + limited))
-            error_total=$((error_total + error))
+            ghcr_total=$((ghcr_total + ghcr)); error_total=$((error_total + error))
             visibility=$(gh api "repos/$repo" --jq .private 2>/dev/null || true)
             if [ "$visibility" = "false" ]; then
-              table+="| $repo | $undated | $aging | $partial | $warnings | $limited | $warn | $error |"$'\n'
+              table+="| $repo | $undated | $aging | $partial | $warnings | $ghcr | $limited | $warn | $error |"$'\n'
               if [ $((warn + error)) -gt 0 ]; then
                 problems_md+=$(jq -r --arg repo "$repo" '.repositories[$repo].problems // [] | map(select((.level // 0) >= 40)
                   | "- \($repo): \(if .level >= 50 then "ERROR" else "WARN" end) \(.msg // "" | gsub("[\r\n|`]"; " "))")
@@ -138,30 +195,30 @@ jobs:
             elif [ "$visibility" = "true" ]; then
               private_repos=$((private_repos + 1))
               p_undated=$((p_undated + undated)); p_aging=$((p_aging + aging))
-              p_partial=$((p_partial + partial)); p_warnings=$((p_warnings + warnings))
+              p_partial=$((p_partial + partial)); p_warnings=$((p_warnings + warnings)); p_ghcr=$((p_ghcr + ghcr))
               p_limited=$((p_limited + limited)); p_warn=$((p_warn + warn)); p_error=$((p_error + error))
             else
               # Not named: the lookup failed, so the repository may be private.
               unknown_repos=$((unknown_repos + 1))
               u_undated=$((u_undated + undated)); u_aging=$((u_aging + aging))
-              u_partial=$((u_partial + partial)); u_warnings=$((u_warnings + warnings))
+              u_partial=$((u_partial + partial)); u_warnings=$((u_warnings + warnings)); u_ghcr=$((u_ghcr + ghcr))
               u_limited=$((u_limited + limited)); u_warn=$((u_warn + warn)); u_error=$((u_error + error))
             fi
           done <<< "$rows"
-          summary "Held: the release-age soak (ADR 0001). Rate-limited: a branch, PR or commit limit stopped the branch this run; a later run retries it once a slot (or, for a commit limit, quota) is free. Problems: Renovate's WARN and ERROR log records."
+          summary "Held: the release-age soak (ADR 0001). Rate-limited: a branch, PR or commit limit stopped the branch this run; a later run retries it once a slot (or, for a commit limit, quota) is free. GHCR lookup warnings: lookups on the GitHub Packages API datasource that returned nothing (no update at all) or no new digest. Problems: Renovate's WARN and ERROR log records."
           summary ""
-          summary "| Repository | Held, no release date | Held, aging | Newer releases withheld | Lookup warnings | Rate-limited branches | Problems (WARN) | Problems (ERROR) |"
-          summary "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
+          summary "| Repository | Held, no release date | Held, aging | Newer releases withheld | Lookup warnings | GHCR lookup warnings | Rate-limited branches | Problems (WARN) | Problems (ERROR) |"
+          summary "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
           [ -n "$table" ] && printf '%s' "$table" >> "$GITHUB_STEP_SUMMARY"
           if [ "$private_repos" -gt 0 ]; then
-            summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_partial | $p_warnings | $p_limited | $p_warn | $p_error |"
+            summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_partial | $p_warnings | $p_ghcr | $p_limited | $p_warn | $p_error |"
           fi
           if [ "$unknown_repos" -gt 0 ]; then
-            summary "| Visibility unknown ($unknown_repos) | $u_undated | $u_aging | $u_partial | $u_warnings | $u_limited | $u_warn | $u_error |"
+            summary "| Visibility unknown ($unknown_repos) | $u_undated | $u_aging | $u_partial | $u_warnings | $u_ghcr | $u_limited | $u_warn | $u_error |"
             echo "::warning title=Renovate summary::$unknown_repos repository visibility lookup(s) failed; those rows are aggregated."
           fi
           if [ $((global_warn + global_error)) -gt 0 ]; then
-            summary "| Not tied to a repository | | | | | | $global_warn | $global_error |"
+            summary "| Not tied to a repository | | | | | | | $global_warn | $global_error |"
           fi
           if [ -n "${problems_md//[[:space:]]/}" ]; then
             summary ""
@@ -176,4 +233,8 @@ jobs:
           fi
           if [ "$error_total" -gt 0 ]; then
             echo "::warning title=Renovate problems::Renovate logged $error_total ERROR record(s); see the job summary and the run log."
+          fi
+          if [ "$ghcr_total" -gt 0 ]; then
+            # A failed lookup leaves the image with no update at all, outside the held counts.
+            echo "::warning title=Release-age soak::$ghcr_total GHCR lookup warning(s): an image the GitHub Packages API returned nothing for gets no update, and a pinned tag older than the API's newest 100 versions gets no digest update; see the job summary."
           fi

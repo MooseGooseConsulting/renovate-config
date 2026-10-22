@@ -97,7 +97,9 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   and never propose one of those updates without a publication date (owner rule, October 21,
   2026). First-party MooseGooseConsulting and Coldaine images, actions and GitHub
   releases, GitHub runner labels and the language-runtime version lists are exempt.
-  See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
+  Third-party `ghcr.io` images are dated through the GitHub Packages API (a custom
+  datasource; the runner token needs `read:packages`), except a few whose newest
+  100 versions span hours. See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not

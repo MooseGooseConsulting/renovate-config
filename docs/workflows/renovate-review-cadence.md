@@ -59,7 +59,9 @@ old notes.
 - CI status and repeated failure patterns on Renovate PRs.
 - The Renovate runner's "Release-age soak" job summary: updates held with no
   release date, updates still aging, updates proposing an older release while
-  newer ones are withheld, and lookup warnings. The undated count excludes
+  newer ones are withheld, lookup warnings, and GHCR lookup warnings (the GitHub
+  Packages API returned nothing, or a pinned tag has left its newest 100
+  versions). The undated count excludes
   withheld releases; a withheld count that stays up across runs for a repository
   needs a local dry run to see whether those releases are undated. A rising count of
   undated holds needs a per-type answer: a container image needs a

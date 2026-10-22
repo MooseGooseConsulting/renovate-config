@@ -39,6 +39,15 @@
   "rebaseWhen": "conflicted",
   "automerge": false,
   "separateMajorMinor": true,
+  "customDatasources": {
+    "ghcr": {
+      "defaultRegistryUrlTemplate": "https://api.github.com/users/{{{replace '^ghcr\\.io/([^/]+)/.*$' '$1' packageName}}}/packages/container/{{{replace '/' '%2F' (replace '^ghcr\\.io/[^/]+/' '' packageName)}}}/versions?per_page=100",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [ $.( $v := $; metadata.container.tags[$not($contains($, /^sha256-/))].{ \"version\": $, \"digest\": $v.name, \"releaseTimestamp\": $v.created_at } ) ] }"
+      ]
+    }
+  },
   "packageRules": [
     {
       "description": "Group routine minor, patch, digest, and pin updates; later rules split operational domains.",
@@ -75,9 +84,10 @@
       "groupName": "development tools"
     },
     {
-      "description": "Group routine container image tag, digest, and initial pin updates from Dockerfiles, Compose files, and other image references no later rule claims. Images referenced from Kubernetes, Helm, Flux, Kustomize, Argo CD, or Terraform files go to infrastructure, and images in GitHub workflows, devcontainers, or pre-commit go to ci and development environment, because those later rules take precedence.",
+      "description": "Group routine container image tag, digest, and initial pin updates from Dockerfiles, Compose files, and other image references no later rule claims. Images referenced from Kubernetes, Helm, Flux, Kustomize, Argo CD, or Terraform files go to infrastructure, and images in GitHub workflows, devcontainers, or pre-commit go to ci and development environment, because those later rules take precedence. custom.ghcr is the GHCR images the release-date rule below moves off the docker datasource.",
       "matchDatasources": [
-        "docker"
+        "docker",
+        "custom.ghcr"
       ],
       "matchUpdateTypes": [
         "minor",
@@ -168,7 +178,7 @@
       "enabled": false
     },
     {
-      "description": "Owner rule (2026-10-21): every major, minor and patch update (including npm range bumps and lock-file-only updates, which are flags on those) and every digest update waits 4 days after publication before Renovate raises it, in every consumer. A release without a publication timestamp stays pending (timestamp-required, Renovate's default since v42, stated so any consumer override is explicit). Renovate's docker datasource reads dates only from Docker Hub, so images on ghcr.io, quay.io, registry.k8s.io, mcr.microsoft.com and other registries stay pending until the consumer maps them to a digest-identical Docker Hub repository with overridePackageName. Digest updates of floating tags (latest, lts-alpine) are never dated by Renovate 44 and stay pending: pin a versioned tag instead. git-refs, git-tags and undated custom datasources stay pending too. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates carry no release date and are not held. Vulnerability-fix PRs still bypass this through vulnerabilityAlerts. See docs/decisions/0001-fleet-release-age-soak.md.",
+      "description": "Owner rule (2026-10-21): every major, minor and patch update (including npm range bumps and lock-file-only updates, which are flags on those) and every digest update waits 4 days after publication before Renovate raises it, in every consumer. A release without a publication timestamp stays pending (timestamp-required, Renovate's default since v42, stated so any consumer override is explicit). Renovate's docker datasource reads dates only from Docker Hub. Third-party ghcr.io images are dated by part 5 below; images on quay.io, registry.k8s.io, mcr.microsoft.com and other registries, and the GHCR images part 5 excludes, stay pending until the consumer maps them to a digest-identical Docker Hub repository with overridePackageName and overrideDatasource: docker. Digest updates of floating tags (latest, lts-alpine) are never dated by Renovate 44 and stay pending: pin a versioned tag instead. git-refs, git-tags and undated custom datasources stay pending too. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates carry no release date and are not held. Vulnerability-fix PRs still bypass this through vulnerabilityAlerts. See docs/decisions/0001-fleet-release-age-soak.md.",
       "matchUpdateTypes": [
         "major",
         "minor",
@@ -179,7 +189,7 @@
       "minimumReleaseAgeBehaviour": "timestamp-required"
     },
     {
-      "description": "Owner rule (2026-10-21), part 2: first-party images on GHCR are built by this fleet's own CI, not by an upstream that could be compromised, so they are not held by the release-age soak. GHCR publishes no release dates, so without this every ghcr.io/moosegooseconsulting and ghcr.io/coldaine image would be held forever. Matching is case-insensitive.",
+      "description": "Owner rule (2026-10-21), part 2: first-party images on GHCR are built by this fleet's own CI, not by an upstream that could be compromised, so they are not held by the release-age soak. They are left on the docker datasource, which reads no GHCR dates (part 5 does not date them: many are private, and most are pinned by digest alone), so without this every ghcr.io/moosegooseconsulting and ghcr.io/coldaine image would be held forever. Matching is case-insensitive.",
       "matchPackageNames": [
         "ghcr.io/moosegooseconsulting/**",
         "ghcr.io/coldaine/**"
@@ -208,6 +218,21 @@
         "dart-version"
       ],
       "minimumReleaseAge": null
+    },
+    {
+      "description": "Owner rule (2026-10-21), part 5: date third-party GHCR images. Renovate's docker datasource reads no dates from ghcr.io, so the soak above would hold them forever. custom.ghcr (customDatasources above) reads tags, index digests and created_at from the GitHub Packages API (GET /users/{owner}/packages/container/{name}/versions, which also serves org-owned packages). GitHub sets created_at when a digest is first pushed; the publisher cannot set it. Needs a runner token with read:packages: without it every lookup fails with HTTP 403, the image gets no update, and the runner reports it (GHCR probe and summary column). The API returns one page, the newest 100 versions, including untagged platform manifests and signatures. A release older than that page is invisible, and a pinned tag that has left it gets no digest update ('Could not determine new digest'). Excluded here because 100 versions span hours, so no release is ever 4 days old in the page (measured 2026-10-21): astral-sh/uv, cloudnative-pg/postgresql and renovatebot/renovate. They stay on the docker datasource, undated and held, unless a consumer maps them to a digest-identical Docker Hub repository. First-party images are exempt from the soak (part 2) and stay on the docker datasource. A consumer rule that maps a ghcr.io image to a docker.io mirror with overridePackageName must also set overrideDatasource: docker, or the lookup asks the GitHub Packages API for the docker.io name and fails. After this rule, matchDatasources: [docker] no longer matches the images it moves; match them by name, or list custom.ghcr too (as the container images group does). See docs/decisions/0001-fleet-release-age-soak.md.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "ghcr.io/**",
+        "!ghcr.io/moosegooseconsulting/**",
+        "!ghcr.io/coldaine/**",
+        "!ghcr.io/astral-sh/uv",
+        "!ghcr.io/cloudnative-pg/postgresql",
+        "!ghcr.io/renovatebot/renovate"
+      ],
+      "overrideDatasource": "custom.ghcr"
     }
   ],
   "vulnerabilityAlerts": {
