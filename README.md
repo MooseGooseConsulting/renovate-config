@@ -104,9 +104,9 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   so transitive releases are soaked too where that manager supports a cooldown.
   Renovate passes it to npm (`--before`) and Poetry; repositories using uv, pnpm or
   bun set it in their own configuration (`exclude-newer`, `minimumReleaseAge`).
-  Weekly lock-file maintenance runs only for npm, bun, pep621, poetry and nuget, and
+  Weekly lock-file maintenance runs only for npm, bun, pep621 and poetry, and
   not where a `yarn.lock` or `pdm.lock` is present. Other managers' lock files
-  (Cargo, Bundler, Composer, Gradle, Terraform and the rest) change only with an
+  (Cargo, Bundler, Composer, Gradle, NuGet, Terraform and the rest) change only with an
   ordinary update: its proposed version is soaked, but the transitive releases the
   package manager re-resolves for it are not.
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
