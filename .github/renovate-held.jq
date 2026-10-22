@@ -1,7 +1,8 @@
 # Per-repository counts of updates the release-age soak is holding and of lookup warnings, from
 # Renovate's file report (reportType "file"), as tab-separated rows: repository, held without a
 # release timestamp, held while aging, lookup warnings. The workflow names only public
-# repositories; this repository's job summary is public.
+# repositories; this repository's job summary is public. An update that proposes an older release
+# while newer ones wait (pendingVersions) counts as aging.
 #
 # A pure digest update never carries releaseTimestamp (renovatebot/renovate#45236): Renovate ages
 # it against the newest release matching the current value. The report holds only the current
@@ -9,8 +10,12 @@
 # (nginx:1.27); a floating or ranged value (latest, lts-alpine) counts as undated.
 .repositories // {} | to_entries[] | .key as $repo
 | [ (.value.packageFiles // {}) | to_entries[] | (.value // [])[] | (.deps // [])[] ] as $deps
-| [ $deps[] | . as $dep | (.updates // [])[] | select(.pendingChecks == true)
-    | if .releaseTimestamp
+| [ $deps[] | . as $dep | (.updates // [])[]
+    | if (.pendingChecks != true) and ((.pendingVersions // []) | length > 0)
+      # Renovate proposed an older release that passed and is still withholding newer ones.
+      then "aging"
+      elif .pendingChecks != true then empty
+      elif .releaseTimestamp
          or (.updateType == "digest" and $dep.currentVersionTimestamp
              and $dep.currentVersion != null and $dep.currentValue == $dep.currentVersion)
       then "aging" else "undated" end ] as $held
