@@ -13,15 +13,22 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      # Both validations run the Renovate release the runner pins; scripts/renovate-version.sh reads
+      # it from renovate-diagnostic.yml, so a runner bump also moves the validator.
+      - name: Resolve the runner's pinned Renovate version
+        id: renovate
+        run: |
+          version=$(scripts/renovate-version.sh)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: npm run renovate:validate
-      - run: npx --yes --package renovate@latest renovate-config-validator --strict .github/renovate-diagnostic.cjs
+      - run: npx --yes --package "renovate@${{ steps.renovate.outputs.version }}" renovate-config-validator --strict .github/renovate-diagnostic.cjs
       # renovate.json dates the runner image on Docker Hub, but the action pulls it from GHCR, so the
       # pinned tag must exist on both with the same index digest.
       - name: Check the pinned Renovate image is identical on GHCR and Docker Hub
         shell: bash
         run: |
           set -euo pipefail
-          version=$(sed -nE 's/^[[:space:]]*renovate-version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/p' .github/workflows/renovate-diagnostic.yml)
+          version="${{ steps.renovate.outputs.version }}"
           test -n "$version"
           accept="Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json"
           digest() { # registry host, repository, token URL

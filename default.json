@@ -5,12 +5,12 @@
     "config:best-practices"
   ],
   "timezone": "America/Chicago",
-  "dependencyDashboard": false,
+  "dependencyDashboard": true,
   "addLabels": [
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Review required: check dependency impact and CI before merging. Routine domain groups and separate major upgrades share two PR slots per repository; queued updates wait for a slot and the next Monday run.",
+  "prHeader": "Review required: check dependency impact and CI before merging. Routine domain groups and separate major upgrades share two PR slots per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
   "reviewers": [
     "Coldaine"
   ],
@@ -75,7 +75,7 @@
       "groupName": "development tools"
     },
     {
-      "description": "Group routine container tag, digest, and initial pin updates across Dockerfiles, Compose, and other image consumers.",
+      "description": "Group routine container image tag, digest, and initial pin updates from Dockerfiles, Compose files, and other image references no later rule claims. Images referenced from Kubernetes, Helm, Flux, Kustomize, Argo CD, or Terraform files go to infrastructure, and images in GitHub workflows, devcontainers, or pre-commit go to ci and development environment, because those later rules take precedence.",
       "matchDatasources": [
         "docker"
       ],
@@ -89,7 +89,7 @@
       "groupName": "container images"
     },
     {
-      "description": "Group routine infrastructure updates across Kubernetes, Flux, Helm, Kustomize, and Terraform.",
+      "description": "Group routine updates from managers in Renovate's kubernetes and terraform categories (Kubernetes, Helm, Helmfile, Flux, Kustomize, Argo CD, Crossplane, Terraform, Terragrunt), including the container images those files reference.",
       "matchCategories": [
         "kubernetes",
         "terraform"
@@ -104,7 +104,7 @@
       "groupName": "infrastructure"
     },
     {
-      "description": "Group routine CI and development-environment updates, including action digests and the Renovate runner version.",
+      "description": "Group routine updates from the github-actions, devcontainer, and pre-commit managers, including action digests, images those files reference, and the Renovate runner version. Other CI systems and tool-version files such as mise or asdf are not matched and stay in earlier groups.",
       "matchManagers": [
         "github-actions",
         "devcontainer",
@@ -135,8 +135,7 @@
         "github-actions"
       ],
       "matchPackageNames": [
-        "MooseGooseConsulting/coldaine-codeOps",
-        "MooseGooseConsulting/coldaine-codeOps/**"
+        "MooseGooseConsulting/coldaine-codeOps"
       ],
       "pinDigests": false
     },
@@ -212,6 +211,7 @@
     }
   ],
   "vulnerabilityAlerts": {
+    "prHeader": "Review required: check dependency impact and CI before merging. This is a security fix: it is not scheduled, not held for release age, and does not use or wait for the repository's two ordinary PR slots.",
     "addLabels": [
       "security",
       "dependencies",
@@ -219,6 +219,8 @@
     ],
     "schedule": [],
     "minimumReleaseAge": null,
-    "prCreation": "immediate"
+    "prCreation": "immediate",
+    "prConcurrentLimit": 0,
+    "branchConcurrentLimit": 0
   }
 }

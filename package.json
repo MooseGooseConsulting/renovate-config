@@ -6,7 +6,7 @@
   "scripts": {
     "docs:update": "node scripts/update-renovate-docs.mjs",
     "hooks:install": "git config core.hooksPath .githooks",
-    "renovate:validate": "npx --yes --package renovate@latest renovate-config-validator --no-global --strict default.json org-inherited-config.json renovate.json",
+    "renovate:validate": "version=$(scripts/renovate-version.sh) && npx --yes --package \"renovate@$version\" renovate-config-validator --no-global --strict default.json org-inherited-config.json renovate.json",
     "verify": "npm run docs:update && npm run renovate:validate"
   }
 }
