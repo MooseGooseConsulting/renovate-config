@@ -237,13 +237,24 @@
       "overrideDatasource": "custom.ghcr"
     },
     {
-      "description": "Owner rule (2026-10-21), lock files, part 2: lock-file maintenance runs only for managers whose lock regeneration honours the 4-day soak. npm: Renovate passes --before; pnpm and Yarn Berry read their own cooldown. bun: bunfig.toml minimumReleaseAge. pep621: uv exclude-newer in pyproject.toml. poetry: Renovate passes POETRY_SOLVER_MIN_RELEASE_AGE. nuget: NuGet resolves the lowest applicable version, never the newest. Every other manager (cargo, bundler, composer, gradle, terraform, helmv3 and the rest) re-resolves to the newest release with no age check, so its lock files change only with an ordinary, soaked update.",
+      "description": "Owner rule (2026-10-21), lock files, part 2: lock-file maintenance runs only for managers whose lock regeneration honours the 4-day soak. npm: Renovate passes --before for package-lock.json, and pnpm reads its own cooldown (yarn.lock is handled by part 3). bun: bunfig.toml minimumReleaseAge. pep621: uv exclude-newer in pyproject.toml (pdm.lock is handled by part 3). poetry: Renovate passes POETRY_SOLVER_MIN_RELEASE_AGE. nuget: NuGet resolves the lowest applicable version, never the newest. Every other manager (cargo, bundler, composer, gradle, terraform, helmv3 and the rest) re-resolves to the newest release with no age check, so its lock files change only with an ordinary update: the proposed version is soaked, but the transitive releases the package manager re-resolves for it are not.",
       "matchManagers": [
         "!npm",
         "!bun",
         "!pep621",
         "!poetry",
         "!nuget"
+      ],
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Owner rule (2026-10-21), lock files, part 3: the npm manager also maintains yarn.lock and the pep621 manager also maintains pdm.lock. Renovate passes no cooldown to Yarn or PDM, and Yarn Classic has none, so lock-file maintenance is off wherever one of those lock files is present (matchFileNames also matches a package file's lock files). A Yarn Berry or PDM repository that sets its own cooldown can turn it back on locally. No fleet repository used either on 2026-10-22.",
+      "matchFileNames": [
+        "**/yarn.lock",
+        "**/pdm.lock"
       ],
       "matchUpdateTypes": [
         "lockFileMaintenance"
