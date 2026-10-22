@@ -23,6 +23,9 @@
   "prHourlyLimit": 0,
   "prCreation": "immediate",
   "internalChecksFilter": "strict",
+  "statusCheckWhen": {
+    "minimumReleaseAge": "never"
+  },
   "schedule": [
     "* * * * 1"
   ],
@@ -164,6 +167,48 @@
         "minor"
       ],
       "enabled": false
+    },
+    {
+      "description": "Owner rule (2026-10-21): every major, minor and patch update (including npm range bumps and lock-file-only updates, which are flags on those) and every digest update waits 4 days after publication before Renovate raises it, in every consumer. A release without a publication timestamp stays pending (timestamp-required, Renovate's default since v42, stated so any consumer override is explicit). Renovate's docker datasource reads dates only from Docker Hub, so images on ghcr.io, quay.io, registry.k8s.io, mcr.microsoft.com and other registries stay pending until the consumer maps them to a digest-identical Docker Hub repository with overridePackageName. Digest updates of floating tags (latest, lts-alpine) are never dated by Renovate 44 and stay pending: pin a versioned tag instead. git-refs, git-tags and undated custom datasources stay pending too. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates carry no release date and are not held. Vulnerability-fix PRs still bypass this through vulnerabilityAlerts. See docs/decisions/0001-fleet-release-age-soak.md.",
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "minimumReleaseAge": "4 days",
+      "minimumReleaseAgeBehaviour": "timestamp-required"
+    },
+    {
+      "description": "Owner rule (2026-10-21), part 2: first-party images on GHCR are built by this fleet's own CI, not by an upstream that could be compromised, so they are not held by the release-age soak. GHCR publishes no release dates, so without this every ghcr.io/moosegooseconsulting and ghcr.io/coldaine image would be held forever. Matching is case-insensitive.",
+      "matchPackageNames": [
+        "ghcr.io/moosegooseconsulting/**",
+        "ghcr.io/coldaine/**"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Owner rule (2026-10-21), part 3: first-party GitHub actions, workflows and releases are this fleet's own code, so they are not held. Scoped to GitHub datasources so the same names on another registry (for example an unclaimed Docker Hub namespace) stay soaked.",
+      "matchDatasources": [
+        "github-tags",
+        "github-digest",
+        "github-releases"
+      ],
+      "matchPackageNames": [
+        "MooseGooseConsulting/**",
+        "Coldaine/**"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Owner rule (2026-10-21), part 4: GitHub-hosted runner labels and the language-runtime version lists (python-version, java-version, dart-version) publish no release dates in Renovate 44, so the soak would hold them forever, including Python patch releases the 2026-10-13 Python rule keeps flowing for security. They name official toolchain releases rather than packages a third party can publish, so they are not held. Runtimes with dated datasources (node-version, golang-version, ruby-version, dotnet-version) stay soaked.",
+      "matchDatasources": [
+        "github-runners",
+        "python-version",
+        "java-version",
+        "dart-version"
+      ],
+      "minimumReleaseAge": null
     }
   ],
   "vulnerabilityAlerts": {

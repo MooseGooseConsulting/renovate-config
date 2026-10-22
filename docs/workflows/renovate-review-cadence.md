@@ -12,7 +12,7 @@ should produce an evidence-backed audit, not a loose opinion about the config.
   even if the config has not changed.
 - **Event-triggered:** Run the relevant rubric after changes to grouping,
   schedules, throttles, dashboard behavior, automerge policy, vulnerability
-  behavior, or the no-Mend operating constraint.
+  behavior, release-age (soak) behavior, or the no-Mend operating constraint.
 - **Incident-triggered:** Run a focused review after repeated noisy PRs, stale
   Renovate queues, missed security updates, surprising repo-local overrides, or
   a repo opting out of the shared preset.
@@ -57,6 +57,16 @@ old notes.
 - Security alerts, vulnerability PRs, emergency update history, or an explicit
   check showing that no relevant current alerts were found.
 - CI status and repeated failure patterns on Renovate PRs.
+- The Renovate runner's "Release-age soak" job summary: updates held with no
+  release date, updates still aging, updates proposing an older release while
+  newer ones are withheld, and lookup warnings. The undated count excludes
+  withheld releases; a withheld count that stays up across runs for a repository
+  needs a local dry run to see whether those releases are undated. A rising count of
+  undated holds needs a per-type answer: a container image needs a
+  digest-identical Docker Hub mapping or a versioned tag in place of a floating
+  one; a `git-refs`/`git-tags` or custom-datasource dependency needs a dated
+  source (for example `github-tags`) or an owner-approved exemption
+  ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)).
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or
   repo-local override decisions.
 - Local hook status and branch protection for this repo only when the review

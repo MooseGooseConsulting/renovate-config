@@ -61,7 +61,7 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Do not require the Dependency Dashboard. Renovate PRs are the inbox.
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
-  before merging. Release-age filtering remains enabled.
+  before merging. Release-age filtering applies to every consumer (below).
 - Keep at most two ordinary Renovate branches and PRs active per repository.
   Security-fix PRs retain their existing exception to this cap.
 - Keep internal checks explicit so release-age gates inherited from
@@ -76,6 +76,11 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   package-replacement proposals remain separate from routine groups too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
+- Hold every major, minor, patch and digest update for 4 days after its release,
+  and never propose one of those updates without a publication date (owner rule, October 21,
+  2026). First-party MooseGooseConsulting and Coldaine images, actions and GitHub
+  releases, GitHub runner labels and the language-runtime version lists are exempt.
+  See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not
