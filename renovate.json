@@ -3,7 +3,7 @@
   "extends": ["github>MooseGooseConsulting/renovate-config"],
   "packageRules": [
     {
-      "description": "The workflow's renovate-version input resolves to ghcr.io/renovatebot/renovate, and GHCR publishes no release timestamp, so the shared 4-day soak would hold it forever. docker.io/renovate/renovate publishes the same index digests (44.107.0: sha256:fb6b7c66be211ee72de037eb48d269da7cf90f30c773e893b6b8002bffafcd4b on both) with tag_last_pushed dates, so look tags up there. The action still pulls from GHCR, so a Docker Hub tag without a GHCR counterpart would break the runner: validate.yml checks on every PR that the pinned renovate-version exists on GHCR.",
+      "description": "The workflow's renovate-version input resolves to ghcr.io/renovatebot/renovate, and GHCR publishes no release timestamp, so the shared 4-day soak would hold it forever. docker.io/renovate/renovate publishes the same index digests (44.107.0: sha256:fb6b7c66be211ee72de037eb48d269da7cf90f30c773e893b6b8002bffafcd4b on both) with tag_last_pushed dates, so look tags up there. The action still pulls from GHCR, so a Docker Hub tag without a GHCR counterpart would break the runner: validate.yml checks on every PR that the pinned renovate-version exists on GHCR and Docker Hub with the same index digest.",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
       "overridePackageName": "docker.io/renovate/renovate"

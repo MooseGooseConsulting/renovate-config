@@ -15,17 +15,27 @@ jobs:
           node-version: 24
       - run: npm run renovate:validate
       - run: npx --yes --package renovate@latest renovate-config-validator --strict .github/renovate-diagnostic.cjs
-      # renovate.json dates the runner image on Docker Hub; the action pulls it from GHCR.
-      - name: Check the pinned Renovate image exists on GHCR
+      # renovate.json dates the runner image on Docker Hub, but the action pulls it from GHCR, so the
+      # pinned tag must exist on both with the same index digest.
+      - name: Check the pinned Renovate image is identical on GHCR and Docker Hub
         shell: bash
         run: |
           set -euo pipefail
           version=$(sed -nE 's/^[[:space:]]*renovate-version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/p' .github/workflows/renovate-diagnostic.yml)
           test -n "$version"
-          token=$(curl -fsS --retry 2 "https://ghcr.io/token?scope=repository:renovatebot/renovate:pull" | jq -r .token)
-          if [ -z "$token" ] || [ "$token" = "null" ]; then echo "::error::no anonymous GHCR token"; exit 1; fi
-          curl -fsSI --retry 2 -o /dev/null \
-            -H "Authorization: Bearer $token" \
-            -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json" \
-            "https://ghcr.io/v2/renovatebot/renovate/manifests/$version"
-          echo "ghcr.io/renovatebot/renovate:$version exists"
+          accept="Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json"
+          digest() { # registry host, repository, token URL
+            local token
+            token=$(curl -fsS --retry 2 "$3" | jq -r '.token // .access_token')
+            if [ -z "$token" ] || [ "$token" = "null" ]; then echo "::error::no anonymous token for $1/$2" >&2; return 1; fi
+            curl -fsSI --retry 2 -H "Authorization: Bearer $token" -H "$accept" "https://$1/v2/$2/manifests/$version" |
+              tr -d '\r' | awk 'tolower($1) == "docker-content-digest:" { print $2 }'
+          }
+          ghcr=$(digest ghcr.io renovatebot/renovate "https://ghcr.io/token?scope=repository:renovatebot/renovate:pull")
+          hub=$(digest registry-1.docker.io renovate/renovate "https://auth.docker.io/token?service=registry.docker.io&scope=repository:renovate/renovate:pull")
+          echo "ghcr.io/renovatebot/renovate:$version $ghcr"
+          echo "docker.io/renovate/renovate:$version $hub"
+          if [ -z "$ghcr" ] || [ "$ghcr" != "$hub" ]; then
+            echo "::error::renovate-version $version differs between GHCR and Docker Hub, or is missing on one"
+            exit 1
+          fi
