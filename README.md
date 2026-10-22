@@ -62,18 +62,23 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   repository so queued work is visible: updates waiting for a PR slot
   ("Rate-Limited"), for Monday, or for the release-age soak ("Pending Status
   Checks"), plus detected dependencies. Nothing waits for approval on it
-  (`dependencyDashboardApproval` stays off). Ticking one of its boxes is a
-  deliberate override that creates that update now, past the cap or the soak.
-  Repositories with issues turned off get no dashboard; the runner's job
-  summary covers them.
+  (`dependencyDashboardApproval` stays off). Ticking a "Rate-Limited" or
+  "Pending Status Checks" box is a deliberate override past the cap or the soak.
+  It takes effect on the runner's next run, the daily scheduled one unless you
+  dispatch the workflow (see "For an immediate run" below); ticking does not
+  start Renovate. Repositories with issues turned off get no dashboard; the
+  runner's job summary covers them. See
+  [ADR 0002](docs/decisions/0002-dashboard-visibility-and-uncapped-security-fixes.md).
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
   before merging. Release-age filtering applies to every consumer (below).
 - Keep at most two ordinary Renovate branches and PRs active per repository.
-  Security-fix branches and PRs are not capped: `vulnerabilityAlerts` sets
-  `prConcurrentLimit` and `branchConcurrentLimit` to 0, Renovate counts them
-  apart from the two ordinary slots, and it processes them before any other
-  branch.
+  Security-fix branches and PRs are not capped. Renovate counts them apart
+  from the two ordinary slots and processes them before any other branch.
+  `branchConcurrentLimit: 0` under `vulnerabilityAlerts` is what lifts the
+  branch cap; without it the top-level `branchConcurrentLimit: 2` still applies
+  to security branches. `prConcurrentLimit: 0` there restates Renovate's own
+  `vulnerabilityAlerts` default, kept explicit so the PR cap stays lifted.
 - Keep internal checks explicit so release-age gates inherited from
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.

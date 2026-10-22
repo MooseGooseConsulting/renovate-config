@@ -148,7 +148,7 @@ jobs:
               u_limited=$((u_limited + limited)); u_warn=$((u_warn + warn)); u_error=$((u_error + error))
             fi
           done <<< "$rows"
-          summary "Held: the release-age soak (ADR 0001). Rate-limited: a branch, PR or commit limit stopped the branch this run; it waits for a free slot. Problems: Renovate's WARN and ERROR log records."
+          summary "Held: the release-age soak (ADR 0001). Rate-limited: a branch, PR or commit limit stopped the branch this run; a later run retries it once a slot (or, for a commit limit, quota) is free. Problems: Renovate's WARN and ERROR log records."
           summary ""
           summary "| Repository | Held, no release date | Held, aging | Newer releases withheld | Lookup warnings | Rate-limited branches | Problems (WARN) | Problems (ERROR) |"
           summary "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
@@ -172,7 +172,7 @@ jobs:
             echo "::warning title=Release-age soak::$undated_total update(s) held with no release date; see the job summary."
           fi
           if [ "$limited_total" -gt 0 ]; then
-            echo "::notice title=Rate-limited updates::$limited_total branch(es) wait for a free PR or branch slot; see the job summary and each repository's Dependency Dashboard."
+            echo "::notice title=Rate-limited updates::$limited_total branch(es) were stopped by a branch, PR or commit limit; see the job summary and each repository's Dependency Dashboard."
           fi
           if [ "$error_total" -gt 0 ]; then
             echo "::warning title=Renovate problems::Renovate logged $error_total ERROR record(s); see the job summary and the run log."
