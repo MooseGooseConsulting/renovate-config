@@ -5,7 +5,7 @@
 # proposes an older release while newer ones wait (pendingVersions): the report does not say
 # whether those newer releases are dated, so they are counted apart and claimed as neither.
 #
-# A pure digest update never carries releaseTimestamp (renovatebot/renovate#45236): Renovate ages
+# A pure digest (or pinDigest) update never carries releaseTimestamp (renovatebot/renovate#45236): Renovate ages
 # it against the newest release matching the current value. The report holds only the current
 # version's date, so a digest counts as aging only when the current value is that dated version
 # (nginx:1.27); a floating or ranged value (latest, lts-alpine) counts as undated.
@@ -17,7 +17,7 @@
       then "partial"
       elif .pendingChecks != true then empty
       elif .releaseTimestamp
-         or (.updateType == "digest" and $dep.currentVersionTimestamp
+         or ((.updateType == "digest" or .updateType == "pinDigest") and $dep.currentVersionTimestamp
              and $dep.currentVersion != null and $dep.currentValue == $dep.currentVersion)
       then "aging" else "undated" end ] as $held
 | [ $deps[] | (.warnings // [])[] ] as $warnings
