@@ -100,6 +100,12 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   Third-party `ghcr.io` images are dated through the GitHub Packages API (a custom
   datasource; the runner token needs `read:packages`), except a few whose newest
   100 versions span hours. See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
+- Hand the 4-day soak to the package manager when Renovate regenerates a lock file,
+  so transitive releases are soaked too. Renovate passes it to npm (`--before`) and
+  Poetry; repositories using uv, pnpm or bun set it in their own configuration
+  (`exclude-newer`, `minimumReleaseAge`). Weekly lock-file maintenance runs only for
+  npm, bun, pep621, poetry and nuget; other managers' lock files change only with
+  an ordinary, soaked update.
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not

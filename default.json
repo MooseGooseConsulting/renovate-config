@@ -30,10 +30,12 @@
     "* * * * 1"
   ],
   "lockFileMaintenance": {
+    "description": "Owner rule (2026-10-21), lock files: lock-file maintenance re-resolves every transitive dependency, so the 4-day soak is handed to the package manager. Renovate passes it to npm as --before and to Poetry 2.4+ as POETRY_SOLVER_MIN_RELEASE_AGE. uv, pnpm and bun take it only from the consumer's own setting (exclude-newer, minimumReleaseAge). This never holds the PR itself: lock-file maintenance has no release date, and the stability status check is off. See docs/decisions/0001-fleet-release-age-soak.md.",
     "enabled": true,
     "schedule": [
       "* * * * 1"
-    ]
+    ],
+    "minimumReleaseAge": "4 days"
   },
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
@@ -233,6 +235,20 @@
         "!ghcr.io/renovatebot/renovate"
       ],
       "overrideDatasource": "custom.ghcr"
+    },
+    {
+      "description": "Owner rule (2026-10-21), lock files, part 2: lock-file maintenance runs only for managers whose lock regeneration honours the 4-day soak. npm: Renovate passes --before; pnpm and Yarn Berry read their own cooldown. bun: bunfig.toml minimumReleaseAge. pep621: uv exclude-newer in pyproject.toml. poetry: Renovate passes POETRY_SOLVER_MIN_RELEASE_AGE. nuget: NuGet resolves the lowest applicable version, never the newest. Every other manager (cargo, bundler, composer, gradle, terraform, helmv3 and the rest) re-resolves to the newest release with no age check, so its lock files change only with an ordinary, soaked update.",
+      "matchManagers": [
+        "!npm",
+        "!bun",
+        "!pep621",
+        "!poetry",
+        "!nuget"
+      ],
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
