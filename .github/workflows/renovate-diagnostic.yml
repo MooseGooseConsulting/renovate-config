@@ -86,32 +86,51 @@ jobs:
       # of the fleet still gets its updates.
       - name: Check the token can read GHCR release dates
         continue-on-error: true
+        # Bounded so a stalled API connection cannot hold up the Renovate step behind it.
+        timeout-minutes: 3
         env:
+          AUTH_MODE: ${{ steps.auth.outputs.mode }}
           RENOVATE_TOKEN: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
         run: |
+          probe() { curl -sS --connect-timeout 10 --max-time 20 --retry 2 --retry-max-time 60 "$@"; }
           # X-OAuth-Scopes lists a classic PAT's scopes, which are not secret; App and fine-grained
           # tokens send none.
-          scopes=$(curl -sSI --retry 2 -H "Authorization: token $RENOVATE_TOKEN" https://api.github.com/rate_limit |
+          scopes=$(probe -I -H "Authorization: token $RENOVATE_TOKEN" https://api.github.com/rate_limit |
             tr -d '\r' | awk 'tolower($1) == "x-oauth-scopes:" { $1 = ""; sub(/^ /, ""); print }' || true)
           # The probe is the real test: a public package, requested the way the datasource asks.
-          status=$(curl -sS -o /dev/null -w '%{http_code}' --retry 2 -H "Authorization: token $RENOVATE_TOKEN" \
+          status=$(probe -o /dev/null -w '%{http_code}' -H "Authorization: token $RENOVATE_TOKEN" \
             "https://api.github.com/users/renovatebot/packages/container/renovate/versions?per_page=1" || true)
-          echo "Token scopes: ${scopes:-none reported}. GitHub Packages API probe: HTTP $status."
+          echo "Auth mode: $AUTH_MODE. Token scopes: ${scopes:-none reported}. GitHub Packages API probe: HTTP ${status:-none}."
           if [ "$status" = "200" ]; then
             echo "GHCR release dates: available (token scopes: ${scopes:-none reported})." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          case ",${scopes// /}," in
-            *,read:packages,* | *,write:packages,*)
-              why="the token has a packages scope, but the GitHub Packages API answered HTTP $status" ;;
-            *)
-              why="the token lacks read:packages (scopes: ${scopes:-none reported}; API probe: HTTP $status)" ;;
-          esac
-          echo "::error title=GHCR release dates unavailable::No third-party ghcr.io image can be dated, so none gets an update: $why. Add read:packages to the RENOVATE_TOKEN classic PAT."
+          if [ "$AUTH_MODE" = "app" ]; then
+            # GitHub's Packages REST API accepts only classic personal access tokens.
+            why="this run uses the GitHub App installation token, which the GitHub Packages API does not accept (API probe: HTTP ${status:-none})"
+            fix="Run with RENOVATE_TOKEN (a classic PAT with read:packages) to date GHCR images."
+          elif [ "$status" = "401" ]; then
+            why="GitHub rejected the token itself (HTTP 401: missing, invalid or expired)"
+            fix="Replace RENOVATE_TOKEN with a valid classic PAT that has read:packages."
+          elif [ "$status" = "403" ]; then
+            case ",${scopes// /}," in
+              *,read:packages,* | *,write:packages,*)
+                why="the token has a packages scope, but the GitHub Packages API refused it (HTTP $status)"
+                fix="Check that RENOVATE_TOKEN is a classic PAT that is still valid." ;;
+              *)
+                why="the token lacks read:packages (scopes: ${scopes:-none reported}; API probe: HTTP $status)"
+                fix="Add read:packages to the RENOVATE_TOKEN classic PAT." ;;
+            esac
+          else
+            # Not an authorization answer: a timeout, a network failure or a GitHub outage.
+            why="the GitHub Packages API probe did not get an authorization answer (HTTP ${status:-none}; 000 means no response)"
+            fix="Check the run log and GitHub's status; the token's scopes are ${scopes:-not reported}."
+          fi
+          echo "::error title=GHCR release dates unavailable::No third-party ghcr.io image can be dated, so none gets an update: $why. $fix"
           {
             echo "## GHCR release dates unavailable"
             echo ""
-            echo "Third-party \`ghcr.io\` images are dated through the GitHub Packages API, and $why. Until \`RENOVATE_TOKEN\` (classic PAT) has the \`read:packages\` scope, no such image gets an update; they appear below as GHCR lookup warnings."
+            echo "Third-party \`ghcr.io\` images are dated through the GitHub Packages API, and $why. $fix Until then no such image gets an update; they appear below as GHCR lookup warnings."
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
