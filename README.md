@@ -102,10 +102,13 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   100 versions span hours. See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
 - Hand the 4-day soak to the package manager when Renovate regenerates a lock file,
   so transitive releases are soaked too where that manager supports a cooldown.
-  Renovate passes it to npm (`--before`) and Poetry; repositories using uv, pnpm or
+  Renovate passes it to npm (`--before`) and Poetry (2.4 or later, read from the
+  `poetry.lock` header); repositories using uv, pnpm or
   bun set it in their own configuration (`exclude-newer`, which needs uv 0.9.17 or
   later; `minimumReleaseAge`). A security fix younger than 4 days is exempted by
-  release, not by package, until it is 4 days old (ADR 0001).
+  release, not by package, until it is 4 days old (ADR 0001). The preset does not
+  check that a repository carries its setting; without it, lock-file maintenance
+  for those managers is not soaked.
   Weekly lock-file maintenance runs only for npm, bun, pep621 and poetry, and
   not where a `yarn.lock` or `pdm.lock` is present. Other managers' lock files
   (Cargo, Bundler, Composer, Gradle, NuGet, Terraform and the rest) change only with an
