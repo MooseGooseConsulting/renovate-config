@@ -79,7 +79,7 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       # default.json dates third-party GHCR images through the GitHub Packages API (custom.ghcr). A
-      # token that cannot read packages gets HTTP 401 there, and Renovate records only a "no-result"
+      # token that cannot read packages gets HTTP 403 there (401 with no token), and Renovate records only a "no-result"
       # lookup warning, so every such image would stay held without anything failing. Probe the API
       # with the token Renovate uses and report a failure as an error annotation and in the job
       # summary. The run continues: undated images stay held either way (fail closed), and the rest

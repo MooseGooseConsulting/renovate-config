@@ -17,7 +17,7 @@
 # GHCR lookup warnings are the lookup warnings that name custom.ghcr, the GitHub Packages API
 # datasource in default.json, counted apart as well as among all lookup warnings. "Failed to look up
 # custom.ghcr package <name>: no-result" means the image got no releases and so no update at all,
-# and it is not counted as held: HTTP 401 (the token lacks read:packages) or 404 (a packageName the
+# and it is not counted as held: HTTP 403 (a classic PAT without read:packages; 401 with no token) or 404 (a packageName the
 # API does not know, such as a docker.io mapping without overrideDatasource: docker). "Could not
 # determine new digest for update (custom.ghcr package <name>)" means the pinned tag is no longer
 # among the newest 100 versions the API returns, or is a floating tag (latest), so its digest
