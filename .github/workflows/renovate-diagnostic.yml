@@ -112,8 +112,8 @@ jobs:
             summary "No updates are held by the release-age soak and no lookups warned."; exit 0
           fi
           table=""; private_repos=0; undated_total=0
-          p_undated=0; p_aging=0; p_warnings=0
-          while IFS=$'\t' read -r repo undated aging warnings; do
+          p_undated=0; p_aging=0; p_partial=0; p_warnings=0
+          while IFS=$'\t' read -r repo undated aging partial warnings; do
             undated_total=$((undated_total + undated))
             # Public means GitHub serves it to anyone. Ask with the workflow token, then without
             # one; any other answer (404, rate limit, error) counts the repository as private.
@@ -121,17 +121,18 @@ jobs:
               visibility=$(curl -fsS "https://api.github.com/repos/$repo" 2>/dev/null | jq -r .private) ||
               visibility=""
             if [ "$visibility" = "false" ]; then
-              table+="| $repo | $undated | $aging | $warnings |"$'\n'
+              table+="| $repo | $undated | $aging | $partial | $warnings |"$'\n'
             else
               private_repos=$((private_repos + 1))
-              p_undated=$((p_undated + undated)); p_aging=$((p_aging + aging)); p_warnings=$((p_warnings + warnings))
+              p_undated=$((p_undated + undated)); p_aging=$((p_aging + aging))
+              p_partial=$((p_partial + partial)); p_warnings=$((p_warnings + warnings))
             fi
           done <<< "$rows"
-          summary "| Repository | Held, no release date | Held, aging | Lookup warnings |"
-          summary "| --- | ---: | ---: | ---: |"
+          summary "| Repository | Held, no release date | Held, aging | Newer releases withheld | Lookup warnings |"
+          summary "| --- | ---: | ---: | ---: | ---: |"
           [ -n "$table" ] && printf '%s' "$table" >> "$GITHUB_STEP_SUMMARY"
           if [ "$private_repos" -gt 0 ]; then
-            summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_warnings |"
+            summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_partial | $p_warnings |"
           fi
           if [ "$undated_total" -gt 0 ]; then
             echo "::warning title=Release-age soak::$undated_total update(s) held with no release date; see the job summary."

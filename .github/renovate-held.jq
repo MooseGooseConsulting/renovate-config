@@ -1,8 +1,9 @@
 # Per-repository counts of updates the release-age soak is holding and of lookup warnings, from
 # Renovate's file report (reportType "file"), as tab-separated rows: repository, held without a
-# release timestamp, held while aging, lookup warnings. The workflow names only public
-# repositories; this repository's job summary is public. An update that proposes an older release
-# while newer ones wait (pendingVersions) counts as aging.
+# release timestamp, held while aging, partially held, lookup warnings. The workflow names only
+# public repositories; this repository's job summary is public. "Partially held" is an update that
+# proposes an older release while newer ones wait (pendingVersions): the report does not say
+# whether those newer releases are dated, so they are counted apart and claimed as neither.
 #
 # A pure digest update never carries releaseTimestamp (renovatebot/renovate#45236): Renovate ages
 # it against the newest release matching the current value. The report holds only the current
@@ -13,7 +14,7 @@
 | [ $deps[] | . as $dep | (.updates // [])[]
     | if (.pendingChecks != true) and ((.pendingVersions // []) | length > 0)
       # Renovate proposed an older release that passed and is still withholding newer ones.
-      then "aging"
+      then "partial"
       elif .pendingChecks != true then empty
       elif .releaseTimestamp
          or (.updateType == "digest" and $dep.currentVersionTimestamp
@@ -24,5 +25,6 @@
 | [ $repo,
     ([ $held[] | select(. == "undated") ] | length),
     ([ $held[] | select(. == "aging") ] | length),
+    ([ $held[] | select(. == "partial") ] | length),
     ($warnings | length) ]
 | @tsv
