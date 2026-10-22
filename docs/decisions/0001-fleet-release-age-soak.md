@@ -30,6 +30,7 @@ Facts about Renovate 44.107.0, the runner's pinned version:
 - **Docker Hub coverage is partial.** Dates come from the newest 1,000 tags. A pin older than that loses digest-update dates, though newer versions still arrive. A mapped image depends on its mirror staying digest-identical; if it drifts, a proposed digest may not exist on the original registry.
 - **No fast lane for images.** GitHub advisories do not cover container images, so an urgent image fix needs a narrow consumer rule with `minimumReleaseAge: null`.
 - **Other runners.** A consumer that runs Renovate outside this runner must set `dockerMaxPages` itself.
+- **The page cap is global.** Renovate 44 always pages GHCR, Quay, cgr.dev and Red Hat registries fully. Other non-Docker-Hub registries stop at 10 pages, but their images have no dates and are held regardless. An image exempted with `minimumReleaseAge: null` on an oldest-first registry such as lscr.io may miss its newest tags; give such a repository its own runner setting if that arises.
 
 ## Revisit when
 
