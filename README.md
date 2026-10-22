@@ -78,7 +78,8 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
 - Hold every major, minor, patch and digest update for 4 days after its release,
   and never propose a release without a publication date (owner rule, October 21,
-  2026). First-party MooseGooseConsulting and Coldaine images and actions are exempt.
+  2026). First-party MooseGooseConsulting and Coldaine images and actions, GitHub runner
+  labels and the language-runtime version lists are exempt.
   See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
