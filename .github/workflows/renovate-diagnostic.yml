@@ -108,7 +108,7 @@ jobs:
         run: |
           report=/tmp/renovate-report.json
           summary() { echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
-          summary "## Held and rate-limited updates"
+          summary "## Release-age soak and rate limits"
           if [ ! -s "$report" ]; then summary "Renovate wrote no report."; exit 0; fi
           if ! rows=$(jq -r -f .github/renovate-held.jq "$report"); then
             summary "The Renovate report could not be read."; exit 0

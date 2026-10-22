@@ -58,12 +58,22 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 
 ## Policy Shape
 
-- Do not require the Dependency Dashboard. Renovate PRs are the inbox.
+- Renovate PRs are the inbox. The Dependency Dashboard issue is on in every
+  repository so queued work is visible: updates waiting for a PR slot
+  ("Rate-Limited"), for Monday, or for the release-age soak ("Pending Status
+  Checks"), plus detected dependencies. Nothing waits for approval on it
+  (`dependencyDashboardApproval` stays off). Ticking one of its boxes is a
+  deliberate override that creates that update now, past the cap or the soak.
+  Repositories with issues turned off get no dashboard; the runner's job
+  summary covers them.
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
   before merging. Release-age filtering applies to every consumer (below).
 - Keep at most two ordinary Renovate branches and PRs active per repository.
-  Security-fix PRs retain their existing exception to this cap.
+  Security-fix branches and PRs are not capped: `vulnerabilityAlerts` sets
+  `prConcurrentLimit` and `branchConcurrentLimit` to 0, Renovate counts them
+  apart from the two ordinary slots, and it processes them before any other
+  branch.
 - Keep internal checks explicit so release-age gates inherited from
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
@@ -75,7 +85,9 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   Renovate's known related-package groups such as Prisma CLI/client. Native
   package-replacement proposals remain separate from routine groups too.
 - Never automatically merge updates, including majors and security fixes.
-- Let vulnerability-fix PRs bypass ordinary scheduling and release-age delays.
+- Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
+  both caps. They come from GitHub Dependabot alerts, so a repository without
+  Dependabot alerts turned on gets none.
 - Hold every major, minor, patch and digest update for 4 days after its release,
   and never propose one of those updates without a publication date (owner rule, October 21,
   2026). First-party MooseGooseConsulting and Coldaine images, actions and GitHub
@@ -104,8 +116,10 @@ This repository intentionally contains no secrets or host rules.
 
 The existing self-hosted [workflow](.github/workflows/renovate-diagnostic.yml)
 discovers `MooseGooseConsulting/*` and `Coldaine/*` using its existing GitHub credentials. It runs
-daily at 10:17 UTC to check security alerts; `default.json` permits ordinary
-updates all day Monday in `America/Chicago`. The full-day window tolerates
+daily at 10:17 UTC to raise security-fix PRs from Dependabot alerts (on for every
+discovered repository as of October 21, 2026; a repository created later needs
+them turned on); `default.json` permits ordinary updates all day Monday in
+`America/Chicago`. The full-day window tolerates
 GitHub scheduled-run delays and daylight-saving changes. A schedule in a preset
 does not itself start Renovate: the GitHub workflow is the executor. Lockfile
 maintenance uses the same full-Monday window, replacing the inherited before-4am
@@ -133,10 +147,12 @@ setup PR merged. Dependency PRs remain subject to normal CI and review requireme
 The two-PR limit is per repository, not per organization and not two new PRs
 every week. Major upgrades share those slots with routine groups. If both are
 occupied, other updates queue; with `updateNotScheduled: false`, new routine
-branches and ordinary branch updates wait for Monday. There is no additional
-one-PR-per-hour throttle. Urgent security fixes can bypass the schedule and cap,
-but still require review. Previously opened PRs are not closed merely to bring
-an existing queue under the cap.
+branches and ordinary branch updates wait for Monday. Queued updates appear as
+rate-limited on the repository's Dependency Dashboard and in the runner's job
+summary. There is no additional one-PR-per-hour throttle. Security fixes bypass
+the schedule, the release-age soak and both caps, but still require review.
+Previously opened PRs are not closed merely to bring an existing queue under the
+cap.
 
 Renovate selects the newest eligible stable releases under each dependency's
 versioning, compatibility and local constraints; it does not promise to update

@@ -34,15 +34,15 @@ The repository uses a small public Renovate preset as the technical center of gr
 | Rubric evaluation | Current | `docs/rubrics/` contains agent-usable checklists for effectiveness and repository coordination. |
 | Consumer repo sampling | Planned | Reviews should periodically sample real consuming repositories before making broad shared-preset changes. |
 | Optional preset modules | Candidate | Future named presets may split policy for specific ecosystems if the default becomes too broad. |
-| Dashboard-first workflow | Deferred | Dependency Dashboard workflows are opt-in exceptions, not the shared operating default. |
+| Dashboard-first workflow | Deferred | Approval-gated Dependency Dashboard workflows are opt-in exceptions, not the shared operating default. The dashboard issue itself is on in every repository as a view of queued and held updates; nothing waits for approval on it. |
 
 ## Current Components
 
 | Component | Status | Responsibility |
 | --- | --- | --- |
-| `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling and caps; the preset does not schedule execution. First-party codeOps workflow/action refs retain branch refs instead of being digest-pinned. Python minor and major upgrades are disabled in every consumer while patch updates continue. Major, minor, patch and digest updates wait 4 days, and undated releases stay held; first-party images and actions are exempt. |
+| `default.json` | Current | Shared policy: weekly Monday domain groups, two ordinary PR slots per repository, separate majors, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling, release age and both caps, are counted apart from the two ordinary slots, and are processed first; the preset does not schedule execution. First-party codeOps workflow/action refs retain branch refs instead of being digest-pinned. Python minor and major upgrades are disabled in every consumer while patch updates continue. Major, minor, patch and digest updates wait 4 days, and undated releases stay held; first-party images and actions are exempt. |
 | `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily discovery scans and manual targeted or run-now dispatch. Credential access determines reachable repositories. |
-| `.github/renovate-diagnostic.cjs` | Current | Native `extends`, `onboarding: false`, `requireConfig: optional`; MooseGooseConsulting and Coldaine discovery including active forks and documented exclusions. No per-repo enrollment file is needed; branch dry runs resolve the proposed shared preset. Caps Docker Hub tag paging at 10 pages and writes a file report that the workflow summarizes as per-repository held-update counts. |
+| `.github/renovate-diagnostic.cjs` | Current | Native `extends`, `onboarding: false`, `requireConfig: optional`; MooseGooseConsulting and Coldaine discovery including active forks and documented exclusions. No per-repo enrollment file is needed; branch dry runs resolve the proposed shared preset. Caps Docker Hub tag paging at 10 pages and writes a file report that the workflow summarizes as per-repository held, rate-limited and problem counts. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
 | `scripts/update-renovate-docs.mjs` | Current | Refreshes an optional local cache of selected official Renovate docs for offline/reference use. It is not policy truth. |
 | `.agents/skills/renovate-config/` | Current | Repo-local agent operating guide for Renovate config work. |
