@@ -1,6 +1,6 @@
 # ADR 0002: Dependency Dashboard on for visibility; security fixes uncapped
 
-- Status: accepted (owner-requested audit fixes, 2026-10-21); amended 2026-10-22: the runner's job summary is removed ([#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33)), so the dashboard is the only view of held and queued updates
+- Status: accepted (owner-requested audit fixes, 2026-10-21); amended 2026-10-22: the runner's job summary is removed ([#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33)), so held and queued updates show on the dashboard, or only in the runner's log for a repository with issues turned off
 - Applies to: every repository the shared preset reaches
 
 ## Context

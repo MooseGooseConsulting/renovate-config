@@ -33,8 +33,11 @@ replacement for Renovate's official documentation.
    same Renovate image and release as the runner. To run it locally, use that workflow's image tag:
 
    ```bash
-   podman run --rm -v "$PWD:/work:ro,Z" -w /work --entrypoint renovate-config-validator \
-     docker.io/renovate/renovate:<tag from validate.yml> --strict --no-global default.json org-inherited-config.json renovate.json
+   image=docker.io/renovate/renovate:<tag from validate.yml>
+   podman run --rm -v "$PWD:/work:ro,Z" -w /work --entrypoint renovate-config-validator "$image" \
+     --strict --no-global default.json org-inherited-config.json renovate.json
+   podman run --rm -v "$PWD:/work:ro,Z" -w /work --entrypoint renovate-config-validator "$image" \
+     --strict .github/renovate-diagnostic.cjs
    ```
 
 5. The runner automatically supplies this preset to discovered repositories;
