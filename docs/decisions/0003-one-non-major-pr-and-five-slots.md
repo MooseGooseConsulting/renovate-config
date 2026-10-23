@@ -32,7 +32,8 @@ Facts about Renovate 44.107.0, the runner's pinned version:
 
 - **One non-major PR.** `default.json` extends `group:allNonMajor` after `config:best-practices`, and
   one rule adds digest, pin and pinDigest updates to the same group. Every minor, patch, digest and pin
-  update in a repository comes in one weekly "all non-major dependencies" PR. Its minor, patch and
+  update in a repository comes in one weekly "all non-major dependencies" PR, except the exceptions in
+  the next bullet (Python patch releases get the group's patch-only branch). Its minor, patch and
   digest updates still wait out the 4-day soak ([ADR 0001](0001-fleet-release-age-soak.md)); pin and
   pinDigest updates carry no release date and are not held.
 - **Separate PRs stay separate:** each major upgrade (`separateMajorMinor`, label `major-upgrade`,
