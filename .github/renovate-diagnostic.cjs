@@ -34,8 +34,8 @@ const config = {
   onboarding: false,
   requireConfig: "optional",
   autodiscover: true,
-  // A repository is kept when it matches a positive pattern and every "!" pattern (Renovate's
-  // matchRegexOrGlobList; globs match case-insensitively).
+  // A repository is kept when it matches a positive pattern and none of the "!" exclusions
+  // (Renovate's matchRegexOrGlobList; globs match case-insensitively).
   autodiscoverFilter: target
     ? [target]
     : ["MooseGooseConsulting/*", "Coldaine/*", ...excludedRepositories.map((repo) => `!${repo}`)],

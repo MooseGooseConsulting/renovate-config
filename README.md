@@ -176,7 +176,7 @@ ColdTrace, ComfyWatchman, constellation-task-gardener, observation-station,
 promptcannon-prd-complete, RepoVisUI, scope-atlas and tidbyt-agent-gateway. The
 list lives in one place, `excludedRepositories` in
 [`.github/renovate-diagnostic.cjs`](.github/renovate-diagnostic.cjs), and becomes
-negated `autodiscoverFilter` patterns. Renovate does not touch an excluded
+negated `autodiscoverFilter` patterns. A fleet run does not touch an excluded
 repository: its open Renovate PRs and Dependency Dashboard issue stay as they
 were, and it gets no Renovate security-fix PRs. Its GitHub Dependabot alerts stay
 on, so vulnerabilities remain visible. A manual run that names one in the
