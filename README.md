@@ -85,9 +85,10 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
 - Request `@Coldaine` review on Renovate PRs.
-- Put every minor, patch, digest and pin update into one weekly PR, "all
-  non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that adds
-  digest and pin updates). Lock-file maintenance stays its own weekly PR:
+- Put every minor, patch, digest, pin and pinDigest update into one weekly PR,
+  "all non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that
+  adds digest, pin and pinDigest updates). The exceptions are below and in
+  [ADR 0003](docs/decisions/0003-one-non-major-pr-and-five-slots.md). Lock-file maintenance stays its own weekly PR:
   Renovate cannot group it with other update types. A consumer's own group
   rules come later and take precedence.
 - Propose each major upgrade as its own PR and label it `major-upgrade`; preserve
