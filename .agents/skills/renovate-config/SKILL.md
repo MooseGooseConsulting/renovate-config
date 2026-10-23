@@ -29,10 +29,12 @@ replacement for Renovate's official documentation.
      artifact; it is not part of the planned no-Mend operating model.
    - A consumer repo's `renovate.json` only to extend or override the shared preset.
 
-4. Validate with Renovate itself:
+4. Validate with Renovate itself. CI runs the validator on every PR (`.github/workflows/validate.yml`), from the
+   same Renovate image and release as the runner. To run it locally, use that workflow's image tag:
 
    ```bash
-   npm run renovate:validate
+   podman run --rm -v "$PWD:/work:ro,Z" -w /work --entrypoint renovate-config-validator \
+     docker.io/renovate/renovate:<tag from validate.yml> --strict --no-global default.json org-inherited-config.json renovate.json
    ```
 
 5. The runner automatically supplies this preset to discovered repositories;

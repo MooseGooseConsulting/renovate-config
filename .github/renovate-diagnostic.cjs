@@ -21,10 +21,6 @@ const config = {
   // that happens Renovate drops every timestamp it fetched, and the release-age soak in
   // default.json then holds the image forever. Ten pages keeps the newest tags and their dates.
   dockerMaxPages: 10,
-  // Per-repository lookup results, branch results and problems for the job summary step
-  // (held, aging and rate-limited updates; WARN and ERROR records).
-  reportType: "file",
-  reportPath: "/tmp/renovate-report.json",
 };
 
 // A manual run-now bypasses time only, never PR caps, release age, or review.

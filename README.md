@@ -6,7 +6,8 @@ There does not appear to be an official Renovate-authored agent `SKILL.md`.
 This repo includes a local Renovate config skill at
 `.agents/skills/renovate-config/SKILL.md`, but it is an operating aid, not a
 source of policy truth. Official Renovate docs, this repo's authority docs, and
-`npm run renovate:validate` remain the references for config behavior.
+Renovate's config validator (run on every PR by `.github/workflows/validate.yml`)
+remain the references for config behavior.
 
 ## No Mend Dependency
 
@@ -66,8 +67,8 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   "Pending Status Checks" box is a deliberate override past the cap or the soak.
   It takes effect on the runner's next run, the daily scheduled one unless you
   dispatch the workflow (see "For an immediate run" below); ticking does not
-  start Renovate. Repositories with issues turned off get no dashboard; the
-  runner's job summary covers them. See
+  start Renovate. Repositories with issues turned off get no dashboard; their
+  queue shows only in the runner's log. See
   [ADR 0002](docs/decisions/0002-dashboard-visibility-and-uncapped-security-fixes.md).
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
@@ -93,13 +94,17 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
   both caps. They come from GitHub Dependabot alerts, so a repository without
   Dependabot alerts turned on gets none.
-- Hold every major, minor, patch and digest update for 4 days after its release,
-  and never propose one of those updates without a publication date (owner rule, October 21,
-  2026). First-party MooseGooseConsulting and Coldaine images, actions and GitHub
-  releases, GitHub runner labels and the language-runtime version lists are exempt.
+- Hold every major, minor, patch and digest update for 4 days after its release
+  (owner rule, October 21, 2026). Sources that publish dates (npm, PyPI, crates.io,
+  GitHub releases and tags, Docker Hub) hold an update until its date is known.
   Third-party `ghcr.io` images are dated through the GitHub Packages API (a custom
   datasource; the runner token needs `read:packages`), except a few whose newest
-  100 versions span hours. See the [decision record](docs/decisions/0001-fleet-release-age-soak.md).
+  100 versions span hours. Sources that publish no dates (other registries such as
+  Quay and registry.k8s.io, git refs and tags, floating-tag digests, runner labels,
+  the Java and Dart version lists) are not held forever: their updates come as
+  ordinary PRs for review (October 22, 2026). First-party MooseGooseConsulting and
+  Coldaine actions and GitHub releases do not wait. See the
+  [decision record](docs/decisions/0001-fleet-release-age-soak.md).
 - Hand the 4-day soak to the package manager when Renovate regenerates a lock file,
   so transitive releases are soaked too where that manager supports a cooldown.
   Renovate passes it to npm (`--before`) and Poetry (2.4 or later, read from the
@@ -119,16 +124,16 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   because the same pinning occurred across several consumers; it does not
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
-- Never propose Python minor or major version upgrades (for example 3.14 to 3.15)
-  in any consuming repository. This is an owner rule, not a per-repository exception.
-  Patch updates (3.14.7 to 3.14.8) and digest or pin updates still flow, so
-  security point releases are not held back. A floating tag such as `python:latest`
-  can still cross minors through a digest update; no packageRule can stop that. The rule matches Python by package
-  name across Docker image tags, `actions/setup-python` `python-version` inputs,
-  `.python-version`, `requires-python`, `runtime.txt` and the mise, asdf, proto,
-  devbox, pixi and devcontainer runtime pins. It does not hold the
-  `actions/setup-python` action itself. To move Python on purpose, edit the pin by
-  hand or add a narrow `enabled: true` packageRule in the consumer repository. See
+- Propose Python minor and major version upgrades (for example 3.14 to 3.15) in
+  their own `python` PR, outside the routine groups, and never automerge them.
+  Patch updates (3.14.7 to 3.14.8) and digest or pin updates stay in the routine
+  groups, so security point releases do not wait behind a minor upgrade. The rule
+  matches Python by package name across Docker image tags, `actions/setup-python`
+  `python-version` inputs, `.python-version`, `requires-python`, `runtime.txt` and
+  the mise, asdf, proto, devbox, pixi and devcontainer runtime pins. It does not
+  match the `actions/setup-python` action itself. Until October 22, 2026 these
+  upgrades were disabled outright; that freeze had no owner record and was removed
+  ([#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33)). See
   the [architecture notes](docs/architecture.md#architectural-invariants).
 
 This repository intentionally contains no secrets or host rules.
@@ -161,7 +166,7 @@ than silently losing personal-account coverage.
 There are no per-repository discovery exclusions. `coldaine-ci` is archived and
 therefore skipped by Renovate's native archived-repository handling.
 `beast-ros` is enrolled after [#56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)
-merged; it uses standard hosted runners and follows the shared Python minor/major hold like every other consumer.
+merged; it uses standard hosted runners and follows the shared Python rule like every other consumer.
 `oh-my-openagent` receives the central policy without needing its config-only
 setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
 
@@ -169,8 +174,8 @@ The two-PR limit is per repository, not per organization and not two new PRs
 every week. Major upgrades share those slots with routine groups. If both are
 occupied, other updates queue; with `updateNotScheduled: false`, new routine
 branches and ordinary branch updates wait for Monday. Queued updates appear as
-rate-limited on the repository's Dependency Dashboard and in the runner's job
-summary. There is no additional one-PR-per-hour throttle. Security fixes bypass
+rate-limited on the repository's Dependency Dashboard. There is no additional
+one-PR-per-hour throttle. Security fixes bypass
 the schedule, the release-age soak and both caps, but still require review.
 Previously opened PRs are not closed merely to bring an existing queue under the
 cap.
@@ -182,7 +187,10 @@ lockfiles, Actions and container files. Kubernetes YAML requires explicit file
 patterns in the consumer config; Flux defaults to `gotk-components.yaml` unless
 expanded. Use local patterns and rules for these repositories, not a bespoke
 dependency-update program. The GitHub Actions manager also updates this runner's
-`renovate-version` input.
+`renovate-version` input. The runner takes its image from Docker Hub
+(`renovate-image: docker.io/renovate/renovate`), so those updates are dated, and
+`renovate.json` groups the pin with the validator image in `validate.yml`, so one
+PR moves both.
 
 For an immediate run, dispatch the workflow with `dryRun=false` and
 `unrestricted=true`. Despite the legacy input name, this bypasses **time only**,
@@ -235,6 +243,8 @@ Install repo-managed hooks after cloning:
 npm run hooks:install
 ```
 
-The pre-push hook runs `npm run renovate:validate` and refuses direct pushes from
-`main`/`master`. GitHub branch protection on `main` enforces the same PR flow
-remotely.
+The pre-push hook refuses direct pushes to `main`/`master`. GitHub branch
+protection on `main` enforces the same PR flow remotely. Config validation runs in
+CI on every PR (`.github/workflows/validate.yml`), with the runner's pinned
+Renovate image; `.agents/skills/renovate-config/SKILL.md` has the command to run
+it locally.

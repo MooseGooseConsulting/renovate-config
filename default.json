@@ -152,7 +152,7 @@
       "pinDigests": false
     },
     {
-      "description": "Owner rule (1 of 2): report Python patch updates apart from minor ones so rule 2 can hold minors without hiding patches. No matchUpdateTypes here because Renovate reads separateMinorPatch before an update type exists.",
+      "description": "Python (1 of 2): report Python patch updates apart from minor ones, so a patch release (3.14.7 to 3.14.8) stays in the routine groups instead of riding in the python PR of rule 2. No matchUpdateTypes here because Renovate reads separateMinorPatch before an update type exists.",
       "matchPackageNames": [
         "python",
         "**/python",
@@ -164,7 +164,7 @@
       "separateMinorPatch": true
     },
     {
-      "description": "Owner rule (2 of 2): never propose Python minor or major bumps such as 3.14 to 3.15; patch (3.14.7 to 3.14.8), digest and pin updates still flow. Matches by package name in every manager: python and other registry python images, setup-python python-version inputs, .python-version, requires-python, runtime.txt, and mise, asdf, proto, devbox, pixi, poetry and devcontainer pins. The setup-python action and the devcontainer python feature are not Python releases and are not matched. To move Python on purpose, edit the pin by hand or add a narrow enabled: true packageRule in the consumer repository.",
+      "description": "Python (2 of 2): Python minor and major upgrades (such as 3.14 to 3.15) come together in one python PR, majors in their own, outside the routine groups, and are never automerged. Patch, digest and pin updates stay in the routine groups. Matches by package name in every manager: python and other registry python images, setup-python python-version inputs, .python-version, requires-python, runtime.txt, and mise, asdf, proto, devbox, pixi, poetry and devcontainer pins. The setup-python action and the devcontainer python feature are not Python releases and are not matched. Until 2026-10-22 this rule set enabled: false, which hid these upgrades without a PR; that freeze had no owner record and was removed (renovate-config#33).",
       "matchPackageNames": [
         "python",
         "**/python",
@@ -177,10 +177,11 @@
         "major",
         "minor"
       ],
-      "enabled": false
+      "groupName": "python",
+      "automerge": false
     },
     {
-      "description": "Owner rule (2026-10-21): every major, minor and patch update (including npm range bumps and lock-file-only updates, which are flags on those) and every digest update waits 4 days after publication before Renovate raises it, in every consumer. A release without a publication timestamp stays pending (timestamp-required, Renovate's default since v42, stated so any consumer override is explicit). Renovate's docker datasource reads dates only from Docker Hub. Third-party ghcr.io images are dated by part 5 below; images on quay.io, registry.k8s.io, mcr.microsoft.com and other registries, and the GHCR images part 5 excludes, stay pending until the consumer maps them to a digest-identical Docker Hub repository with overridePackageName and overrideDatasource: docker. Digest updates of floating tags (latest, lts-alpine) are never dated by Renovate 44 and stay pending: pin a versioned tag instead. git-refs, git-tags and undated custom datasources stay pending too. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates carry no release date and are not held. Vulnerability-fix PRs still bypass this through vulnerabilityAlerts. See docs/decisions/0001-fleet-release-age-soak.md.",
+      "description": "Owner rule (2026-10-21): every major, minor and patch update (including npm range bumps and lock-file-only updates, which are flags on those) and every digest update waits 4 days after publication before Renovate raises it, in every consumer. timestamp-required (Renovate's default since v42, stated so any consumer override is explicit) also holds an update whose release date is missing, which is right for sources that publish dates: npm, PyPI, crates.io, GitHub releases and tags, Docker Hub, and third-party GHCR images (custom.ghcr, below). Sources that publish no dates are switched to timestamp-optional by the three 'undated sources' rules below (owner, 2026-10-22: no permanent holds), so their updates come as ordinary PRs. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates carry no release date and are not held. Vulnerability-fix PRs bypass this through vulnerabilityAlerts. See docs/decisions/0001-fleet-release-age-soak.md.",
       "matchUpdateTypes": [
         "major",
         "minor",
@@ -191,15 +192,7 @@
       "minimumReleaseAgeBehaviour": "timestamp-required"
     },
     {
-      "description": "Owner rule (2026-10-21), part 2: first-party images on GHCR are built by this fleet's own CI, not by an upstream that could be compromised, so they are not held by the release-age soak. They are left on the docker datasource, which reads no GHCR dates (part 5 does not date them: many are private, and most are pinned by digest alone), so without this every ghcr.io/moosegooseconsulting and ghcr.io/coldaine image would be held forever. Matching is case-insensitive.",
-      "matchPackageNames": [
-        "ghcr.io/moosegooseconsulting/**",
-        "ghcr.io/coldaine/**"
-      ],
-      "minimumReleaseAge": null
-    },
-    {
-      "description": "Owner rule (2026-10-21), part 3: first-party GitHub actions, workflows and releases are this fleet's own code, so they are not held. Scoped to GitHub datasources so the same names on another registry (for example an unclaimed Docker Hub namespace) stay soaked.",
+      "description": "Owner rule (2026-10-21), first-party code: first-party GitHub actions, workflows and releases are this fleet's own code, so they do not wait 4 days. Scoped to GitHub datasources so the same names on another registry (for example an unclaimed Docker Hub namespace) still wait. First-party GHCR images need no rule: they are undated and come through under 'undated sources (2 of 3)'.",
       "matchDatasources": [
         "github-tags",
         "github-digest",
@@ -212,17 +205,7 @@
       "minimumReleaseAge": null
     },
     {
-      "description": "Owner rule (2026-10-21), part 4: GitHub-hosted runner labels and the language-runtime version lists (python-version, java-version, dart-version) publish no release dates in Renovate 44, so the soak would hold them forever, including Python patch releases the 2026-10-13 Python rule keeps flowing for security. They name official toolchain releases rather than packages a third party can publish, so they are not held. Runtimes with dated datasources (node-version, golang-version, ruby-version, dotnet-version) stay soaked.",
-      "matchDatasources": [
-        "github-runners",
-        "python-version",
-        "java-version",
-        "dart-version"
-      ],
-      "minimumReleaseAge": null
-    },
-    {
-      "description": "Owner rule (2026-10-21), part 5: date third-party GHCR images. Renovate's docker datasource reads no dates from ghcr.io, so the soak above would hold them forever. custom.ghcr (customDatasources above) reads tags, index digests and created_at from the GitHub Packages API (GET /users/{owner}/packages/container/{name}/versions, which also serves org-owned packages). GitHub sets created_at when a digest is first pushed; the publisher cannot set it. Needs a runner token with read:packages: without it every lookup fails with HTTP 403, the image gets no update, and the runner reports it (GHCR probe and summary column). The API returns one page, the newest 100 versions, including untagged platform manifests and signatures. A release older than that page is invisible, and a pinned tag that has left it gets no digest update ('Could not determine new digest'). Excluded here because 100 versions span hours, so no release is ever 4 days old in the page (measured 2026-10-21): astral-sh/uv, cloudnative-pg/postgresql and renovatebot/renovate. They stay on the docker datasource, undated and held, unless a consumer maps them to a digest-identical Docker Hub repository. First-party images are exempt from the soak (part 2) and stay on the docker datasource. A consumer rule that maps a ghcr.io image to a docker.io mirror with overridePackageName must also set overrideDatasource: docker, or the lookup asks the GitHub Packages API for the docker.io name and fails. After this rule, matchDatasources: [docker] no longer matches the images it moves; match them by name, or list custom.ghcr too (as the container images group does). See docs/decisions/0001-fleet-release-age-soak.md.",
+      "description": "Owner rule (2026-10-21), GHCR dates: date third-party GHCR images. Renovate's docker datasource reads no dates from ghcr.io. custom.ghcr (customDatasources above) reads tags, index digests and created_at from the GitHub Packages API (GET /users/{owner}/packages/container/{name}/versions, which also serves org-owned packages). GitHub sets created_at when a digest is first pushed; the publisher cannot set it. Needs a runner token with read:packages: without it every lookup fails with HTTP 403, the image gets no update (a lookup warning on the Dependency Dashboard), and the runner's GHCR probe reports it. The API returns one page, the newest 100 versions, including untagged platform manifests and signatures. A release older than that page is invisible, and a pinned tag that has left it gets no digest update ('Could not determine new digest'). Excluded here because 100 versions span hours, so no release would ever be 4 days old in the page (measured 2026-10-21): astral-sh/uv, cloudnative-pg/postgresql and renovatebot/renovate. They and first-party images stay on the docker datasource, undated, and come through under 'undated sources (2 of 3)'. An image whose Docker Hub repository serves the same digests can be referenced there instead, to get Docker Hub dates. After this rule, matchDatasources: [docker] no longer matches the images it moves; match them by name, or list custom.ghcr too (as the container images group does). See docs/decisions/0001-fleet-release-age-soak.md.",
       "matchDatasources": [
         "docker"
       ],
@@ -235,6 +218,37 @@
         "!ghcr.io/renovatebot/renovate"
       ],
       "overrideDatasource": "custom.ghcr"
+    },
+    {
+      "description": "Owner rule (2026-10-22), undated sources (1 of 3): git-refs, git-tags, github-runners, java-version and dart-version carry no release dates in Renovate 44.107.0, so timestamp-required held their updates forever. timestamp-optional keeps the 4-day wait whenever a date exists and otherwise lets the update through as an ordinary PR for review. python-version is dated from python.org's release feed and so waits 4 days; it is listed so a feed outage does not hold Python patch releases. Replaces the 2026-10-21 exemption of the runtime lists and runner labels, which skipped the wait even when a date existed.",
+      "matchDatasources": [
+        "git-refs",
+        "git-tags",
+        "github-runners",
+        "python-version",
+        "java-version",
+        "dart-version"
+      ],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "description": "Owner rule (2026-10-22), undated sources (2 of 3): Renovate's docker datasource reads release dates only from Docker Hub (an image name with no registry host, or docker.io, index.docker.io or registry-1.docker.io). Images on every other registry (quay.io, registry.k8s.io, mcr.microsoft.com, lscr.io, first-party ghcr.io images, and the GHCR images the rule above leaves on the docker datasource) were held forever; they now come as ordinary PRs, and wait 4 days if a date ever appears. Must stay after the GHCR rule, so the images it moves to custom.ghcr keep timestamp-required.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "/^[^/]*[.:][^/]*\\//",
+        "!/^(?:index\\.|registry-1\\.)?docker\\.io\\//"
+      ],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "description": "Owner rule (2026-10-22), undated sources (3 of 3): a digest update of a tag that is not a version (latest, lts-alpine, stable, or a branch name such as main) has no release to take a date from, so it was held forever, even on Docker Hub. It now comes as an ordinary PR. A versioned tag (1.27, v2.5.0, 3.13-slim) keeps timestamp-required: its digest update is dated by that version's release.",
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "matchCurrentValue": "!/^v?\\d/",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     },
     {
       "description": "Owner rule (2026-10-21), lock files, part 2: lock-file maintenance runs only for managers whose lock regeneration can honour the 4-day soak. From Renovate: npm gets --before for package-lock.json, and poetry gets POETRY_SOLVER_MIN_RELEASE_AGE, which only Poetry 2.4+ honours (Renovate runs the Poetry version in the poetry.lock header, so an older lock must be re-locked). Consumer-supplied, not checked here: pnpm-workspace.yaml minimumReleaseAge, bunfig.toml minimumReleaseAge, uv exclude-newer in pyproject.toml; a repository without its setting gets un-soaked maintenance. yarn.lock and pdm.lock are handled by part 3. Every other manager re-resolves with no age check: cargo, bundler, composer, gradle, terraform, helmv3 and the rest take the newest release, and nuget, though it resolves the lowest applicable version, takes the newest match for a floating version such as 1.*. Their lock files change only with an ordinary update: the proposed version is soaked, but the transitive releases the package manager re-resolves for it are not.",

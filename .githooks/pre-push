@@ -1,4 +1,6 @@
 #!/bin/sh
+# Refuse direct pushes to main. Renovate config validation runs in CI (validate.yml) on every PR,
+# with the runner's own Renovate release.
 set -eu
 
 while read -r local_ref local_sha remote_ref remote_sha; do
@@ -10,6 +12,3 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       ;;
   esac
 done
-
-echo "Running Renovate config validation before push..."
-npm run renovate:validate

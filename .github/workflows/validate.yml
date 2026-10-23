@@ -10,39 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
         with:
-          node-version: 24
-      # Both validations run the Renovate release the runner pins; scripts/renovate-version.sh reads
-      # it from renovate-diagnostic.yml, so a runner bump also moves the validator.
-      - name: Resolve the runner's pinned Renovate version
-        id: renovate
-        run: |
-          version=$(scripts/renovate-version.sh)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-      - run: npm run renovate:validate
-      - run: npx --yes --package "renovate@${{ steps.renovate.outputs.version }}" renovate-config-validator --strict .github/renovate-diagnostic.cjs
-      # renovate.json dates the runner image on Docker Hub, but the action pulls it from GHCR, so the
-      # pinned tag must exist on both with the same index digest.
-      - name: Check the pinned Renovate image is identical on GHCR and Docker Hub
-        shell: bash
-        run: |
-          set -euo pipefail
-          version="${{ steps.renovate.outputs.version }}"
-          test -n "$version"
-          accept="Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json"
-          digest() { # registry host, repository, token URL
-            local token
-            token=$(curl -fsS --retry 2 "$3" | jq -r '.token // .access_token')
-            if [ -z "$token" ] || [ "$token" = "null" ]; then echo "::error::no anonymous token for $1/$2" >&2; return 1; fi
-            curl -fsSI --retry 2 -H "Authorization: Bearer $token" -H "$accept" "https://$1/v2/$2/manifests/$version" |
-              tr -d '\r' | awk 'tolower($1) == "docker-content-digest:" { print $2 }'
-          }
-          ghcr=$(digest ghcr.io renovatebot/renovate "https://ghcr.io/token?scope=repository:renovatebot/renovate:pull")
-          hub=$(digest registry-1.docker.io renovate/renovate "https://auth.docker.io/token?service=registry.docker.io&scope=repository:renovate/renovate:pull")
-          echo "ghcr.io/renovatebot/renovate:$version $ghcr"
-          echo "docker.io/renovate/renovate:$version $hub"
-          if [ -z "$ghcr" ] || [ "$ghcr" != "$hub" ]; then
-            echo "::error::renovate-version $version differs between GHCR and Docker Hub, or is missing on one"
-            exit 1
-          fi
+          persist-credentials: false
+      # The same Renovate image and release as the runner in renovate-diagnostic.yml. renovate.json
+      # groups the two references, so Renovate bumps them in one PR.
+      - name: Validate the presets
+        uses: docker://docker.io/renovate/renovate:44.107.0@sha256:fb6b7c66be211ee72de037eb48d269da7cf90f30c773e893b6b8002bffafcd4b
+        with:
+          entrypoint: /usr/local/sbin/renovate-config-validator
+          args: --strict --no-global default.json org-inherited-config.json renovate.json
+      - name: Validate the runner configuration
+        uses: docker://docker.io/renovate/renovate:44.107.0@sha256:fb6b7c66be211ee72de037eb48d269da7cf90f30c773e893b6b8002bffafcd4b
+        with:
+          entrypoint: /usr/local/sbin/renovate-config-validator
+          args: --strict .github/renovate-diagnostic.cjs
