@@ -7,9 +7,9 @@ Audit `docs/inspiration/` entries by their `review_by` date, or within three mon
 Before Renovate config edits, use `.agents/skills/renovate-config/SKILL.md`.
 Docs authority: `docs/NORTH_STAR.md` -> `docs/architecture.md` -> workflows/rubrics.
 Config surfaces: shared policy in `default.json`; repo-specific behavior in consumer `renovate.json`; `org-inherited-config.json` is compatibility-only and not part of the no-Mend operating model.
-Commands: `npm run renovate:validate`; `npm run docs:update` refreshes the optional Renovate docs cache; `npm run verify` refreshes that cache and then validates config.
-Install repo hooks with `npm run hooks:install`; pre-push runs Renovate validation and blocks direct pushes from `main`.
-Run `npm run renovate:validate` before committing config changes.
+Commands: `npm run docs:update` refreshes the optional Renovate docs cache. Config validation runs in CI (`.github/workflows/validate.yml`) with the runner's pinned Renovate image; `.agents/skills/renovate-config/SKILL.md` has the same command for a local run.
+Install repo hooks with `npm run hooks:install`; pre-push blocks direct pushes to `main`.
+Validate config changes before pushing (local command in the skill), and do not merge with the Validate workflow red.
 Work on PR branches, not `main`; completed scoped work goes through a non-draft PR.
 Keep this repo public and secret-free; no host tokens, registry passwords, or `.env` values.
 Do not recommend features that require paying for Mend or using the Mend Developer Portal.

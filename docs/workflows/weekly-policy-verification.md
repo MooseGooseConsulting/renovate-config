@@ -60,7 +60,8 @@ replacement proposals are also kept separate. The run reported existing
 nonbreaking-space warnings in two HTML files and the existing default git-author
 warning; neither was an extraction/registry error.
 
-- Run `npm run renovate:validate` for native schema and preset validation.
+- Run Renovate's config validator for native schema and preset validation (CI's
+  `validate.yml` does this on every PR).
 - Dispatch a full dry run from the PR branch. The runner maps the shared preset
   to that branch using native `migratePresets`; otherwise consumer configs would
   silently resolve the old main policy. Check dependency extraction, grouping,

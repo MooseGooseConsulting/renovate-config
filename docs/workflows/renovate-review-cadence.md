@@ -57,25 +57,19 @@ old notes.
 - Security alerts, vulnerability PRs, emergency update history, or an explicit
   check showing that no relevant current alerts were found.
 - CI status and repeated failure patterns on Renovate PRs.
-- The Renovate runner's "Release-age soak" job summary: updates held with no
-  release date, updates still aging, updates proposing an older release while
-  newer ones are withheld, lookup warnings, and GHCR lookup warnings (the GitHub
-  Packages API returned nothing, or a pinned tag has left its newest 100
-  versions). The undated count excludes
-  withheld releases; a withheld count that stays up across runs for a repository
-  needs a local dry run to see whether those releases are undated. A rising count of
-  undated holds needs a per-type answer: a container image needs a
-  digest-identical Docker Hub mapping or a versioned tag in place of a floating
-  one; a `git-refs`/`git-tags` or custom-datasource dependency needs a dated
-  source (for example `github-tags`) or an owner-approved exemption
-  ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)).
-- The same summary's rate-limited branches (a branch, PR or commit limit stopped
-  them this run; a later run retries them) and Renovate's WARN and ERROR
-  problems. Public repositories' problem messages are listed; private ones are
-  only counted. Each repository's Dependency Dashboard issue lists the same
-  queue under "Rate-Limited" and the soak's holds under "Pending Status Checks".
-  Security-fix branches are uncapped and Renovate exempts them from the commit
-  limits, so one listed as rate-limited is a defect.
+- Each sampled repository's Dependency Dashboard issue: updates still waiting
+  out the 4-day soak ("Pending Status Checks"), queued updates ("Rate-Limited"),
+  and dependencies Renovate failed to look up (for example a third-party GHCR
+  image while the runner token lacks `read:packages`). A soak hold clears by
+  itself; one still listed after several weekly runs needs a local dry run.
+  Undated sources (other registries, git refs and tags, floating-tag digests)
+  are not held: they arrive as ordinary PRs
+  ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)), so check that
+  reviewers treated a just-published undated release with care. Security-fix
+  branches are uncapped and Renovate exempts them from the commit limits, so one
+  listed as rate-limited is a defect.
+- The Renovate runner's log for WARN and ERROR records and the GHCR probe's
+  error annotation.
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or
   repo-local override decisions.
 - Local hook status and branch protection for this repo only when the review
@@ -188,8 +182,8 @@ Coordination band: __
 ## Follow-Up Rules
 
 - If the review recommends changing Renovate config behavior, consult current
-  official Renovate docs before editing config and run
-  `npm run renovate:validate` before committing the config change.
+  official Renovate docs before editing config and make sure the Validate
+  workflow passes on the config change.
 - If repeated repo-local overrides appear, decide whether they should become a
   shared default, a documented optional preset, or intentionally local behavior.
 - If a recommendation depends on unavailable evidence, list the evidence request

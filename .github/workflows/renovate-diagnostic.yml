@@ -24,7 +24,7 @@ on:
         type: boolean
         default: true
       unrestricted:
-        description: Run now outside Monday (preserves two-PR cap, release age, and review).
+        description: Run now outside Monday (preserves the PR cap, release age, and review).
         type: boolean
         default: false
       repository:
@@ -80,9 +80,9 @@ jobs:
 
       # default.json dates third-party GHCR images through the GitHub Packages API (custom.ghcr). A
       # token that cannot read packages gets HTTP 403 there (401 with no token), and Renovate records only a "no-result"
-      # lookup warning, so every such image would stay held without anything failing. Probe the API
+      # lookup warning, so every such image would get no update without anything failing. Probe the API
       # with the token Renovate uses and report a failure as an error annotation and in the job
-      # summary. The run continues: undated images stay held either way (fail closed), and the rest
+      # summary. The run continues: those images get no update either way (fail closed), and the rest
       # of the fleet still gets its updates.
       - name: Check the token can read GHCR release dates
         continue-on-error: true
@@ -130,7 +130,7 @@ jobs:
           {
             echo "## GHCR release dates unavailable"
             echo ""
-            echo "Third-party \`ghcr.io\` images are dated through the GitHub Packages API, and $why. $fix Until then no such image gets an update; they appear below as GHCR lookup warnings."
+            echo "Third-party \`ghcr.io\` images are dated through the GitHub Packages API, and $why. $fix Until then no such image gets an update; each repository's Dependency Dashboard lists them as failed lookups."
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -143,98 +143,12 @@ jobs:
         with:
           configurationFile: .github/renovate-diagnostic.cjs
           token: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
-          # Wrapper v46.3.3; pin Renovate 44.107.0 (documented github-action pin)
-          # so the runner image stays reproducible.
+          # Docker Hub's image, so Renovate dates the runner's own updates (it reads no GHCR dates for this
+          # image). renovate.json groups this pin with the validator image in validate.yml.
+          renovate-image: docker.io/renovate/renovate
           renovate-version: 44.107.0
         env:
           LOG_LEVEL: info
           RENOVATE_TARGET_REPOSITORY: ${{ inputs.repository }}
           RENOVATE_DIAGNOSTIC_FORCE: ${{ inputs.unrestricted || false }}
           RENOVATE_PRESET_REF: ${{ inputs.dryRun && github.ref_name != github.event.repository.default_branch && github.ref_name || '' }}
-
-      # The release-age soak and the PR and branch caps hold updates without opening anything. Each
-      # repository's Dependency Dashboard issue lists them; this summary is the fleet-wide view, and the
-      # only one for repositories with issues turned off. This repository is public: the summary names
-      # only repositories GitHub serves publicly and aggregates the rest. It must not fail the run.
-      - name: Summarize held and rate-limited updates and Renovate problems
-        if: always()
-        continue-on-error: true
-        env:
-          # The runner's PAT reads both owners' repositories, so it can tell public from private.
-          GH_TOKEN: ${{ secrets.RENOVATE_TOKEN || github.token }}
-        run: |
-          report=/tmp/renovate-report.json
-          summary() { echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
-          summary "## Release-age soak and rate limits"
-          if [ ! -s "$report" ]; then summary "Renovate wrote no report."; exit 0; fi
-          if ! rows=$(jq -r -f .github/renovate-held.jq "$report"); then
-            summary "The Renovate report could not be read."; exit 0
-          fi
-          # Problems not tied to a repository are counted only: their text may name private repositories.
-          global_warn=$(jq '[.problems // [] | .[] | select((.level // 0) >= 40 and (.level // 0) < 50)] | length' "$report" || echo 0)
-          global_error=$(jq '[.problems // [] | .[] | select((.level // 0) >= 50)] | length' "$report" || echo 0)
-          if [ -z "$rows" ] && [ "$global_warn" -eq 0 ] && [ "$global_error" -eq 0 ]; then
-            summary "No updates are held or rate-limited, no lookups warned, and Renovate logged no problems."; exit 0
-          fi
-          table=""; problems_md=""; private_repos=0; unknown_repos=0; undated_total=0; limited_total=0; ghcr_total=0
-          error_total=$global_error
-          p_undated=0; p_aging=0; p_partial=0; p_warnings=0; p_ghcr=0; p_limited=0; p_warn=0; p_error=0
-          u_undated=0; u_aging=0; u_partial=0; u_warnings=0; u_ghcr=0; u_limited=0; u_warn=0; u_error=0
-          while IFS=$'\t' read -r repo undated aging partial warnings ghcr limited warn error; do
-            [ -n "$repo" ] || continue
-            undated_total=$((undated_total + undated)); limited_total=$((limited_total + limited))
-            ghcr_total=$((ghcr_total + ghcr)); error_total=$((error_total + error))
-            visibility=$(gh api "repos/$repo" --jq .private 2>/dev/null || true)
-            if [ "$visibility" = "false" ]; then
-              table+="| $repo | $undated | $aging | $partial | $warnings | $ghcr | $limited | $warn | $error |"$'\n'
-              if [ $((warn + error)) -gt 0 ]; then
-                problems_md+=$(jq -r --arg repo "$repo" '.repositories[$repo].problems // [] | map(select((.level // 0) >= 40)
-                  | "- \($repo): \(if .level >= 50 then "ERROR" else "WARN" end) \(.msg // "" | gsub("[\r\n|`]"; " "))")
-                  | unique | .[:20][]' "$report" || true)$'\n'
-              fi
-            elif [ "$visibility" = "true" ]; then
-              private_repos=$((private_repos + 1))
-              p_undated=$((p_undated + undated)); p_aging=$((p_aging + aging))
-              p_partial=$((p_partial + partial)); p_warnings=$((p_warnings + warnings)); p_ghcr=$((p_ghcr + ghcr))
-              p_limited=$((p_limited + limited)); p_warn=$((p_warn + warn)); p_error=$((p_error + error))
-            else
-              # Not named: the lookup failed, so the repository may be private.
-              unknown_repos=$((unknown_repos + 1))
-              u_undated=$((u_undated + undated)); u_aging=$((u_aging + aging))
-              u_partial=$((u_partial + partial)); u_warnings=$((u_warnings + warnings)); u_ghcr=$((u_ghcr + ghcr))
-              u_limited=$((u_limited + limited)); u_warn=$((u_warn + warn)); u_error=$((u_error + error))
-            fi
-          done <<< "$rows"
-          summary "Held: the release-age soak (ADR 0001). Rate-limited: a branch, PR or commit limit stopped the branch this run; a later run retries it once a slot (or, for a commit limit, quota) is free. GHCR lookup warnings: lookups on the GitHub Packages API datasource that returned nothing (no update at all) or no new digest. Problems: Renovate's WARN and ERROR log records."
-          summary ""
-          summary "| Repository | Held, no release date | Held, aging | Newer releases withheld | Lookup warnings | GHCR lookup warnings | Rate-limited branches | Problems (WARN) | Problems (ERROR) |"
-          summary "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
-          [ -n "$table" ] && printf '%s' "$table" >> "$GITHUB_STEP_SUMMARY"
-          if [ "$private_repos" -gt 0 ]; then
-            summary "| Private repositories ($private_repos) | $p_undated | $p_aging | $p_partial | $p_warnings | $p_ghcr | $p_limited | $p_warn | $p_error |"
-          fi
-          if [ "$unknown_repos" -gt 0 ]; then
-            summary "| Visibility unknown ($unknown_repos) | $u_undated | $u_aging | $u_partial | $u_warnings | $u_ghcr | $u_limited | $u_warn | $u_error |"
-            echo "::warning title=Renovate summary::$unknown_repos repository visibility lookup(s) failed; those rows are aggregated."
-          fi
-          if [ $((global_warn + global_error)) -gt 0 ]; then
-            summary "| Not tied to a repository | | | | | | | $global_warn | $global_error |"
-          fi
-          if [ -n "${problems_md//[[:space:]]/}" ]; then
-            summary ""
-            summary "### Problems in public repositories"
-            printf '%s\n' "$problems_md" | grep -v '^$' >> "$GITHUB_STEP_SUMMARY" || true
-          fi
-          if [ "$undated_total" -gt 0 ]; then
-            echo "::warning title=Release-age soak::$undated_total update(s) held with no release date; see the job summary."
-          fi
-          if [ "$limited_total" -gt 0 ]; then
-            echo "::notice title=Rate-limited updates::$limited_total branch(es) were stopped by a branch, PR or commit limit; see the job summary and each repository's Dependency Dashboard."
-          fi
-          if [ "$error_total" -gt 0 ]; then
-            echo "::warning title=Renovate problems::Renovate logged $error_total ERROR record(s); see the job summary and the run log."
-          fi
-          if [ "$ghcr_total" -gt 0 ]; then
-            # A failed lookup leaves the image with no update at all, outside the held counts.
-            echo "::warning title=Release-age soak::$ghcr_total GHCR lookup warning(s): an image the GitHub Packages API returned nothing for gets no update, and a pinned tag older than the API's newest 100 versions gets no digest update; see the job summary."
-          fi

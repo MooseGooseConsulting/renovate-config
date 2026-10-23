@@ -20,13 +20,13 @@ G2. **Share a useful default across repositories.** Keep the shared preset flexi
 
 G3. **Balance central coordination with repo autonomy.** Put common policy in this repo, and let consumer repositories keep narrow local overrides when their CI, release process, ecosystem, or risk profile requires them.
 
-G4. **Keep Renovate quiet enough to trust.** Use weekly domain grouping and a two-PR cap so routine updates are reviewable instead of overwhelming. Open PRs promptly so PR-triggered CI can run; every merge requires review. Major upgrades are proposed separately, and security fixes retain their faster lane.
+G4. **Keep Renovate quiet enough to trust.** Use one weekly non-major PR, one PR per major, and a five-PR cap so routine updates are reviewable instead of overwhelming. Open PRs promptly so PR-triggered CI can run; every merge requires review. Major upgrades are proposed separately, and security fixes retain their faster lane.
 
 G5. **Make Renovate PRs agent-reviewable.** Label, assign, and describe dependency PRs so humans and agents can triage, verify, merge, close, defer, or escalate them from GitHub PR state.
 
 ## Requirements
 
-G1-R1. The shared preset remains valid under `npm run renovate:validate`.
+G1-R1. The shared preset remains valid under Renovate's config validator, run in CI (`.github/workflows/validate.yml`) with the runner's own Renovate release.
 
 G1-R2. Current official Renovate documentation and `.agents/skills/renovate-config/SKILL.md` are consulted before changing Renovate config behavior. The generated local docs snapshot is an optional cache, not a policy source.
 
