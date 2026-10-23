@@ -86,6 +86,21 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Keep internal checks explicit so release-age gates inherited from
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
+- Temporary (2026-10-23): `constraints.npm: "^11"` makes Renovate update
+  `package-lock.json` with npm 11. With no npm version stated, Renovate installs
+  the newest npm, now npm 12. npm 12 turned `allow-remote` off by default
+  ([npm/cli#9466](https://github.com/npm/cli/pull/9466)), and
+  `--package-lock-only` then refuses the registry tarball of any package with
+  `bundleDependencies`, such as `@tailwindcss/oxide-wasm32-wasi`. The result was
+  `EALLOWREMOTE` artifact errors on Renovate PRs across the fleet
+  ([npm/cli#9800](https://github.com/npm/cli/issues/9800)). Remove the
+  constraint once an npm 12 release ships the fix
+  ([npm/cli#9818](https://github.com/npm/cli/pull/9818)). In Renovate 44.107.0
+  `constraints.npm` takes precedence over the npm version a `package.json`
+  states (`volta`, `devEngines`, `packageManager`, `engines.npm`) and over the
+  `lockfileVersion` guess. No fleet repository stated one on 2026-10-23. A
+  repository that needs another npm sets `constraints.npm` in its own
+  `renovate.json`.
 - Request `@Coldaine` review on Renovate PRs.
 - Put every minor, patch, digest, pin and pinDigest update into one weekly PR,
   "all non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that
