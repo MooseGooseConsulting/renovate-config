@@ -41,7 +41,9 @@ promoting it into shared policy.
 
 New non-archived repositories owned by MooseGooseConsulting or Coldaine are
 discovered automatically and receive the shared policy without an onboarding PR
-or a `renovate.json` file. No per-repository registration is required.
+or a `renovate.json` file. No per-repository registration is required. The only
+exceptions are the dormant repositories listed under
+[Execution and Weekly Cadence](#execution-and-weekly-cadence).
 
 Existing repository configs remain supported. For explicit inheritance when
 adding local customizations or using another runner, use:
@@ -168,8 +170,20 @@ path is scoped to one installation owner and only allowed for manually targeted
 organization runs. Full-fleet runs fail visibly without a cross-owner PAT rather
 than silently losing personal-account coverage.
 
-There are no per-repository discovery exclusions. `coldaine-ci` is archived and
-therefore skipped by Renovate's native archived-repository handling.
+Fleet runs skip nine dormant MooseGooseConsulting repositories (owner decision,
+October 23, 2026, from the October 22 inactive-repository review): ActuarialKnowledge,
+ColdTrace, ComfyWatchman, constellation-task-gardener, observation-station,
+promptcannon-prd-complete, RepoVisUI, scope-atlas and tidbyt-agent-gateway. The
+list lives in one place, `excludedRepositories` in
+[`.github/renovate-diagnostic.cjs`](.github/renovate-diagnostic.cjs), and becomes
+negated `autodiscoverFilter` patterns. A fleet run does not touch an excluded
+repository: its open Renovate PRs and Dependency Dashboard issue stay as they
+were, and it gets no Renovate security-fix PRs. Its GitHub Dependabot alerts stay
+on, so vulnerabilities remain visible. A manual run that names one in the
+`repository` input still processes it. To re-include a repository, delete its
+line from `excludedRepositories`; the next fleet run discovers it again.
+`coldaine-ci` is archived and therefore skipped by Renovate's native
+archived-repository handling.
 `beast-ros` is enrolled after [#56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)
 merged; it uses standard hosted runners and follows the shared Python rule like every other consumer.
 `oh-my-openagent` receives the central policy without needing its config-only
