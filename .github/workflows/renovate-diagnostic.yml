@@ -24,7 +24,7 @@ on:
         type: boolean
         default: true
       unrestricted:
-        description: Run now outside Monday (preserves two-PR cap, release age, and review).
+        description: Run now outside Monday (preserves the PR cap, release age, and review).
         type: boolean
         default: false
       repository:

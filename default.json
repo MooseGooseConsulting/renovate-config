@@ -1,8 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Weekly domain-grouped updates, two ordinary PRs per repository, separate majors, and review before every merge.",
+  "description": "Weekly updates: one PR for every non-major update, one per major upgrade, up to five ordinary PRs per repository, and review before every merge.",
   "extends": [
-    "config:best-practices"
+    "config:best-practices",
+    "group:allNonMajor"
   ],
   "timezone": "America/Chicago",
   "dependencyDashboard": true,
@@ -10,7 +11,7 @@
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Review required: check dependency impact and CI before merging. Routine domain groups and separate major upgrades share two PR slots per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
+  "prHeader": "Review required: check dependency impact and CI before merging. One weekly PR carries every non-major update; each major upgrade, Python minor upgrades and lock-file maintenance come as their own PRs. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
   "reviewers": [
     "Coldaine"
   ],
@@ -18,8 +19,8 @@
   "assignees": [
     "Coldaine"
   ],
-  "prConcurrentLimit": 2,
-  "branchConcurrentLimit": 2,
+  "prConcurrentLimit": 5,
+  "branchConcurrentLimit": 5,
   "prHourlyLimit": 0,
   "prCreation": "immediate",
   "internalChecksFilter": "strict",
@@ -28,7 +29,7 @@
   },
   "logLevelRemap": [
     {
-      "matchMessage": "/^Some release\\(s\\) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding/",
+      "matchMessage": "/^Some (release|upgrade)\\(s\\) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding/",
       "newLogLevel": "info"
     }
   ],
@@ -58,15 +59,14 @@
   },
   "packageRules": [
     {
-      "description": "Group routine minor, patch, digest, and pin updates; later rules split operational domains.",
+      "description": "group:allNonMajor (extends) puts every minor and patch update into one weekly 'all non-major dependencies' PR. This adds digest, pin and pinDigest updates to the same PR (same groupName and groupSlug). Lock-file maintenance stays its own PR: Renovate 44.107.0 cannot group it with other update types (lib/workers/repository/updates/branch-name.ts). Majors are not matched and come one PR each; later rules (Python, consumer groups) take precedence.",
       "matchUpdateTypes": [
-        "minor",
-        "patch",
         "digest",
         "pin",
         "pinDigest"
       ],
-      "groupName": "application dependencies"
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
     },
     {
       "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",
@@ -76,69 +76,7 @@
       "rangeStrategy": "bump"
     },
     {
-      "description": "Group routine development dependencies separately from application runtime dependencies.",
-      "matchDepTypes": [
-        "devDependencies",
-        "dev-dependencies",
-        "build-dependencies"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest",
-        "pin",
-        "pinDigest"
-      ],
-      "groupName": "development tools"
-    },
-    {
-      "description": "Group routine container image tag, digest, and initial pin updates from Dockerfiles, Compose files, and other image references no later rule claims. Images referenced from Kubernetes, Helm, Flux, Kustomize, Argo CD, or Terraform files go to infrastructure, and images in GitHub workflows, devcontainers, or pre-commit go to ci and development environment, because those later rules take precedence. custom.ghcr is the GHCR images the release-date rule below moves off the docker datasource.",
-      "matchDatasources": [
-        "docker",
-        "custom.ghcr"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest",
-        "pin",
-        "pinDigest"
-      ],
-      "groupName": "container images"
-    },
-    {
-      "description": "Group routine updates from managers in Renovate's kubernetes and terraform categories (Kubernetes, Helm, Helmfile, Flux, Kustomize, Argo CD, Crossplane, Terraform, Terragrunt), including the container images those files reference.",
-      "matchCategories": [
-        "kubernetes",
-        "terraform"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest",
-        "pin",
-        "pinDigest"
-      ],
-      "groupName": "infrastructure"
-    },
-    {
-      "description": "Group routine updates from the github-actions, devcontainer, and pre-commit managers, including action digests, images those files reference, and the Renovate runner version. Other CI systems and tool-version files such as mise or asdf are not matched and stay in earlier groups.",
-      "matchManagers": [
-        "github-actions",
-        "devcontainer",
-        "pre-commit"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest",
-        "pin",
-        "pinDigest"
-      ],
-      "groupName": "ci and development environment"
-    },
-    {
-      "description": "Keep major upgrades separate from routine groups and preserve Renovate's related-package groups; never automerge.",
+      "description": "Keep major upgrades out of the non-major group, one PR each, and preserve Renovate's related-package groups (such as monorepos); never automerge.",
       "matchUpdateTypes": [
         "major"
       ],
@@ -158,7 +96,7 @@
       "pinDigests": false
     },
     {
-      "description": "Python (1 of 2): report Python patch updates apart from minor ones, so a patch release (3.14.7 to 3.14.8) stays in the routine groups instead of riding in the python PR of rule 2. No matchUpdateTypes here because Renovate reads separateMinorPatch before an update type exists.",
+      "description": "Python (1 of 2): report Python patch updates apart from minor ones, so a patch release (3.14.7 to 3.14.8) is not hidden behind a minor upgrade waiting in the python PR of rule 2. Renovate then puts Python patches in a separate patch branch of the non-major group. No matchUpdateTypes here because Renovate reads separateMinorPatch before an update type exists.",
       "matchPackageNames": [
         "python",
         "**/python",
@@ -170,7 +108,7 @@
       "separateMinorPatch": true
     },
     {
-      "description": "Python (2 of 2): Python minor and major upgrades (such as 3.14 to 3.15) come together in one python PR, majors in their own, outside the routine groups, and are never automerged. Patch, digest and pin updates stay in the routine groups. Matches by package name in every manager: python and other registry python images, setup-python python-version inputs, .python-version, requires-python, runtime.txt, and mise, asdf, proto, devbox, pixi, poetry and devcontainer pins. The setup-python action and the devcontainer python feature are not Python releases and are not matched. Until 2026-10-22 this rule set enabled: false, which hid these upgrades without a PR; that freeze had no owner record and was removed (renovate-config#33).",
+      "description": "Python (2 of 2): Python minor and major upgrades (such as 3.14 to 3.15) come together in one python PR, majors in their own, outside the non-major group, and are never automerged. Patch, digest and pin updates stay in the non-major group. Matches by package name in every manager: python and other registry python images, setup-python python-version inputs, .python-version, requires-python, runtime.txt, and mise, asdf, proto, devbox, pixi, poetry and devcontainer pins. The setup-python action and the devcontainer python feature are not Python releases and are not matched. Until 2026-10-22 this rule set enabled: false, which hid these upgrades without a PR; that freeze had no owner record and was removed (renovate-config#33).",
       "matchPackageNames": [
         "python",
         "**/python",
@@ -211,7 +149,7 @@
       "minimumReleaseAge": null
     },
     {
-      "description": "Owner rule (2026-10-21), GHCR dates: date third-party GHCR images. Renovate's docker datasource reads no dates from ghcr.io. custom.ghcr (customDatasources above) reads tags, index digests and created_at from the GitHub Packages API (GET /users/{owner}/packages/container/{name}/versions, which also serves org-owned packages). GitHub sets created_at when a digest is first pushed; the publisher cannot set it. Needs a runner token with read:packages: without it every lookup fails with HTTP 403, the image gets no update (a lookup warning on the Dependency Dashboard), and the runner's GHCR probe reports it. The API returns one page, the newest 100 versions, including untagged platform manifests and signatures. A release older than that page is invisible, and a pinned tag that has left it gets no digest update ('Could not determine new digest'). Excluded here because 100 versions span hours, so no release would ever be 4 days old in the page (measured 2026-10-21): astral-sh/uv, cloudnative-pg/postgresql and renovatebot/renovate. They and first-party images stay on the docker datasource, undated, and come through under 'undated sources (2 of 3)'. An image whose Docker Hub repository serves the same digests can be referenced there instead, to get Docker Hub dates. After this rule, matchDatasources: [docker] no longer matches the images it moves; match them by name, or list custom.ghcr too (as the container images group does). See docs/decisions/0001-fleet-release-age-soak.md.",
+      "description": "Owner rule (2026-10-21), GHCR dates: date third-party GHCR images. Renovate's docker datasource reads no dates from ghcr.io. custom.ghcr (customDatasources above) reads tags, index digests and created_at from the GitHub Packages API (GET /users/{owner}/packages/container/{name}/versions, which also serves org-owned packages). GitHub sets created_at when a digest is first pushed; the publisher cannot set it. Needs a runner token with read:packages: without it every lookup fails with HTTP 403, the image gets no update (a lookup warning on the Dependency Dashboard), and the runner's GHCR probe reports it. The API returns one page, the newest 100 versions, including untagged platform manifests and signatures. A release older than that page is invisible, and a pinned tag that has left it gets no digest update ('Could not determine new digest'). Excluded here because 100 versions span hours, so no release would ever be 4 days old in the page (measured 2026-10-21): astral-sh/uv, cloudnative-pg/postgresql and renovatebot/renovate. They and first-party images stay on the docker datasource, undated, and come through under 'undated sources (2 of 3)'. An image whose Docker Hub repository serves the same digests can be referenced there instead, to get Docker Hub dates. After this rule, matchDatasources: [docker] no longer matches the images it moves; match them by name, or list custom.ghcr too. See docs/decisions/0001-fleet-release-age-soak.md.",
       "matchDatasources": [
         "docker"
       ],
@@ -282,7 +220,7 @@
     }
   ],
   "vulnerabilityAlerts": {
-    "prHeader": "Review required: check dependency impact and CI before merging. This is a security fix: it is not scheduled, not held for release age, and does not use or wait for the repository's two ordinary PR slots.",
+    "prHeader": "Review required: check dependency impact and CI before merging. This is a security fix: it is not scheduled, not held for release age, and does not use or wait for the repository's five ordinary PR slots.",
     "addLabels": [
       "security",
       "dependencies",

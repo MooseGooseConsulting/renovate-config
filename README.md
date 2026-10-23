@@ -73,23 +73,26 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
   before merging. Release-age filtering applies to every consumer (below).
-- Keep at most two ordinary Renovate branches and PRs active per repository.
+- Keep at most five ordinary Renovate branches and PRs active per repository
+  ([ADR 0003](docs/decisions/0003-one-non-major-pr-and-five-slots.md)).
   Security-fix branches and PRs are not capped. Renovate counts them apart
-  from the two ordinary slots and processes them before any other branch.
+  from the five ordinary slots and processes them before any other branch.
   `branchConcurrentLimit: 0` under `vulnerabilityAlerts` is what lifts the
-  branch cap; without it the top-level `branchConcurrentLimit: 2` still applies
+  branch cap; without it the top-level `branchConcurrentLimit: 5` still applies
   to security branches. `prConcurrentLimit: 0` there restates Renovate's own
   `vulnerabilityAlerts` default, kept explicit so the PR cap stays lifted.
 - Keep internal checks explicit so release-age gates inherited from
   `config:best-practices`, especially npm's three-day security window, are not
   bypassed by early PR creation.
 - Request `@Coldaine` review on Renovate PRs.
-- Group routine minor, patch, digest, and pin updates by domain:
-  application dependencies, development tools, container images, infrastructure,
-  and CI/development environments. Later matching rules take precedence.
-- Propose major upgrades separately and label them `major-upgrade`; preserve
+- Put every minor, patch, digest and pin update into one weekly PR, "all
+  non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that adds
+  digest and pin updates). Lock-file maintenance stays its own weekly PR:
+  Renovate cannot group it with other update types. A consumer's own group
+  rules come later and take precedence.
+- Propose each major upgrade as its own PR and label it `major-upgrade`; preserve
   Renovate's known related-package groups such as Prisma CLI/client. Native
-  package-replacement proposals remain separate from routine groups too.
+  package-replacement proposals remain separate too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
   both caps. They come from GitHub Dependabot alerts, so a repository without
@@ -125,9 +128,10 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
 - Propose Python minor and major version upgrades (for example 3.14 to 3.15) in
-  their own `python` PR, outside the routine groups, and never automerge them.
-  Patch updates (3.14.7 to 3.14.8) and digest or pin updates stay in the routine
-  groups, so security point releases do not wait behind a minor upgrade. The rule
+  their own `python` PR, outside the non-major group, and never automerge them.
+  Patch updates (3.14.7 to 3.14.8) come in a patch branch of the non-major group,
+  and digest or pin updates in the group itself, so security point releases do
+  not wait behind a minor upgrade. The rule
   matches Python by package name across Docker image tags, `actions/setup-python`
   `python-version` inputs, `.python-version`, `requires-python`, `runtime.txt` and
   the mise, asdf, proto, devbox, pixi and devcontainer runtime pins. It does not
@@ -170,9 +174,9 @@ merged; it uses standard hosted runners and follows the shared Python rule like 
 `oh-my-openagent` receives the central policy without needing its config-only
 setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
 
-The two-PR limit is per repository, not per organization and not two new PRs
-every week. Major upgrades share those slots with routine groups. If both are
-occupied, other updates queue; with `updateNotScheduled: false`, new routine
+The five-PR limit is per repository, not per organization and not five new PRs
+every week. Major upgrades share those slots with the non-major PR, the Python
+PR and lock-file maintenance. If all five are occupied, other updates queue; with `updateNotScheduled: false`, new routine
 branches and ordinary branch updates wait for Monday. Queued updates appear as
 rate-limited on the repository's Dependency Dashboard. There is no additional
 one-PR-per-hour throttle. Security fixes bypass

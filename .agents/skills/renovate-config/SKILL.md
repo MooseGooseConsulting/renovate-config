@@ -33,7 +33,7 @@ replacement for Renovate's official documentation.
    same Renovate image and release as the runner. To run it locally, use that workflow's image tag:
 
    ```bash
-   image=docker.io/renovate/renovate:<tag from validate.yml>
+   image=docker.io/renovate/renovate:<tag@sha256:digest from validate.yml>
    podman run --rm -v "$PWD:/work:ro,Z" -w /work --entrypoint renovate-config-validator "$image" \
      --strict --no-global default.json org-inherited-config.json renovate.json
    podman run --rm -v "$PWD:/work:ro,Z" -w /work --entrypoint renovate-config-validator "$image" \
@@ -55,7 +55,7 @@ replacement for Renovate's official documentation.
 - Renovate PRs are the inbox; do not depend on Patrick opening Dependency Dashboards.
 - Do not depend on a Mend account, Mend-hosted app, Mend Developer Portal, or
   paid Mend feature.
-- Keep Renovate quiet through weekly domain grouping and the two-PR cap. Open PRs promptly so PR-triggered CI can run; check CI before merging.
+- Keep Renovate quiet through the weekly non-major group and the five-PR cap. Open PRs promptly so PR-triggered CI can run; check CI before merging.
 - Request review/assignment on PR creation so agents can triage PRs from GitHub directly.
 - Keep the shared preset public and secret-free.
 - Never add host tokens, registry passwords, or private credentials to this repo.

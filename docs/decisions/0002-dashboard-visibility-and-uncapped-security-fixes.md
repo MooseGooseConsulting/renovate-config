@@ -1,6 +1,6 @@
 # ADR 0002: Dependency Dashboard on for visibility; security fixes uncapped
 
-- Status: accepted (owner-requested audit fixes, 2026-10-21); amended 2026-10-22: the runner's job summary is removed ([#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33)), so held and queued updates show on the dashboard, or only in the runner's log for a repository with issues turned off
+- Status: accepted (owner-requested audit fixes, 2026-10-21); amended 2026-10-22: the runner's job summary is removed ([#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33)), so held and queued updates show on the dashboard, or only in the runner's log for a repository with issues turned off; the ordinary cap is five from 2026-10-22 ([ADR 0003](0003-one-non-major-pr-and-five-slots.md))
 - Applies to: every repository the shared preset reaches
 
 ## Context
