@@ -2,6 +2,7 @@
  * Discover organization and personal repositories without a rollout allowlist.
  * Apply the shared default even when a repository has no Renovate config file.
  * Include owned forks; archived repositories retain Renovate's default skip.
+ * Dormant repositories listed in excludedRepositories are left out of discovery.
  */
 const preset = "github>MooseGooseConsulting/renovate-config";
 const target = process.env.RENOVATE_TARGET_REPOSITORY;
@@ -9,13 +10,35 @@ if (target && !/^(MooseGooseConsulting|Coldaine)\/[A-Za-z0-9_.-]+$/i.test(target
   throw new Error("Target must be one MooseGooseConsulting or Coldaine repository, not a pattern.");
 }
 
+// Dormant repositories that fleet runs skip (owner decision, 2026-10-23, from the 2026-10-22
+// inactive-repository report). Renovate does not open, update, rebase or close anything in them,
+// so their existing Renovate PRs and Dependency Dashboard issues stay as they are, and they get no
+// Renovate security-fix PRs. Their GitHub Dependabot alerts stay on. A manual run that names one
+// in the workflow's repository input still processes it. To re-include a repository, delete its
+// line here; the next fleet run discovers it again.
+const excludedRepositories = [
+  "MooseGooseConsulting/ActuarialKnowledge",
+  "MooseGooseConsulting/ColdTrace",
+  "MooseGooseConsulting/ComfyWatchman",
+  "MooseGooseConsulting/constellation-task-gardener",
+  "MooseGooseConsulting/observation-station",
+  "MooseGooseConsulting/promptcannon-prd-complete",
+  "MooseGooseConsulting/RepoVisUI",
+  "MooseGooseConsulting/scope-atlas",
+  "MooseGooseConsulting/tidbyt-agent-gateway",
+];
+
 const config = {
   platform: "github",
   extends: [preset],
   onboarding: false,
   requireConfig: "optional",
   autodiscover: true,
-  autodiscoverFilter: target ? [target] : ["MooseGooseConsulting/*", "Coldaine/*"],
+  // A repository is kept when it matches a positive pattern and every "!" pattern (Renovate's
+  // matchRegexOrGlobList; globs match case-insensitively).
+  autodiscoverFilter: target
+    ? [target]
+    : ["MooseGooseConsulting/*", "Coldaine/*", ...excludedRepositories.map((repo) => `!${repo}`)],
   forkProcessing: "enabled",
   // Docker Hub refuses anonymous tag pagination past page 10 (renovatebot/renovate#46925). When
   // that happens Renovate drops every timestamp it fetched, and the release-age soak in
