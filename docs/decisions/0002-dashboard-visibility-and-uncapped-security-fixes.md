@@ -109,10 +109,12 @@ them. Renovate 44.107.0 source:
   "- autoclosed", closed, and the branch is deleted.
 
 Which of the two silent paths was taken cannot be shown: the runner logs at
-info. The three repositories ran between 15:27 and 15:43 UTC, inside GitHub's
-incident of 2026-10-22 15:28 UTC to 2026-10-23 02:30 UTC ("intermittent errors
-loading Issues, Pull Requests and search results"; API requests degraded;
-<https://stspg.io/sx51v1tlpqjc>). Dependabot alerts were on in all three
+info. The three repositories ran between 15:27 and 15:43 UTC, as a GitHub
+incident began: its first status update came at 15:28 UTC ("degraded
+performance for Actions, Issues and Pull Requests", then "intermittent errors
+loading Issues, Pull Requests and search results"; API requests degraded later;
+resolved 2026-10-23 02:30 UTC; <https://stspg.io/sx51v1tlpqjc>). big-ui started
+at 15:27:51, one minute before that first update. Dependabot alerts were on in all three
 repositories at 08:10 UTC that day and are on now.
 
 ### Why the preset is not the cause
