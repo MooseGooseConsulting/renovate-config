@@ -65,12 +65,12 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Create GitHub App token
         if: steps.auth.outputs.mode == 'app'
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3
         with:
           # v3 accepts client-id (preferred) or legacy app-id. Secret is the App Client ID.
           # owner without repositories = all repos in the owner's App installation.
@@ -139,7 +139,7 @@ jobs:
         run: echo "RENOVATE_DRY_RUN=full" >> "$GITHUB_ENV"
 
       - name: Self-hosted Renovate (fleet)
-        uses: renovatebot/github-action@v46.3.3
+        uses: renovatebot/github-action@2804199d260ad00c1fae0e9e842888369391c776 # v46.3.10
         with:
           configurationFile: .github/renovate-diagnostic.cjs
           token: ${{ steps.app-token.outputs.token || secrets.RENOVATE_TOKEN }}
