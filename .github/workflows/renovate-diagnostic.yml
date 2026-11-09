@@ -146,7 +146,7 @@ jobs:
           # Docker Hub's image, so Renovate dates the runner's own updates (it reads no GHCR dates for this
           # image). renovate.json groups this pin with the validator image in validate.yml.
           renovate-image: docker.io/renovate/renovate
-          renovate-version: 44.107.0
+          renovate-version: 44.221.1
         env:
           LOG_LEVEL: info
           RENOVATE_TARGET_REPOSITORY: ${{ inputs.repository }}
