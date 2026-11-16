@@ -15,12 +15,12 @@ jobs:
       # The same Renovate image and release as the runner in renovate-diagnostic.yml. renovate.json
       # groups the two references, so Renovate bumps them in one PR.
       - name: Validate the presets
-        uses: docker://docker.io/renovate/renovate:44.107.0@sha256:fb6b7c66be211ee72de037eb48d269da7cf90f30c773e893b6b8002bffafcd4b
+        uses: docker://docker.io/renovate/renovate:44.236.4@sha256:c00542ee2c0ca5623fd9e98b3878ae175ddc7b6a695c7bd04aceba8a9b44d0e4
         with:
           entrypoint: /usr/local/sbin/renovate-config-validator
           args: --strict --no-global default.json org-inherited-config.json renovate.json
       - name: Validate the runner configuration
-        uses: docker://docker.io/renovate/renovate:44.107.0@sha256:fb6b7c66be211ee72de037eb48d269da7cf90f30c773e893b6b8002bffafcd4b
+        uses: docker://docker.io/renovate/renovate:44.236.4@sha256:c00542ee2c0ca5623fd9e98b3878ae175ddc7b6a695c7bd04aceba8a9b44d0e4
         with:
           entrypoint: /usr/local/sbin/renovate-config-validator
           args: --strict .github/renovate-diagnostic.cjs
