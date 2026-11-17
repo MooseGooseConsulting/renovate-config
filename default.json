@@ -69,7 +69,7 @@
       "groupSlug": "all-minor-patch"
     },
     {
-      "description": "Put every major upgrade into one weekly 'all major dependencies' PR, separate from the non-major group. Renovate's related-package groups within majors are preserved; consumer group rules come later and take precedence. Never automerge (top-level).",
+      "description": "Put every major upgrade into one weekly 'all major dependencies' PR, separate from the non-major group. Related-package majors (Prisma CLI/client, monorepos) are folded into this single major PR instead of their own branches. Consumer group rules come later and take precedence. Never automerge (top-level).",
       "matchUpdateTypes": [
         "major"
       ],

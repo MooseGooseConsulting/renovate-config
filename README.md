@@ -109,9 +109,10 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   `separateMajorMinor` stays on so majors never join the non-major PR, and
   `separateMinorPatch` is off so minor and patch stay together. See
   [ADR 0004](docs/decisions/0004-one-pr-per-repository.md). Two total PRs per
-  repository: lock-file maintenance is disabled, because Renovate cannot group
-  it with other update types. A consumer's own group rules come later and
-  take precedence.
+  repository for ordinary updates: lock-file maintenance is disabled, because
+  Renovate cannot group it with other update types. A consumer's own group
+  rules come later and take precedence. Native package-replacement proposals
+  remain separate too (Renovate ignores the grouped branch name for them).
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
   both caps. They come from GitHub Dependabot alerts, so a repository without
@@ -144,9 +145,9 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
 - Let Python updates ride in the two weekly PRs instead of their former
-  `python` PR: Python patch releases (3.14.7 to 3.14.8), digest and pin updates
-  join "all non-major dependencies"; Python minor and major upgrades (3.14 to
-  3.15) join the major PR ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md),
+  `python` PR: Python patch releases (3.14.7 to 3.14.8), minor upgrades (3.14
+  to 3.15), digest and pin updates join "all non-major dependencies"; only
+  Python major upgrades (3.14 to 4.0) join the major PR ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md),
   superseding the October 13, 2026, revised October 22, 2026, split). The
   4-day soak and no-automerge rules still apply to Python.
 

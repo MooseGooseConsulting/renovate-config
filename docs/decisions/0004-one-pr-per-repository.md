@@ -34,17 +34,17 @@ together, non-majors together, nothing else.
 - **Majors stay out of the non-major PR.** `separateMajorMinor` stays on (its
   original semantics): it keeps majors out of the non-major PR; the grouping
   rule is what gathers them into their own PR.
-- **No Python split.** The former Python rules are deleted: Python patches,
-  digest and pin updates join "all non-major dependencies", Python minor and
-  major upgrades join "all major dependencies". Ecosystem splits contradict
-  the two-PR-by-update-type model.
+- **No Python split.** The former Python rules are deleted: Python patch, minor, digest and pin updates join "all non-major dependencies"; only Python major upgrades join "all major dependencies". Ecosystem splits contradict the two-PR-by-update-type model.
 - **No lock-file maintenance.** `lockFileMaintenance` is disabled: Renovate
   44.107.0 cannot group it with other update types, so keeping it would be a
   third PR. Trade-off: lockfiles are still refreshed inside the two grouped
-  PRs whenever dependencies change (the grouped updates' lock regeneration,
-  soaked per ADR 0001), but standalone lock-file-only refreshes stop
-  happening. The ADR 0001 pass-to-package-manager soak still applies when
-  Renovate regenerates a lock file for a grouped update.
+  PRs whenever dependencies change, but standalone lock-file-only refreshes
+  stop happening. When Renovate regenerates a lock file for a grouped update,
+  the ADR 0001 pass-to-package-manager soak still applies only where the
+  manager supports an age cutoff (npm and Poetry); for Cargo and similar
+  managers, transitive releases in the regeneration are not age-checked.
+  Native package-replacement updates likewise remain separate: Renovate
+  ignores the grouped branch name for them.
 - **What stays.** The Monday schedule, the 4-day release-age soak, no
   automerge, the five ordinary PR slots, the Dependency Dashboard, and the
   uncapped security lane are untouched. A consumer's own group rules come
