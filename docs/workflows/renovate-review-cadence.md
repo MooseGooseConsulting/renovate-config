@@ -61,6 +61,7 @@ old notes.
   failed lookups, including third-party GHCR images when the runner token lacks
   `read:packages`. Undated sources can arrive without the soak and require care.
   Security-fix branches are uncapped; a rate-limited security branch is a defect.
+- To investigate held updates or missing timestamps, run a targeted Renovate dry run with `LOG_LEVEL=debug`; the fleet runner logs at info.
 - The Renovate runner's log for WARN and ERROR records and the GHCR probe's
   error annotation.
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or

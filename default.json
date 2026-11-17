@@ -79,7 +79,7 @@
     {
       "description": "Owner rule (2026-11-17): isolate TypeScript and ESLint stack updates so plugin incompatibilities do not block other dependency upgrades.",
       "matchDatasources": ["npm"],
-      "matchPackageNames": ["typescript", "eslint", "@eslint/**", "typescript-eslint", "@typescript-eslint/**", "eslint-plugin-*", "eslint-config-*", "@*/eslint-plugin-*", "@*/eslint-config-*"],
+      "matchPackageNames": ["typescript", "eslint", "@eslint/**", "typescript-eslint", "@typescript-eslint/**", "eslint-plugin-*", "eslint-config-*", "@*/eslint-plugin", "@*/eslint-config", "@*/eslint-plugin-*", "@*/eslint-config-*"],
       "groupName": "TypeScript and ESLint stack",
       "groupSlug": "typescript-eslint-stack",
       "separateMajorMinor": false
@@ -87,13 +87,13 @@
     {
       "description": "Owner rule (2026-11-17): find Python and Go patches separately so a newer minor release cannot hide security fixes in the current line.",
       "matchDatasources": ["docker", "python-version", "golang-version", "github-tags", "github-releases"],
-      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?(?:python|golang)$/", "python/cpython", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?(?:python|golang)$/", "python/cpython", "containerbase/python-prebuild", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
       "separateMinorPatch": true
     },
     {
       "description": "Owner rule (2026-11-17): reunite Python and Go patch candidates with the non-major group after selecting patches separately from minors.",
       "matchDatasources": ["docker", "python-version", "golang-version", "github-tags", "github-releases"],
-      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?(?:python|golang)$/", "python/cpython", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?(?:python|golang)$/", "python/cpython", "containerbase/python-prebuild", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
       "matchUpdateTypes": ["patch"],
       "group": { "branchTopic": "all-minor-patch" },
       "groupName": "all non-major dependencies",
@@ -102,21 +102,21 @@
     {
       "description": "Owner rule (2026-11-17): Python minor and major releases are deliberate platform migrations; select patches in the current minor line instead.",
       "matchDatasources": ["docker", "python-version", "github-tags", "github-releases"],
-      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?python$/", "python/cpython", "actions/python-versions"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?python$/", "python/cpython", "containerbase/python-prebuild", "actions/python-versions"],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
     {
       "description": "Owner rule (2026-11-17): Node major releases are deliberate platform migrations; keep updates within the selected major line.",
       "matchDatasources": ["docker", "node-version", "github-releases"],
-      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?node$/", "actions/node-versions"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?node$/", "actions/node-versions"],
       "matchUpdateTypes": ["major"],
       "enabled": false
     },
     {
       "description": "Owner rule (2026-11-17): Go minor and major toolchain releases are deliberate platform migrations; select patches in the current minor line without restricting ordinary Go modules.",
       "matchDatasources": ["docker", "golang-version", "github-tags", "github-releases"],
-      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?golang$/", "go", "golang/go", "actions/go-versions"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?golang$/", "go", "golang/go", "actions/go-versions"],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
