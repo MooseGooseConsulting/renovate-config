@@ -1,9 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Weekly updates: one PR per repository carrying every dependency update, including majors, plus separate lock-file maintenance, and review before every merge.",
+  "description": "Weekly updates: two PRs per repository, one for every non-major update and one for every major update, and review before every merge.",
   "extends": [
     "config:best-practices",
-    "group:all"
+    "group:allNonMajor"
   ],
   "timezone": "America/Chicago",
   "dependencyDashboard": true,
@@ -11,7 +11,7 @@
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Review required: check dependency impact and CI before merging. One weekly PR carries every update, majors included; lock-file maintenance comes as its own PR. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
+  "prHeader": "Review required: check dependency impact and CI before merging. Two weekly PRs per repository: one carries every non-major update, one carries every major update. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
   "reviewers": [
     "Coldaine"
   ],
@@ -40,17 +40,13 @@
     "* * * * 1"
   ],
   "lockFileMaintenance": {
-    "description": "Owner rule (2026-10-21), lock files: lock-file maintenance re-resolves every transitive dependency, so the 4-day soak is handed to the package manager. Renovate passes it to npm as --before and to Poetry 2.4+ as POETRY_SOLVER_MIN_RELEASE_AGE. uv, pnpm and bun take it only from the consumer's own setting (exclude-newer, minimumReleaseAge). This never holds the PR itself: lock-file maintenance has no release date, and the stability status check is off. See docs/decisions/0001-fleet-release-age-soak.md.",
-    "enabled": true,
-    "schedule": [
-      "* * * * 1"
-    ],
-    "minimumReleaseAge": "4 days"
+    "description": "Owner rule (2026-11-16): two total PRs per repository (non-major group + major group), so lock-file maintenance is off. Renovate cannot group it with other update types. Lockfiles are still updated inside the grouped PRs when dependencies change; standalone lock-file-only refreshes stop happening. Superseded the 2026-10-21 lock-file maintenance rule.",
+    "enabled": false
   },
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
   "automerge": false,
-  "separateMajorMinor": false,
+  "separateMajorMinor": true,
   "separateMinorPatch": false,
   "customDatasources": {
     "ghcr": {
@@ -62,6 +58,24 @@
     }
   },
   "packageRules": [
+    {
+      "description": "group:allNonMajor (extends) puts every minor and patch update into one weekly 'all non-major dependencies' PR. This adds digest, pin and pinDigest updates to the same PR (same groupName and groupSlug). Lock-file maintenance is disabled (see lockFileMaintenance), so there are two total PRs per repository. Majors are matched by the next rule. Later consumer group rules take precedence.",
+      "matchUpdateTypes": [
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Put every major upgrade into one weekly 'all major dependencies' PR, separate from the non-major group. Renovate's related-package groups within majors are preserved; consumer group rules come later and take precedence. Never automerge (top-level).",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "all major dependencies",
+      "groupSlug": "all-major"
+    },
     {
       "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",
       "matchManagers": [

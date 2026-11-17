@@ -102,15 +102,16 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   repository that needs another npm sets `constraints.npm` in its own
   `renovate.json`.
 - Request `@Coldaine` review on Renovate PRs.
-- Put every update, including majors, into one weekly PR, "all dependencies"
-  (Renovate's `group:all`, with `separateMajorMinor` and `separateMinorPatch`
-  off). See [ADR 0004](docs/decisions/0004-one-pr-per-repository.md). Lock-file
-  maintenance stays its own weekly PR: Renovate cannot group it with other
-  update types. A consumer's own group rules come later and take precedence.
-- Include major upgrades in the single weekly PR rather than separate
-  `major-upgrade` PRs; preserve Renovate's known related-package groups such
-  as Prisma CLI/client. Native package-replacement proposals remain separate
-  too.
+- Put every minor, patch, digest, pin and pinDigest update into one weekly PR,
+  "all non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that
+  adds digest, pin and pinDigest updates), and every major upgrade into one
+  weekly PR, "all major dependencies" (a package rule that groups all majors).
+  `separateMajorMinor` stays on so majors never join the non-major PR, and
+  `separateMinorPatch` is off so minor and patch stay together. See
+  [ADR 0004](docs/decisions/0004-one-pr-per-repository.md). Two total PRs per
+  repository: lock-file maintenance is disabled, because Renovate cannot group
+  it with other update types. A consumer's own group rules come later and
+  take precedence.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
   both caps. They come from GitHub Dependabot alerts, so a repository without
@@ -126,31 +127,28 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   ordinary PRs for review (October 22, 2026). First-party MooseGooseConsulting and
   Coldaine actions and GitHub releases do not wait. See the
   [decision record](docs/decisions/0001-fleet-release-age-soak.md).
-- Hand the 4-day soak to the package manager when Renovate regenerates a lock file,
-  so transitive releases are soaked too where that manager supports a cooldown.
-  Renovate passes it to npm (`--before`) and Poetry (2.4 or later, read from the
-  `poetry.lock` header); repositories using uv, pnpm or
+- Hand the 4-day soak to the package manager when Renovate regenerates a lock file
+  inside a grouped PR, so transitive releases are soaked too where that manager
+  supports a cooldown. Renovate passes it to npm (`--before`) and Poetry (2.4 or
+  later, read from the `poetry.lock` header); repositories using uv, pnpm or
   bun set it in their own configuration (`exclude-newer`, which needs uv 0.9.17 or
   later; `minimumReleaseAge`). A security fix younger than 4 days is exempted by
   release, not by package, until it is 4 days old (ADR 0001). The preset does not
-  check that a repository carries its setting; without it, lock-file maintenance
-  for those managers is not soaked.
-  Weekly lock-file maintenance runs only for npm, bun, pep621 and poetry, and
-  not where a `yarn.lock` or `pdm.lock` is present. Other managers' lock files
-  (Cargo, Bundler, Composer, Gradle, NuGet, Terraform and the rest) change only with an
-  ordinary update: its proposed version is soaked, but the transitive releases the
-  package manager re-resolves for it are not.
+  check that a repository carries its setting; without it, lock-file regeneration
+  for those managers is not soaked. Standalone lock-file maintenance is disabled
+  (two total PRs per repository): lockfiles are still refreshed whenever the
+  grouped PRs change dependencies, but a lock-file-only refresh never opens its own PR.
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
-- Let Python updates ride in the single weekly PR instead of their former
-  `python` PR: Python minor and major upgrades (3.14 to 3.15), patch releases
-  (3.14.7 to 3.14.8), and digest or pin updates all join "all dependencies"
-  ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md), superseding the
-  October 13, 2026, revised October 22, 2026, split). The 4-day soak and
-  no-automerge rules still apply to Python.
+- Let Python updates ride in the two weekly PRs instead of their former
+  `python` PR: Python patch releases (3.14.7 to 3.14.8), digest and pin updates
+  join "all non-major dependencies"; Python minor and major upgrades (3.14 to
+  3.15) join the major PR ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md),
+  superseding the October 13, 2026, revised October 22, 2026, split). The
+  4-day soak and no-automerge rules still apply to Python.
 
 This repository intentionally contains no secrets or host rules.
 
@@ -199,7 +197,7 @@ merged; it uses standard hosted runners and follows the shared preset like every
 setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
 
 The five-PR limit is per repository, not per organization and not five new PRs
-every week. The single weekly PR shares those slots with lock-file maintenance. If all five are occupied, other updates queue; with `updateNotScheduled: false`, new routine
+every week. The two weekly PRs (all non-major, all major) share those slots. If all five are occupied, other updates queue; with `updateNotScheduled: false`, new routine
 branches and ordinary branch updates wait for Monday. Queued updates appear as
 rate-limited on the repository's Dependency Dashboard. There is no additional
 one-PR-per-hour throttle. Security fixes bypass
