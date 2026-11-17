@@ -91,6 +91,15 @@
       "separateMinorPatch": true
     },
     {
+      "description": "Owner rule (2026-11-17): reunite Python and Go patch candidates with the non-major group after selecting patches separately from minors.",
+      "matchDatasources": ["docker", "python-version", "golang-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?(?:python|golang)$/", "python/cpython", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
+      "matchUpdateTypes": ["patch"],
+      "group": { "branchTopic": "all-minor-patch" },
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
       "description": "Owner rule (2026-11-17): Python minor and major releases are deliberate platform migrations; select patches in the current minor line instead.",
       "matchDatasources": ["docker", "python-version", "github-tags", "github-releases"],
       "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?python$/", "python/cpython", "actions/python-versions"],
@@ -173,6 +182,11 @@
         "!ghcr.io/renovatebot/renovate"
       ],
       "overrideDatasource": "custom.ghcr"
+    },
+    {
+      "description": "Owner rule (2026-11-17): Docker Hub tag dates can be unavailable beyond the tag-page limit; keep the four-day soak when dated but do not indefinitely hold undated Docker updates. GHCR images moved to custom.ghcr above keep their existing policy.",
+      "matchDatasources": ["docker"],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     },
     {
       "description": "Owner rule (2026-10-22), undated sources (1 of 3): git-refs, git-tags, github-runners, java-version and dart-version carry no release dates in Renovate 44.107.0, so timestamp-required held their updates forever. timestamp-optional keeps the 4-day wait whenever a date exists and otherwise lets the update through as an ordinary PR for review. python-version is dated from python.org's release feed and so waits 4 days; it is listed so a feed outage does not hold Python patch releases. Replaces the 2026-10-21 exemption of the runtime lists and runner labels, which skipped the wait even when a date existed.",

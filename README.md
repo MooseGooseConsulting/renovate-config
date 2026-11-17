@@ -106,8 +106,9 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   both caps. They come from GitHub Dependabot alerts, so a repository without
   Dependabot alerts turned on gets none.
 - Hold every major, minor, patch and digest update for 4 days after its release
-  (owner rule, October 21, 2026). Sources that publish dates (npm, PyPI, crates.io,
-  GitHub releases and tags, Docker Hub) hold an update until its date is known.
+  (owner rule, October 21, 2026). Dated sources such as npm, PyPI, crates.io
+  and GitHub releases and tags hold an update until its date is known. Docker
+  updates still wait when dated; an undated Docker update is not held forever.
   Third-party `ghcr.io` images are dated through the GitHub Packages API (a custom
   datasource; the runner token needs `read:packages`), except a few whose newest
   100 versions span hours. Sources that publish no dates (other registries such as
