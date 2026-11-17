@@ -85,28 +85,38 @@
       "separateMajorMinor": false
     },
     {
+      "description": "Owner rule (2026-11-17): find Python and Go patches separately so a newer minor release cannot hide security fixes in the current line.",
+      "matchDatasources": ["docker", "python-version", "golang-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?(?:python|golang)$/", "python/cpython", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
+      "separateMinorPatch": true
+    },
+    {
       "description": "Owner rule (2026-11-17): Python minor and major releases are deliberate platform migrations; select patches in the current minor line instead.",
       "matchDatasources": ["docker", "python-version", "github-tags", "github-releases"],
       "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?python$/", "python/cpython", "actions/python-versions"],
-      "allowedVersions": "/^v?{{{major}}}\\.{{{minor}}}(?:\\.\\d+)?(?:[-+_].*)?$/"
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
     },
     {
       "description": "Owner rule (2026-11-17): Node major releases are deliberate platform migrations; keep updates within the selected major line.",
       "matchDatasources": ["docker", "node-version", "github-releases"],
       "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?node$/", "actions/node-versions"],
-      "allowedVersions": "/^v?{{{major}}}(?:\\.\\d+)*(?:[-+_].*)?$/"
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     },
     {
       "description": "Owner rule (2026-11-17): Go minor and major toolchain releases are deliberate platform migrations; select patches in the current minor line without restricting ordinary Go modules.",
       "matchDatasources": ["docker", "golang-version", "github-tags", "github-releases"],
       "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?golang$/", "go", "golang/go", "actions/go-versions"],
-      "allowedVersions": "/^v?{{{major}}}\\.{{{minor}}}(?:\\.\\d+)?(?:[-+_].*)?$/"
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
     },
     {
       "description": "Owner rule (2026-11-17): .NET major SDK and runtime releases are deliberate platform migrations; keep the current major line without restricting NuGet libraries.",
       "matchDatasources": ["docker", "dotnet-version"],
       "matchPackageNames": ["dotnet-sdk", "dotnet-runtime", "/^mcr\\.microsoft\\.com\\/dotnet\\/(?:sdk|runtime|runtime-deps|aspnet)$/"],
-      "allowedVersions": "/^v?{{{major}}}(?:\\.\\d+)*(?:[-+_].*)?$/"
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     },
     {
       "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",
