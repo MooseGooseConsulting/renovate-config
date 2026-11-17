@@ -6,7 +6,7 @@
     "group:allNonMajor"
   ],
   "timezone": "America/Chicago",
-  "dependencyDashboard": true,
+  "dependencyDashboard": { "enabled": true },
   "addLabels": [
     "dependencies",
     "agent-review"
