@@ -14,7 +14,7 @@ Start here when navigating the Renovate config docs.
 | Agent-governed Renovate proposal | `docs/inspiration/agent-governed-renovate-change-agent.md` |
 | Detailed combinator, dead-dependency, and major-upgrade proposal | `docs/inspiration/renovate-as-combinator-and-dead-code-agent.md` |
 | Static subagent research archive | `docs/inspiration/subagents/README.md` |
-| Architecture decision records | `docs/decisions/README.md` |
+| Shared Renovate policy and runtime holds | `docs/plans/2026-11-17-renovate-policy.md` |
 
 ## Inspiration Docs (non-authoritative — review by date in frontmatter)
 

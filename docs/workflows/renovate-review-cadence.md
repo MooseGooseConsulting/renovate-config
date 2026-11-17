@@ -57,17 +57,11 @@ old notes.
 - Security alerts, vulnerability PRs, emergency update history, or an explicit
   check showing that no relevant current alerts were found.
 - CI status and repeated failure patterns on Renovate PRs.
-- Each sampled repository's Dependency Dashboard issue: updates still waiting
-  out the 4-day soak ("Pending Status Checks"), queued updates ("Rate-Limited"),
-  and dependencies Renovate failed to look up (for example a third-party GHCR
-  image while the runner token lacks `read:packages`). A soak hold clears by
-  itself; one still listed after several weekly runs needs a local dry run.
-  Undated sources (other registries, git refs and tags, floating-tag digests)
-  are not held: they arrive as ordinary PRs
-  ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)), so check that
-  reviewers treated a just-published undated release with care. Security-fix
-  branches are uncapped and Renovate exempts them from the commit limits, so one
-  listed as rate-limited is a defect.
+- Runner logs for updates waiting out the four-day soak, queued updates and
+  failed lookups, including third-party GHCR images when the runner token lacks
+  `read:packages`. Undated sources can arrive without the soak and require care.
+  Security-fix branches are uncapped; a rate-limited security branch is a defect.
+- To investigate held updates or missing timestamps, run a targeted Renovate dry run with `LOG_LEVEL=debug`; the fleet runner logs at info.
 - The Renovate runner's log for WARN and ERROR records and the GHCR probe's
   error annotation.
 - Human or agent notes explaining merge, close, defer, rebase, escalation, or

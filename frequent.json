@@ -1,0 +1,5 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Owner rule (2026-11-17): allow routine updates daily for repositories opting into a faster cadence.",
+  "schedule": ["* * * * *"]
+}

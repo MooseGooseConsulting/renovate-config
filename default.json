@@ -1,17 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Weekly updates: two PRs per repository, one for every non-major update and one for every major update, and review before every merge.",
+  "description": "Weekly grouped updates with separate TypeScript and ESLint tooling, deliberate runtime release lines, and review before every merge.",
   "extends": [
     "config:best-practices",
     "group:allNonMajor"
   ],
   "timezone": "America/Chicago",
-  "dependencyDashboard": { "enabled": true },
+  "dependencyDashboard": { "enabled": false },
   "addLabels": [
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Review required: check dependency impact and CI before merging. Two weekly PRs per repository: one carries every non-major update, one carries every major update. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
+  "prHeader": "Review required: check dependency impact and CI before merging. Routine updates are grouped into non-major, major, and TypeScript/ESLint stack PRs; security fixes are separate. Never push commits to Renovate branches: fix the default branch instead.",
   "reviewers": [
     "Coldaine"
   ],
@@ -77,6 +77,57 @@
       "groupSlug": "all-major"
     },
     {
+      "description": "Owner rule (2026-11-17): isolate TypeScript and ESLint stack updates so plugin incompatibilities do not block other dependency upgrades.",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["typescript", "eslint", "@eslint/**", "typescript-eslint", "@typescript-eslint/**", "eslint-plugin-*", "eslint-config-*", "@*/eslint-plugin", "@*/eslint-config", "@*/eslint-plugin-*", "@*/eslint-config-*"],
+      "groupName": "TypeScript and ESLint stack",
+      "groupSlug": "typescript-eslint-stack",
+      "separateMajorMinor": false
+    },
+    {
+      "description": "Owner rule (2026-11-17): find Python and Go patches separately so a newer minor release cannot hide security fixes in the current line.",
+      "matchDatasources": ["docker", "python-version", "golang-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?(?:python|golang)$/", "python/cpython", "containerbase/python-prebuild", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Owner rule (2026-11-17): reunite Python and Go patch candidates with the non-major group after selecting patches separately from minors.",
+      "matchDatasources": ["docker", "python-version", "golang-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?(?:python|golang)$/", "python/cpython", "containerbase/python-prebuild", "actions/python-versions", "go", "golang/go", "actions/go-versions"],
+      "matchUpdateTypes": ["patch"],
+      "group": { "branchTopic": "all-minor-patch" },
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Owner rule (2026-11-17): Python minor and major releases are deliberate platform migrations; select patches in the current minor line instead.",
+      "matchDatasources": ["docker", "python-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?python$/", "python/cpython", "containerbase/python-prebuild", "actions/python-versions"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "description": "Owner rule (2026-11-17): Node major releases are deliberate platform migrations; keep updates within the selected major line.",
+      "matchDatasources": ["docker", "node-version", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?node$/", "actions/node-versions"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Owner rule (2026-11-17): Go minor and major toolchain releases are deliberate platform migrations; select patches in the current minor line without restricting ordinary Go modules.",
+      "matchDatasources": ["docker", "golang-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/)?(?:library\\/)?golang$/", "go", "golang/go", "actions/go-versions"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "description": "Owner rule (2026-11-17): .NET major SDK and runtime releases are deliberate platform migrations; keep the current major line without restricting NuGet libraries.",
+      "matchDatasources": ["docker", "dotnet-version"],
+      "matchPackageNames": ["dotnet-sdk", "dotnet-runtime", "/^mcr\\.microsoft\\.com\\/dotnet\\/(?:sdk|runtime|runtime-deps|aspnet)$/"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",
       "matchManagers": [
         "npm"
@@ -131,6 +182,11 @@
         "!ghcr.io/renovatebot/renovate"
       ],
       "overrideDatasource": "custom.ghcr"
+    },
+    {
+      "description": "Owner rule (2026-11-17): Docker Hub tag dates can be unavailable beyond the tag-page limit; keep the four-day soak when dated but do not indefinitely hold undated Docker updates. GHCR images moved to custom.ghcr above keep their existing policy.",
+      "matchDatasources": ["docker"],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     },
     {
       "description": "Owner rule (2026-10-22), undated sources (1 of 3): git-refs, git-tags, github-runners, java-version and dart-version carry no release dates in Renovate 44.107.0, so timestamp-required held their updates forever. timestamp-optional keeps the 4-day wait whenever a date exists and otherwise lets the update through as an ordinary PR for review. python-version is dated from python.org's release feed and so waits 4 days; it is listed so a feed outage does not hold Python patch releases. Replaces the 2026-10-21 exemption of the runtime lists and runner labels, which skipped the wait even when a date existed.",

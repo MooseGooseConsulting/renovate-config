@@ -61,22 +61,14 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 
 ## Policy Shape
 
-- Renovate PRs are the inbox. The Dependency Dashboard issue is on in every
-  repository so queued work is visible: updates waiting for a PR slot
-  ("Rate-Limited"), for Monday, or for the release-age soak ("Pending Status
-  Checks"), plus detected dependencies. Nothing waits for approval on it
-  (`dependencyDashboardApproval` stays off). Ticking a "Rate-Limited" or
-  "Pending Status Checks" box is a deliberate override past the cap or the soak.
-  It takes effect on the runner's next run, the daily scheduled one unless you
-  dispatch the workflow (see "For an immediate run" below); ticking does not
-  start Renovate. Repositories with issues turned off get no dashboard; their
-  queue shows only in the runner's log. See
-  [ADR 0002](docs/decisions/0002-dashboard-visibility-and-uncapped-security-fixes.md).
+- Renovate PRs are the inbox. The Dependency Dashboard is disabled; inspect
+  runner logs for queued updates and GitHub Security for vulnerability alerts.
+- Never push commits to `renovate/` branches. Fix the default branch instead so
+  Renovate retains ownership of its PRs.
 - Extend Renovate's `config:best-practices` preset as the base policy.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
   before merging. Release-age filtering applies to every consumer (below).
-- Keep at most five ordinary Renovate branches and PRs active per repository
-  ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md)).
+- Keep at most five ordinary Renovate branches and PRs active per repository.
   Security-fix branches and PRs are not capped. Renovate counts them apart
   from the five ordinary slots and processes them before any other branch.
   `branchConcurrentLimit: 0` under `vulnerabilityAlerts` is what lifts the
@@ -102,54 +94,48 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   repository that needs another npm sets `constraints.npm` in its own
   `renovate.json`.
 - Request `@Coldaine` review on Renovate PRs.
-- Put every minor, patch, digest, pin and pinDigest update into one weekly PR,
-  "all non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that
-  adds digest, pin and pinDigest updates), and every major upgrade into one
-  weekly PR, "all major dependencies" (a package rule that groups all majors).
-  `separateMajorMinor` stays on so majors never join the non-major PR, and
-  `separateMinorPatch` is off so minor and patch stay together. See
-  [ADR 0004](docs/decisions/0004-one-pr-per-repository.md). Two total PRs per
-  repository for ordinary updates: lock-file maintenance is disabled, because
-  Renovate cannot group it with other update types. A consumer's own group
-  rules come later and take precedence. Native package-replacement proposals
-  remain separate too (Renovate ignores the grouped branch name for them).
+- Group routine updates into one non-major PR and one major PR. TypeScript and
+  ESLint core, plugins and configurations have a separate stack group so
+  compatibility failures do not block other major upgrades. Pin and digest
+  updates join the non-major group. Standalone lock-file maintenance is disabled;
+  consumer grouping rules and native replacements can create additional branches.
+- Extend `github>MooseGooseConsulting/renovate-config:frequent` after the default
+  preset to opt into daily routine updates instead of Monday-only updates.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
   both caps. They come from GitHub Dependabot alerts, so a repository without
   Dependabot alerts turned on gets none.
 - Hold every major, minor, patch and digest update for 4 days after its release
-  (owner rule, October 21, 2026). Sources that publish dates (npm, PyPI, crates.io,
-  GitHub releases and tags, Docker Hub) hold an update until its date is known.
+  (owner rule, October 21, 2026). Dated sources such as npm, PyPI, crates.io
+  and GitHub releases and tags hold an update until its date is known. Docker
+  updates still wait when dated; an undated Docker update is not held forever.
   Third-party `ghcr.io` images are dated through the GitHub Packages API (a custom
   datasource; the runner token needs `read:packages`), except a few whose newest
   100 versions span hours. Sources that publish no dates (other registries such as
   Quay and registry.k8s.io, git refs and tags, floating-tag digests, runner labels,
   the Java and Dart version lists) are not held forever: their updates come as
   ordinary PRs for review (October 22, 2026). First-party MooseGooseConsulting and
-  Coldaine actions and GitHub releases do not wait. See the
-  [decision record](docs/decisions/0001-fleet-release-age-soak.md).
+  Coldaine actions and GitHub releases do not wait.
 - Hand the 4-day soak to the package manager when Renovate regenerates a lock file
   inside a grouped PR, so transitive releases are soaked too where that manager
   supports a cooldown. Renovate passes it to npm (`--before`) and Poetry (2.4 or
   later, read from the `poetry.lock` header); repositories using uv, pnpm or
   bun set it in their own configuration (`exclude-newer`, which needs uv 0.9.17 or
   later; `minimumReleaseAge`). A security fix younger than 4 days is exempted by
-  release, not by package, until it is 4 days old (ADR 0001). The preset does not
+  release, not by package, until it is 4 days old. The preset does not
   check that a repository carries its setting; without it, lock-file regeneration
-  for those managers is not soaked. Standalone lock-file maintenance is disabled
-  (two total PRs per repository): lockfiles are still refreshed whenever the
-  grouped PRs change dependencies, but a lock-file-only refresh never opens its own PR.
+  for those managers is not soaked. Standalone lock-file maintenance is disabled;
+  lockfiles are refreshed with grouped dependency updates.
 - Do not digest-pin first-party codeOps workflow or action branch refs: its `prod`
   branch is a centrally promoted delivery channel. This exception is shared
   because the same pinning occurred across several consumers; it does not
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
-- Let Python updates ride in the two weekly PRs instead of their former
-  `python` PR: Python patch releases (3.14.7 to 3.14.8), minor upgrades (3.14
-  to 3.15), digest and pin updates join "all non-major dependencies"; only
-  Python major upgrades (3.14 to 4.0) join the major PR ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md),
-  superseding the October 13, 2026, revised October 22, 2026, split). The
-  4-day soak and no-automerge rules still apply to Python.
+- Hold Python and Go to their current major/minor line, and Node and .NET to
+  their current major line; patch and digest updates remain eligible. Runtime
+  migrations are deliberate changes, not routine Renovate proposals. See the
+  [shared policy](docs/plans/2026-11-17-renovate-policy.md) for coverage and
+  floating-tag limitations.
 
 This repository intentionally contains no secrets or host rules.
 
@@ -198,10 +184,10 @@ merged; it uses standard hosted runners and follows the shared preset like every
 setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
 
 The five-PR limit is per repository, not per organization and not five new PRs
-every week. The two weekly PRs (all non-major, all major) share those slots. If all five are occupied, other updates queue; with `updateNotScheduled: false`, new routine
-branches and ordinary branch updates wait for Monday. Queued updates appear as
-rate-limited on the repository's Dependency Dashboard. There is no additional
-one-PR-per-hour throttle. Security fixes bypass
+every week. The non-major, major and TypeScript/ESLint stack groups share those
+slots. If all five are occupied, other updates queue; with `updateNotScheduled:
+false`, new routine branches and ordinary branch updates wait for Monday.
+Inspect runner logs for queued updates. There is no additional one-PR-per-hour throttle. Security fixes bypass
 the schedule, the release-age soak and both caps, but still require review.
 Previously opened PRs are not closed merely to bring an existing queue under the
 cap.
