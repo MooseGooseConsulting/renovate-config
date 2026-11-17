@@ -1,17 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Weekly updates: two PRs per repository, one for every non-major update and one for every major update, and review before every merge.",
+  "description": "Weekly grouped updates with separate TypeScript and ESLint tooling, deliberate runtime release lines, and review before every merge.",
   "extends": [
     "config:best-practices",
     "group:allNonMajor"
   ],
   "timezone": "America/Chicago",
-  "dependencyDashboard": { "enabled": true },
+  "dependencyDashboard": { "enabled": false },
   "addLabels": [
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Review required: check dependency impact and CI before merging. Two weekly PRs per repository: one carries every non-major update, one carries every major update. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
+  "prHeader": "Review required: check dependency impact and CI before merging. Routine updates are grouped into non-major, major, and TypeScript/ESLint stack PRs; security fixes are separate. Never push commits to Renovate branches: fix the default branch instead.",
   "reviewers": [
     "Coldaine"
   ],
@@ -75,6 +75,38 @@
       ],
       "groupName": "all major dependencies",
       "groupSlug": "all-major"
+    },
+    {
+      "description": "Owner rule (2026-11-17): isolate TypeScript and ESLint stack updates so plugin incompatibilities do not block other dependency upgrades.",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["typescript", "eslint", "@eslint/**", "typescript-eslint", "@typescript-eslint/**", "eslint-plugin-*", "eslint-config-*", "@*/eslint-plugin-*", "@*/eslint-config-*"],
+      "groupName": "TypeScript and ESLint stack",
+      "groupSlug": "typescript-eslint-stack",
+      "separateMajorMinor": false
+    },
+    {
+      "description": "Owner rule (2026-11-17): Python minor and major releases are deliberate platform migrations; select patches in the current minor line instead.",
+      "matchDatasources": ["docker", "python-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?python$/", "python/cpython", "actions/python-versions"],
+      "allowedVersions": "/^v?{{{major}}}\\.{{{minor}}}(?:\\.\\d+)?(?:[-+_].*)?$/"
+    },
+    {
+      "description": "Owner rule (2026-11-17): Node major releases are deliberate platform migrations; keep updates within the selected major line.",
+      "matchDatasources": ["docker", "node-version", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?node$/", "actions/node-versions"],
+      "allowedVersions": "/^v?{{{major}}}(?:\\.\\d+)*(?:[-+_].*)?$/"
+    },
+    {
+      "description": "Owner rule (2026-11-17): Go minor and major toolchain releases are deliberate platform migrations; select patches in the current minor line without restricting ordinary Go modules.",
+      "matchDatasources": ["docker", "golang-version", "github-tags", "github-releases"],
+      "matchPackageNames": ["/^(?:(?:docker\\.io|index\\.docker\\.io|registry-1\\.docker\\.io)\\/(?:library\\/)?)?golang$/", "go", "golang/go", "actions/go-versions"],
+      "allowedVersions": "/^v?{{{major}}}\\.{{{minor}}}(?:\\.\\d+)?(?:[-+_].*)?$/"
+    },
+    {
+      "description": "Owner rule (2026-11-17): .NET major SDK and runtime releases are deliberate platform migrations; keep the current major line without restricting NuGet libraries.",
+      "matchDatasources": ["docker", "dotnet-version"],
+      "matchPackageNames": ["dotnet-sdk", "dotnet-runtime", "/^mcr\\.microsoft\\.com\\/dotnet\\/(?:sdk|runtime|runtime-deps|aspnet)$/"],
+      "allowedVersions": "/^v?{{{major}}}(?:\\.\\d+)*(?:[-+_].*)?$/"
     },
     {
       "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",

@@ -20,7 +20,7 @@ G2. **Share a useful default across repositories.** Keep the shared preset flexi
 
 G3. **Balance central coordination with repo autonomy.** Put common policy in this repo, and let consumer repositories keep narrow local overrides when their CI, release process, ecosystem, or risk profile requires them.
 
-G4. **Keep Renovate quiet enough to trust.** Use one weekly non-major PR and one weekly major PR per repository, plus a five-PR cap so routine updates are reviewable instead of overwhelming. Open PRs promptly so PR-triggered CI can run; every merge requires review. Security fixes retain their faster lane.
+G4. **Keep Renovate quiet enough to trust.** Use weekly non-major and major PR groups and a separate TypeScript/ESLint group, plus a five-PR cap so routine updates are reviewable instead of overwhelming. Open PRs promptly so PR-triggered CI can run; every merge requires review. Security fixes retain their faster lane.
 
 G5. **Make Renovate PRs agent-reviewable.** Label, assign, and describe dependency PRs so humans and agents can triage, verify, merge, close, defer, or escalate them from GitHub PR state.
 

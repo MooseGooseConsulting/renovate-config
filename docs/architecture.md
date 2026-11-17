@@ -34,13 +34,13 @@ The repository uses a small public Renovate preset as the technical center of gr
 | Rubric evaluation | Current | `docs/rubrics/` contains agent-usable checklists for effectiveness and repository coordination. |
 | Consumer repo sampling | Planned | Reviews should periodically sample real consuming repositories before making broad shared-preset changes. |
 | Optional preset modules | Candidate | Future named presets may split policy for specific ecosystems if the default becomes too broad. |
-| Dashboard-first workflow | Deferred | Approval-gated Dependency Dashboard workflows are opt-in exceptions, not the shared operating default. The dashboard issue itself is on in every repository as a view of queued and held updates; nothing waits for approval on it ([ADR 0002](decisions/0002-dashboard-visibility-and-uncapped-security-fixes.md)). |
+| Dashboard workflow | Deferred | The shared preset disables the Dependency Dashboard; Renovate PRs are the inbox and runner logs surface lookup problems. |
 
 ## Current Components
 
 | Component | Status | Responsibility |
 | --- | --- | --- |
-| `default.json` | Current | Shared policy: one weekly Monday non-major PR and one weekly Monday major PR per repository (`group:allNonMajor` plus a major group rule), lock-file maintenance disabled ([ADR 0004](decisions/0004-one-pr-per-repository.md)); five ordinary PR slots per repository, prompt PR creation and no automerge. Vulnerability fixes bypass routine scheduling, release age and both caps (`branchConcurrentLimit: 0` under `vulnerabilityAlerts` lifts the branch cap; `prConcurrentLimit: 0` restates Renovate's default there), are counted apart from the five ordinary slots, and are processed first ([ADR 0002](decisions/0002-dashboard-visibility-and-uncapped-security-fixes.md)); the preset does not schedule execution. First-party codeOps workflow/action refs retain branch refs instead of being digest-pinned. Python updates ride in the two PRs by update type. Major, minor, patch and digest updates wait 4 days; updates from sources that publish no dates come as ordinary PRs instead of being held; first-party actions and releases are exempt. Third-party GHCR images are dated by the `custom.ghcr` datasource (GitHub Packages API). |
+| `default.json` | Current | Shared policy: weekly non-major and major groups plus a separate TypeScript/ESLint stack group; five ordinary PR slots, prompt PR creation and no automerge. Runtime release lines are held as described in [shared policy](plans/2026-11-17-renovate-policy.md). Vulnerability fixes bypass schedule, release age and caps. First-party codeOps branch refs are not digest-pinned; third-party GHCR images use the custom GitHub Packages datasource. Standalone lock-file maintenance is disabled. |
 | `.github/workflows/renovate-diagnostic.yml` | Current | Existing self-hosted executor: daily discovery scans and manual targeted or run-now dispatch. Credential access determines reachable repositories. Probes the token's GitHub Packages API access before each run and reports a failure as an error annotation. Runs the Docker Hub Renovate image (`renovate-image: docker.io/renovate/renovate`), so its own updates are dated. |
 | `.github/renovate-diagnostic.cjs` | Current | Native `extends`, `onboarding: false`, `requireConfig: optional`; MooseGooseConsulting and Coldaine discovery including active forks; dormant repositories in its `excludedRepositories` list become negated `autodiscoverFilter` patterns (README, Execution and Weekly Cadence). No per-repo enrollment file is needed; branch dry runs resolve the proposed shared preset. Caps Docker Hub tag paging at 10 pages. |
 | `org-inherited-config.json` | Deferred | Compatibility-only Mend-hosted inheritance file. Do not assume it is active or required. |
@@ -64,9 +64,9 @@ The repository uses a small public Renovate preset as the technical center of gr
 
 The codeOps digest-pinning exception is a repeated fleet pattern, not a general opt-out from dependency handling. Renovate opened first-party SHA-pin PRs in codeOps #163, capacitor #202, llm-rig #13 and coldaine-configurations #47; homelab-next #250 merged a local exception. The common policy prevents another pin PR while codeOps adopts a centrally promoted `prod` branch. It covers codeOps GitHub Actions references in every consumer of this preset, including callers not yet migrated from `@main`; it does not migrate them. Remove or narrow the rule if the shared publication model changes, and re-sample consumers before doing so.
 
-The release-age soak is an owner rule (October 21, 2026), adopted after the LiteLLM 1.107.0 supply-chain compromise: major, minor, patch and digest updates wait 4 days. Sources that publish dates hold an update until its date is known; sources that publish none (other registries, git refs and tags, floating-tag digests, runner labels and the Java and Dart version lists) come as ordinary PRs for review, because the owner ruled on October 22, 2026 that nothing is held forever. First-party actions and GitHub releases are exempt; vulnerability fixes keep their bypass. Third-party GHCR images are dated through the GitHub Packages API by a custom datasource in the preset, which needs `read:packages` on the runner token. Lock files are covered too: Renovate hands the soak to npm and Poetry when it regenerates a lock file, uv, pnpm and bun repositories carry the same cooldown in their own configuration, and lock-file maintenance is off for managers that cannot honour one. The runner supplies the Docker Hub page cap (`dockerMaxPages`, global-only) and the GitHub Packages API probe; held updates surface on each repository's Dependency Dashboard. Mechanics, blast radius, known gaps and revisit triggers are in [ADR 0001](decisions/0001-fleet-release-age-soak.md).
+The four-day release-age soak applies to major, minor, patch and digest updates where timestamps are available; undated sources use timestamp-optional. First-party actions and releases are exempt and vulnerability fixes bypass the soak. Third-party GHCR images use a custom datasource requiring `read:packages`; lock regeneration observes the soak only where the package manager supports it.
 
-The former Python rule (October 13, 2026, revised October 22, 2026) kept Python minor and major upgrades out of the non-major group, in their own never-automerged `python` PR, while patches stayed in the non-major group's patch branch. ADR 0004 (2026-11-16) removed that split: Python updates now ride in the two weekly PRs by update type, still subject to the 4-day soak and no automerge.
+Python and Go stay within their selected major/minor line; Node and .NET stay within their selected major. TypeScript and ESLint stack updates have their own group. See [shared policy](plans/2026-11-17-renovate-policy.md) for limits.
 
 ## Review Cadence
 
@@ -80,8 +80,7 @@ recorded in [weekly policy verification](workflows/weekly-policy-verification.md
 - Reconfirm this architecture at least quarterly, or sooner if Renovate behavior changes materially.
 - Revisit the release-age soak when Renovate dates GHCR images natively
   (renovatebot/renovate#39064), which would replace the `custom.ghcr` datasource, and
-  check consumer Dependency Dashboards for updates that stay under "Pending Status
-  Checks" across runs and for failed GHCR lookups.
+  inspect runner logs for held updates and failed GHCR lookups.
 
 ## Open Architecture Questions
 

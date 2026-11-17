@@ -141,11 +141,8 @@ Questions:
 - Are closed or ignored updates revisited, or do they disappear into permanent
   drift?
 - Updates waiting out the 4-day release-age soak are an owner rule, not missing
-  coverage ([ADR 0001](../decisions/0001-fleet-release-age-soak.md)). They clear
-  by themselves; each repository's Dependency Dashboard lists them under
-  "Pending Status Checks". Undated sources are not held: their updates arrive as
-  ordinary PRs. Score whether held updates clear within days; one still listed
-  after several weekly runs needs a dry run to find out why.
+  coverage. Undated sources are not held: their updates arrive as ordinary PRs.
+  Use runner logs and dry runs to investigate updates held across weekly runs.
 
 Good looks like:
 
