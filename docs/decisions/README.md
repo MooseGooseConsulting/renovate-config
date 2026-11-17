@@ -12,4 +12,5 @@ agent-review workflow.
 
 - [ADR 0001](0001-fleet-release-age-soak.md): fleet-wide 4-day release-age soak.
 - [ADR 0002](0002-dashboard-visibility-and-uncapped-security-fixes.md): Dependency Dashboard on; security fixes uncapped.
-- [ADR 0003](0003-one-non-major-pr-and-five-slots.md): one non-major PR per repository; five PR slots.
+- [ADR 0003](0003-one-non-major-pr-and-five-slots.md): one non-major PR per repository; five PR slots (superseded).
+- [ADR 0004](0004-one-pr-per-repository.md): two PRs per repository — non-major group plus major group.

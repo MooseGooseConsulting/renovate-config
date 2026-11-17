@@ -1,6 +1,6 @@
 # ADR 0003: One non-major PR per repository and five PR slots
 
-- Status: accepted (owner approval, 2026-10-22; [#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33) item 2)
+- Status: superseded by [ADR 0004](0004-one-pr-per-repository.md) (2026-11-16); previously accepted (owner approval, 2026-10-22; [#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33) item 2)
 - Applies to: every repository the shared preset reaches
 - Supersedes: the five domain groups and the two-slot cap in `default.json`; the security-fix
   uncapping in [ADR 0002](0002-dashboard-visibility-and-uncapped-security-fixes.md) is unchanged

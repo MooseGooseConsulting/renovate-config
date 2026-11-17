@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Weekly updates: one PR for every non-major update, one per major upgrade, up to five ordinary PRs per repository, and review before every merge.",
+  "description": "Weekly updates: two PRs per repository, one for every non-major update and one for every major update, and review before every merge.",
   "extends": [
     "config:best-practices",
     "group:allNonMajor"
@@ -11,7 +11,7 @@
     "dependencies",
     "agent-review"
   ],
-  "prHeader": "Review required: check dependency impact and CI before merging. One weekly PR carries every non-major update; each major upgrade, Python minor upgrades and lock-file maintenance come as their own PRs. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
+  "prHeader": "Review required: check dependency impact and CI before merging. Two weekly PRs per repository: one carries every non-major update, one carries every major update. Up to five ordinary PRs are open per repository; queued updates wait for a slot and the next Monday run, and the repository's Dependency Dashboard issue lists them.",
   "reviewers": [
     "Coldaine"
   ],
@@ -40,17 +40,14 @@
     "* * * * 1"
   ],
   "lockFileMaintenance": {
-    "description": "Owner rule (2026-10-21), lock files: lock-file maintenance re-resolves every transitive dependency, so the 4-day soak is handed to the package manager. Renovate passes it to npm as --before and to Poetry 2.4+ as POETRY_SOLVER_MIN_RELEASE_AGE. uv, pnpm and bun take it only from the consumer's own setting (exclude-newer, minimumReleaseAge). This never holds the PR itself: lock-file maintenance has no release date, and the stability status check is off. See docs/decisions/0001-fleet-release-age-soak.md.",
-    "enabled": true,
-    "schedule": [
-      "* * * * 1"
-    ],
-    "minimumReleaseAge": "4 days"
+    "description": "Owner rule (2026-11-16): two total PRs per repository (non-major group + major group), so lock-file maintenance is off. Renovate cannot group it with other update types. Lockfiles are still updated inside the grouped PRs when dependencies change; standalone lock-file-only refreshes stop happening. Superseded the 2026-10-21 lock-file maintenance rule.",
+    "enabled": false
   },
   "updateNotScheduled": false,
   "rebaseWhen": "conflicted",
   "automerge": false,
   "separateMajorMinor": true,
+  "separateMinorPatch": false,
   "customDatasources": {
     "ghcr": {
       "defaultRegistryUrlTemplate": "https://api.github.com/users/{{{replace '^ghcr\\.io/([^/]+)/.*$' '$1' packageName}}}/packages/container/{{{replace '/' '%2F' (replace '^ghcr\\.io/[^/]+/' '' packageName)}}}/versions?per_page=100",
@@ -62,7 +59,7 @@
   },
   "packageRules": [
     {
-      "description": "group:allNonMajor (extends) puts every minor and patch update into one weekly 'all non-major dependencies' PR. This adds digest, pin and pinDigest updates to the same PR (same groupName and groupSlug). Lock-file maintenance stays its own PR: Renovate 44.107.0 cannot group it with other update types (lib/workers/repository/updates/branch-name.ts). Majors are not matched and come one PR each; later rules (Python, consumer groups) take precedence.",
+      "description": "group:allNonMajor (extends) puts every minor and patch update into one weekly 'all non-major dependencies' PR. This adds digest, pin and pinDigest updates to the same PR (same groupName and groupSlug). Lock-file maintenance is disabled (see lockFileMaintenance), so there are two total PRs per repository. Majors are matched by the next rule. Later consumer group rules take precedence.",
       "matchUpdateTypes": [
         "digest",
         "pin",
@@ -72,21 +69,19 @@
       "groupSlug": "all-minor-patch"
     },
     {
+      "description": "Put every major upgrade into one weekly 'all major dependencies' PR, separate from the non-major group. Related-package majors (Prisma CLI/client, monorepos) are folded into this single major PR instead of their own branches. Consumer group rules come later and take precedence. Never automerge (top-level).",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "all major dependencies",
+      "groupSlug": "all-major"
+    },
+    {
       "description": "Refresh npm ranges even when the newest eligible version already satisfies the old range.",
       "matchManagers": [
         "npm"
       ],
       "rangeStrategy": "bump"
-    },
-    {
-      "description": "Keep major upgrades out of the non-major group, one PR each, and preserve Renovate's related-package groups (such as monorepos); never automerge.",
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "automerge": false,
-      "addLabels": [
-        "major-upgrade"
-      ]
     },
     {
       "description": "Preserve first-party codeOps workflow and action branch refs without digest pinning; retain other update handling",
@@ -97,35 +92,6 @@
         "MooseGooseConsulting/coldaine-codeOps"
       ],
       "pinDigests": false
-    },
-    {
-      "description": "Python (1 of 2): report Python patch updates apart from minor ones, so a patch release (3.14.7 to 3.14.8) is not hidden behind a minor upgrade waiting in the python PR of rule 2. Renovate then puts Python patches in a separate patch branch of the non-major group. No matchUpdateTypes here because Renovate reads separateMinorPatch before an update type exists.",
-      "matchPackageNames": [
-        "python",
-        "**/python",
-        "python/cpython",
-        "actions/python-versions",
-        "containerbase/python-prebuild",
-        "!ghcr.io/devcontainers/features/python"
-      ],
-      "separateMinorPatch": true
-    },
-    {
-      "description": "Python (2 of 2): Python minor and major upgrades (such as 3.14 to 3.15) come together in one python PR, majors in their own, outside the non-major group, and are never automerged. Patch, digest and pin updates stay in the non-major group. Matches by package name in every manager: python and other registry python images, setup-python python-version inputs, .python-version, requires-python, runtime.txt, and mise, asdf, proto, devbox, pixi, poetry and devcontainer pins. The setup-python action and the devcontainer python feature are not Python releases and are not matched. Until 2026-10-22 this rule set enabled: false, which hid these upgrades without a PR; that freeze had no owner record and was removed (renovate-config#33).",
-      "matchPackageNames": [
-        "python",
-        "**/python",
-        "python/cpython",
-        "actions/python-versions",
-        "containerbase/python-prebuild",
-        "!ghcr.io/devcontainers/features/python"
-      ],
-      "matchUpdateTypes": [
-        "major",
-        "minor"
-      ],
-      "groupName": "python",
-      "automerge": false
     },
     {
       "description": "Owner rule (2026-10-21): every major, minor and patch update (including npm range bumps and lock-file-only updates, which are flags on those) and every digest update waits 4 days after publication before Renovate raises it, in every consumer. timestamp-required (Renovate's default since v42, stated so any consumer override is explicit) also holds an update whose release date is missing, which is right for sources that publish dates: npm, PyPI, crates.io, GitHub releases and tags, Docker Hub, and third-party GHCR images (custom.ghcr, below). Sources that publish no dates are switched to timestamp-optional by the three 'undated sources' rules below (owner, 2026-10-22: no permanent holds), so their updates come as ordinary PRs. Pin, pinDigest, replacement, lockFileMaintenance and rollback updates carry no release date and are not held. Vulnerability-fix PRs bypass this through vulnerabilityAlerts. See docs/decisions/0001-fleet-release-age-soak.md.",
