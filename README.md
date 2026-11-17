@@ -76,7 +76,7 @@ ordinary self-hosted Renovate options; no Mend service is involved.
 - Open PRs when branches are ready so pull-request-only CI can run; review CI
   before merging. Release-age filtering applies to every consumer (below).
 - Keep at most five ordinary Renovate branches and PRs active per repository
-  ([ADR 0003](docs/decisions/0003-one-non-major-pr-and-five-slots.md)).
+  ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md)).
   Security-fix branches and PRs are not capped. Renovate counts them apart
   from the five ordinary slots and processes them before any other branch.
   `branchConcurrentLimit: 0` under `vulnerabilityAlerts` is what lifts the
@@ -102,15 +102,15 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   repository that needs another npm sets `constraints.npm` in its own
   `renovate.json`.
 - Request `@Coldaine` review on Renovate PRs.
-- Put every minor, patch, digest, pin and pinDigest update into one weekly PR,
-  "all non-major dependencies" (Renovate's `group:allNonMajor` plus a rule that
-  adds digest, pin and pinDigest updates). The exceptions are below and in
-  [ADR 0003](docs/decisions/0003-one-non-major-pr-and-five-slots.md). Lock-file maintenance stays its own weekly PR:
-  Renovate cannot group it with other update types. A consumer's own group
-  rules come later and take precedence.
-- Propose each major upgrade as its own PR and label it `major-upgrade`; preserve
-  Renovate's known related-package groups such as Prisma CLI/client. Native
-  package-replacement proposals remain separate too.
+- Put every update, including majors, into one weekly PR, "all dependencies"
+  (Renovate's `group:all`, with `separateMajorMinor` and `separateMinorPatch`
+  off). See [ADR 0004](docs/decisions/0004-one-pr-per-repository.md). Lock-file
+  maintenance stays its own weekly PR: Renovate cannot group it with other
+  update types. A consumer's own group rules come later and take precedence.
+- Include major upgrades in the single weekly PR rather than separate
+  `major-upgrade` PRs; preserve Renovate's known related-package groups such
+  as Prisma CLI/client. Native package-replacement proposals remain separate
+  too.
 - Never automatically merge updates, including majors and security fixes.
 - Let vulnerability-fix PRs bypass ordinary scheduling, release-age delays and
   both caps. They come from GitHub Dependabot alerts, so a repository without
@@ -145,18 +145,12 @@ ordinary self-hosted Renovate options; no Mend service is involved.
   because the same pinning occurred across several consumers; it does not
   disable other update handling or migrate existing `@main` callers. See the
   [architecture evidence](docs/architecture.md#architectural-invariants).
-- Propose Python minor and major version upgrades (for example 3.14 to 3.15) in
-  their own `python` PR, outside the non-major group, and never automerge them.
-  Patch updates (3.14.7 to 3.14.8) come in a patch branch of the non-major group,
-  and digest or pin updates in the group itself, so security point releases do
-  not wait behind a minor upgrade. The rule
-  matches Python by package name across Docker image tags, `actions/setup-python`
-  `python-version` inputs, `.python-version`, `requires-python`, `runtime.txt` and
-  the mise, asdf, proto, devbox, pixi and devcontainer runtime pins. It does not
-  match the `actions/setup-python` action itself. Until October 22, 2026 these
-  upgrades were disabled outright; that freeze had no owner record and was removed
-  ([#33](https://github.com/MooseGooseConsulting/renovate-config/issues/33)). See
-  the [architecture notes](docs/architecture.md#architectural-invariants).
+- Let Python updates ride in the single weekly PR instead of their former
+  `python` PR: Python minor and major upgrades (3.14 to 3.15), patch releases
+  (3.14.7 to 3.14.8), and digest or pin updates all join "all dependencies"
+  ([ADR 0004](docs/decisions/0004-one-pr-per-repository.md), superseding the
+  October 13, 2026, revised October 22, 2026, split). The 4-day soak and
+  no-automerge rules still apply to Python.
 
 This repository intentionally contains no secrets or host rules.
 
@@ -200,13 +194,12 @@ line from `excludedRepositories`; the next fleet run discovers it again.
 `coldaine-ci` is archived and therefore skipped by Renovate's native
 archived-repository handling.
 `beast-ros` is enrolled after [#56](https://github.com/MooseGooseConsulting/beast-ros/pull/56)
-merged; it uses standard hosted runners and follows the shared Python rule like every other consumer.
+merged; it uses standard hosted runners and follows the shared preset like every other consumer.
 `oh-my-openagent` receives the central policy without needing its config-only
 setup PR merged. Dependency PRs remain subject to normal CI and review requirements.
 
 The five-PR limit is per repository, not per organization and not five new PRs
-every week. Major upgrades share those slots with the non-major PR, the Python
-PR and lock-file maintenance. If all five are occupied, other updates queue; with `updateNotScheduled: false`, new routine
+every week. The single weekly PR shares those slots with lock-file maintenance. If all five are occupied, other updates queue; with `updateNotScheduled: false`, new routine
 branches and ordinary branch updates wait for Monday. Queued updates appear as
 rate-limited on the repository's Dependency Dashboard. There is no additional
 one-PR-per-hour throttle. Security fixes bypass
